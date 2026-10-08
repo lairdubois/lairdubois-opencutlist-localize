@@ -29,6 +29,7 @@ Production (Debian 12, NGINX, systemd) : see `deploy/README.md`.
 | `OCL_GITHUB_WEBHOOK_SECRET` | Secret of the GitHub `push` webhook pointing to `/github/webhook` |
 | `OCL_HOST` | Production host name (default `ocl-i18n.lairdubois.fr`) : allowed host and mail links |
 | `OCL_MAIL_FROM`, `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | Production mail sender and SMTP server |
+| `SMTP_OPENSSL_VERIFY_MODE` | `none` / `peer` ; default : no certificate check for a localhost MTA, checked otherwise |
 | `OCL_MAIL_ENABLED` | `1` to actually send e-mails (login links, invitations, comment notifications) ; off by default |
 | `ANTHROPIC_API_KEY` | Enables Claude pre-translation suggestions |
 | `OCL_I18N_EXPORT_DIR` | Optional : local directory for the plain YAML export |

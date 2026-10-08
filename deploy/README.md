@@ -1,63 +1,94 @@
 # Deployment (Debian 12, NGINX, systemd)
 
 The app runs as one Puma process (Solid Queue inside Puma) on `127.0.0.1:3007`, behind the
-server's existing NGINX, at `https://ocl-i18n.lairdubois.fr`. All state lives in
-`/srv/ocl-i18n/app/storage` (SQLite databases + the OCL repo checkout).
+server's existing NGINX, at `https://ocl-i18n.lairdubois.fr`.
 
-## One-time setup (as root)
+    /var/www/ocl-i18n.lairdubois.fr/   home of the ocl-i18n system user
+      .rbenv/                          Ruby 4.0.1
+      app/                             the code (deploy/deploy.sh), NGINX serves app/public
+      app/storage/                     SQLite databases + the OCL repo checkout : the only state
+      sandbox-repo.git                 sandbox only : the local repo publishing pushes to
+      acme/                            Let's Encrypt challenges (certbot webroot)
+    /etc/ocl-i18n.env                  environment (secrets)
 
-    apt install -y git curl build-essential pkg-config libssl-dev libyaml-dev zlib1g-dev \
-      libffi-dev libreadline-dev libgmp-dev libsqlite3-dev sqlite3 libjemalloc2 rsync
+It first runs as a **sandbox** : publishing commits and pushes to `sandbox-repo.git` on the
+server, never to GitHub (no GitHub credentials are configured, so no pull request either), and
+no e-mail is sent. Going to production = reset the data and switch the environment
+(see the end).
 
-    useradd --system --create-home --home-dir /srv/ocl-i18n --shell /bin/bash ocl-i18n
-    mkdir -p /srv/ocl-i18n/app && chown ocl-i18n:ocl-i18n /srv/ocl-i18n/app
+## Prerequisites
 
-    # Ruby 4.0.1 for that user only (rbenv + ruby-build)
-    sudo -iu ocl-i18n bash -c '
-      git clone --depth 1 https://github.com/rbenv/rbenv.git ~/.rbenv
-      git clone --depth 1 https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
-      ~/.rbenv/bin/rbenv install 4.0.1
-    '
+- DNS : `ocl-i18n.lairdubois.fr` → the server (the certificate is requested during the setup).
+- An SSH account with sudo on the server, and `rsync` there (`sudo apt install rsync` if missing).
+- certbot (webroot mode : its NGINX plugin is not needed).
 
-    # Environment : fill in RAILS_MASTER_KEY (config/master.key) and the GitHub App values
-    install -m 640 -o root -g ocl-i18n deploy/ocl-i18n.env.example /etc/ocl-i18n.env
-    # GitHub App private key
-    install -m 640 -o root -g ocl-i18n github-app.pem /srv/ocl-i18n/github-app.pem
+## First install
 
-    install -m 644 deploy/ocl-i18n.service /etc/systemd/system/ && systemctl daemon-reload
-    systemctl enable ocl-i18n
+From the dev machine :
 
-    # NGINX + certificate (DNS : ocl-i18n.lairdubois.fr → the server)
-    certbot certonly --nginx -d ocl-i18n.lairdubois.fr
-    cp deploy/nginx.conf /etc/nginx/sites-available/ocl-i18n.lairdubois.fr
-    ln -s ../sites-available/ocl-i18n.lairdubois.fr /etc/nginx/sites-enabled/
-    nginx -t && systemctl reload nginx
+    DEPLOY_HOST=you@<server> deploy/deploy.sh setup
 
-Then from the dev machine : `DEPLOY_HOST=root@<server> deploy/deploy.sh`.
+It uploads the code to `~/ocl-i18n-deploy` on the server (no secrets : `.env*` and `config/*.key`
+are excluded), then, with sudo (one password prompt), runs `deploy/setup.sh` and `deploy/remote.sh`.
 
-First data load, on the server :
+`deploy/setup.sh` (safe to run again, keeps what already exists) :
+- apt packages : runtime ones (git, sqlite3, jemalloc, rsync, openssl) and build ones for Ruby
+  and native gems (build-essential, pkg-config, libssl / libyaml / zlib / libffi `-dev`)
+- the `ocl-i18n` system user, home `/var/www/ocl-i18n.lairdubois.fr`
+- Ruby 4.0.1 through rbenv (compiles for a few minutes the first time)
+- `sandbox-repo.git` : bare clone of the OCL repo's master
+- `/etc/ocl-i18n.env` from `ocl-i18n.env.example`, with a generated `SECRET_KEY_BASE`
+- the systemd service, the `ocl-i18n-rails` wrapper in `/usr/local/bin`
+- the certificate (certbot webroot, first time only : an HTTP-only site serves the challenge
+  from `acme/`) and the NGINX site, then `nginx -t` and reload
 
-    sudo -u ocl-i18n bash -c 'cd /srv/ocl-i18n/app && set -a && source /etc/ocl-i18n.env && set +a &&
-      export PATH=/srv/ocl-i18n/.rbenv/versions/4.0.1/bin:$PATH &&
-      git clone --depth 1 https://github.com/lairdubois/lairdubois-opencutlist-sketchup-extension.git /tmp/ocl &&
-      bin/rails "i18n:bootstrap[/tmp/ocl/src/ladb_opencutlist/yaml/i18n-src]" &&
-      bin/rails "i18n:admin[you@example.org,Your Name]" &&
-      bin/rails "i18n:login_link[you@example.org]"'
+`deploy/remote.sh` : copy into `app/`, gems, assets, migrations, restart, `/up` check.
 
-While e-mails are off (`OCL_MAIL_ENABLED=0`), `i18n:login_link[email]` prints a single-use login
-link (30 min).
+Then on the server, first data load (from the sandbox repo's fr.yml) and your admin account :
 
-## GitHub
+    cd /tmp && sudo -u ocl-i18n git clone -q /var/www/ocl-i18n.lairdubois.fr/sandbox-repo.git /tmp/ocl
+    sudo ocl-i18n-rails "i18n:bootstrap[/tmp/ocl/src/ladb_opencutlist/yaml/i18n-src]"
+    sudo rm -rf /tmp/ocl
+    sudo ocl-i18n-rails "i18n:admin[you@example.org,Your Name]"
+    sudo ocl-i18n-rails "i18n:login_link[you@example.org]"
 
-- App callback URL : `https://ocl-i18n.lairdubois.fr/github/callback`
-- OCL repo webhook (`push` events, JSON) : `https://ocl-i18n.lairdubois.fr/github/webhook`,
-  secret = `OCL_GITHUB_WEBHOOK_SECRET`
+Logging in : e-mails are off, so `i18n:login_link[email]` prints a single-use link (30 min) to
+hand over. Testers' accounts are created from the users page.
 
-## Operations
+## Updates
+
+    DEPLOY_HOST=you@<server> deploy/deploy.sh
+
+## Running commands on the server
+
+    sudo ocl-i18n-rails console     # or any bin/rails task, as ocl-i18n with the production environment
+
+## Sandbox operations
+
+- Simulate a change on the OCL side (then "Synchroniser" in the tool) : pull GitHub's latest
+  master into the sandbox repo, as ocl-i18n (`sudo -iu ocl-i18n`)
+  `git -C ~/sandbox-repo.git fetch -q --depth 1 https://github.com/lairdubois/lairdubois-opencutlist-sketchup-extension.git +master:master`
+- See what "Publier" produced (as ocl-i18n too) : `git -C ~/sandbox-repo.git log --stat i18n/updates`
+- Reset everything (in a root shell, from `/var/www/ocl-i18n.lairdubois.fr`) :
+  `systemctl stop ocl-i18n`, delete `app/storage/production*.sqlite3*`, `app/storage/ocl_repo`
+  and `sandbox-repo.git`, then `deploy/deploy.sh setup` (re-clones the sandbox repo, recreates
+  the databases) and the first data load again.
+
+## Going to production
+
+1. Stop the service, delete the databases, `app/storage/ocl_repo` and `sandbox-repo.git`.
+2. In `/etc/ocl-i18n.env` : remove `OCL_REPO_URL`, fill in the `OCL_GITHUB_*` variables, put the
+   App's private key in `/var/www/ocl-i18n.lairdubois.fr/github-app.pem` (`root:ocl-i18n`, mode 640).
+3. GitHub App callback URL : `https://ocl-i18n.lairdubois.fr/github/callback` ; OCL repo webhook
+   (`push` events, JSON) : `https://ocl-i18n.lairdubois.fr/github/webhook`, secret =
+   `OCL_GITHUB_WEBHOOK_SECRET`.
+4. `deploy/deploy.sh` (recreates the databases, restarts), first data load from a clone of the
+   real repo, Transifex import.
+
+## Logs and backups
 
 - Logs : `journalctl -u ocl-i18n -f`
-- Console : same as the first data load, with `bin/rails console`
-- Backups : the SQLite files run in WAL mode, copy them with
-  `sqlite3 storage/production.sqlite3 ".backup '/backup/ocl-i18n-$(date +%F).sqlite3'"`
+- Backups (as root, from `/var/www/ocl-i18n.lairdubois.fr`) : the SQLite files run in WAL mode, copy them with
+  `sqlite3 app/storage/production.sqlite3 ".backup '/backup/ocl-i18n-$(date +%F).sqlite3'"`
   (`production_queue`, `_cache` and `_cable` are disposable). `storage/ocl_repo` is re-cloned
   on demand.

@@ -1,35 +1,20 @@
 #!/usr/bin/env bash
 # Ships the working tree to the server, then installs gems, builds assets, migrates and restarts.
-# Usage : DEPLOY_HOST=root@lairdubois.fr deploy/deploy.sh
+# Usage : DEPLOY_HOST=you@lairdubois.fr deploy/deploy.sh [setup]
+# The account only needs sudo : the code goes to ~/ocl-i18n-deploy first, then deploy/remote.sh
+# (one sudo password prompt) copies it into the app and restarts the service.
+# "setup" runs deploy/setup.sh before (packages, user, Ruby, service, NGINX : first time only).
 set -euo pipefail
 
 host="${DEPLOY_HOST:?DEPLOY_HOST=user@server}"
-app=/var/www/ocl-i18n/app
 cd "$(dirname "$0")/.."
 
 rsync -az --delete \
   --exclude /.git/ --exclude /.idea/ --exclude /.env\* --exclude /config/\*.key \
   --exclude /storage/ --exclude /log/ --exclude /tmp/ \
   --exclude /public/assets/ --exclude /app/assets/builds/ --exclude /vendor/bundle/ --exclude /.bundle/ \
-  ./ "$host:$app/"
+  ./ "$host:ocl-i18n-deploy/"
 
-ssh "$host" bash -s <<EOF
-set -euo pipefail
-chown -R ocl-i18n:ocl-i18n $app
-cd $app
-sudo -u ocl-i18n bash -c '
-  set -euo pipefail
-  set -a; source /etc/ocl-i18n.env; set +a
-  export PATH=/var/www/ocl-i18n/.rbenv/versions/4.0.1/bin:\$PATH
-  mkdir -p storage log tmp
-  chmod 750 storage
-  bundle config set --local deployment true
-  bundle config set --local without "development test"
-  bundle install --quiet
-  bin/rails assets:precompile
-  bin/rails db:prepare
-'
-systemctl restart ocl-i18n
-sleep 3
-curl -fsS -o /dev/null -w "up : %{http_code}\n" http://127.0.0.1:3007/up
-EOF
+remote='sudo bash "$HOME/ocl-i18n-deploy/deploy/remote.sh" "$HOME/ocl-i18n-deploy"'
+[ "${1:-}" = setup ] && remote="sudo bash \"\$HOME/ocl-i18n-deploy/deploy/setup.sh\" && $remote"
+ssh -t "$host" "$remote"

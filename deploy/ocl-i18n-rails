@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# bin/rails as ocl-i18n with the production environment, e.g. sudo ocl-i18n-rails console
+# (installed in /usr/local/bin by deploy/setup.sh)
+set -euo pipefail
+
+home=/var/www/ocl-i18n.lairdubois.fr
+cd "$home/app"
+exec sudo -u ocl-i18n bash -c '
+  set -a; source /etc/ocl-i18n.env; set +a
+  export PATH='"$home"'/.rbenv/versions/4.0.1/bin:$PATH
+  exec bin/rails "$@"
+' ocl-i18n-rails "$@"

@@ -8,11 +8,11 @@ After=network.target
 Type=simple
 User=ocl-i18n
 Group=ocl-i18n
-WorkingDirectory=/var/www/ocl-i18n/app
+WorkingDirectory=/var/www/ocl-i18n.lairdubois.fr/app
 EnvironmentFile=/etc/ocl-i18n.env
-Environment=PATH=/var/www/ocl-i18n/.rbenv/versions/4.0.1/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PATH=/var/www/ocl-i18n.lairdubois.fr/.rbenv/versions/4.0.1/bin:/usr/local/bin:/usr/bin:/bin
 Environment=LD_PRELOAD=libjemalloc.so.2
-ExecStart=/var/www/ocl-i18n/.rbenv/versions/4.0.1/bin/ruby bin/rails server
+ExecStart=/var/www/ocl-i18n.lairdubois.fr/.rbenv/versions/4.0.1/bin/ruby bin/rails server
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=30
@@ -24,8 +24,8 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/var/www/ocl-i18n/app/storage /var/www/ocl-i18n/app/log /var/www/ocl-i18n/app/tmp
-ReadWritePaths=-/var/www/ocl-i18n/sandbox-repo.git
+ReadWritePaths=/var/www/ocl-i18n.lairdubois.fr/app/storage /var/www/ocl-i18n.lairdubois.fr/app/log /var/www/ocl-i18n.lairdubois.fr/app/tmp
+ReadWritePaths=-/var/www/ocl-i18n.lairdubois.fr/sandbox-repo.git
 
 [Install]
 WantedBy=multi-user.target

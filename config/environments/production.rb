@@ -58,14 +58,19 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: ENV.fetch("OCL_HOST", "ocl-i18n.lairdubois.fr"), protocol: "https" }
 
   # Outgoing SMTP server (deliveries stay off unless OCL_MAIL_ENABLED=1)
+  smtp_address = ENV.fetch("SMTP_ADDRESS", "localhost")
+  # A local MTA's certificate (self-signed, or named after the host) can't be verified for "localhost",
+  # and that traffic never leaves the machine : no verification there unless SMTP_OPENSSL_VERIFY_MODE says so
+  smtp_local = %w[localhost 127.0.0.1 ::1].include?(smtp_address)
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address: ENV.fetch("SMTP_ADDRESS", "localhost"),
+    address: smtp_address,
     port: ENV.fetch("SMTP_PORT", 25).to_i,
     user_name: ENV["SMTP_USERNAME"].presence,
     password: ENV["SMTP_PASSWORD"].presence,
     authentication: (:plain if ENV["SMTP_USERNAME"].present?),
-    enable_starttls_auto: true
+    enable_starttls_auto: true,
+    openssl_verify_mode: ENV["SMTP_OPENSSL_VERIFY_MODE"].presence || ("none" if smtp_local)
   }.compact
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
