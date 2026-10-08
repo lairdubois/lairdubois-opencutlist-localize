@@ -1,6 +1,6 @@
 <h1 class="mb-2 text-lg font-semibold"><%= t(".title") %></h1>
 <p class="mb-4 text-sm text-stone-600">
-  <%= t(".intro_html", branch: Rails.configuration.x.ocl.i18n_branch) %><%= t(".intro_pr", base: Rails.configuration.x.ocl.base_branch) if @auth.configured? %>.
+  <%= t(".intro_html", branch: Rails.configuration.x.ocl.i18n_branch) %><%= t(".intro_pr", base: OclRepo.base_branch) if @auth.configured? %>.
 </p>
 <% if @oauth.enabled? %>
   <div class="mb-4 flex items-center gap-3 rounded border border-stone-200 bg-white px-4 py-2 text-sm">

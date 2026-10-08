@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  # Main reference in the translator's editor : the fr source, or the en translation for non-French speakers
+  REFERENCE_LANGUAGES = %w[fr en].freeze
+
   has_many :memberships, dependent: :destroy
   has_many :languages, through: :memberships
   has_many :revisions, dependent: :nullify
@@ -6,6 +9,7 @@ class User < ApplicationRecord
   normalizes :email, with: ->(e) { e.strip.downcase }
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :name, presence: true
+  validates :reference_language, inclusion: { in: REFERENCE_LANGUAGES }
 
   # Admins' GitHub user access tokens (GithubOauth)
   encrypts :github_access_token, :github_refresh_token

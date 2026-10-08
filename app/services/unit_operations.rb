@@ -66,8 +66,25 @@ class UnitOperations
     end
   end
 
+  # The YAML comment written above the key in every language file
+  def edit_note(unit, note)
+    note = self.class.normalize_note(note)
+    old_note = unit.note
+    return if note == old_note
+
+    unit.update!(note: note)
+    unit.revisions.create!(kind: "note", old_value: old_note, new_value: note, author: @author, user: @user)
+  end
+
   def archive(unit)
     unit.update!(archived_at: Time.current)
     unit.revisions.create!(kind: "archive", old_value: unit.key, author: @author, user: @user)
+  end
+  # Trailing spaces and leading / trailing blank lines would not survive the YAML round trip
+  def self.normalize_note(note)
+    lines = note.to_s.gsub("\r\n", "\n").split("\n").map(&:rstrip)
+    lines.shift while lines.first == ""
+    lines.pop while lines.last == ""
+    lines.join("\n").presence
   end
 end

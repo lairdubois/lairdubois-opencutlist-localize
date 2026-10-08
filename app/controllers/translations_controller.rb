@@ -1,10 +1,12 @@
 # The translator's editor : fr source, en reference, one or two target languages side by side
 class TranslationsController < ApplicationController
+  include ListFilters
+
   PER_PAGE = 40
-  FILTERS = %w[todo untranslated outdated unreviewed questions all].freeze
 
   before_action :set_language
   before_action :set_second_language, only: [:index]
+  before_action :set_reference, only: [:index]
   before_action :set_unit, only: [:update]
 
   # Asks Claude for suggestions on the untranslated or outdated strings of the current page
@@ -15,9 +17,13 @@ class TranslationsController < ApplicationController
   end
 
   def index
-    @filter = FILTERS.include?(params[:filter]) ? params[:filter] : "todo"
-    scope = filtered_units
-    @count = scope.count
+    searched = searched_units
+    # A single index drops the other filters when applied (ListFilters) and they drop it :
+    # the menu's counts leave it out
+    @counts = filter_counts(searched)
+    searched = filter_by_index(searched) if single_index?
+    @count = single_index? ? searched.count : @counts[:list]
+    scope = searched.where(status_condition).where(questions_condition)
     @page = [params[:page].to_i, 1].max
     @units = scope.offset((@page - 1) * PER_PAGE).limit(PER_PAGE).to_a
     @more = @page * PER_PAGE < @count
@@ -29,6 +35,7 @@ class TranslationsController < ApplicationController
 
   def update
     operations.save(@unit, @language, params[:text], reviewed: params[:reviewed] == "1")
+    @ref_texts = Unit.ref_texts([@unit])
     render partial: "editor", locals: { unit: @unit, language: @language, data: preload_language(@language, [@unit]), saved: true }
   end
 
@@ -47,6 +54,13 @@ class TranslationsController < ApplicationController
     @second_language = language if language && current_user.can_translate?(language)
   end
 
+  # en is shown as a reference unless it is edited on this page ; it becomes the main one on the user's choice
+  def set_reference
+    en = Language.find_by(code: "en")
+    @en = en if en && [@language, @second_language].exclude?(en)
+    @en_reference = @en.present? && current_user.reference_language == "en"
+  end
+
   def set_unit
     @unit = Unit.active.find(params[:unit_id])
   end
@@ -55,29 +69,63 @@ class TranslationsController < ApplicationController
     TranslationOperations.new(current_user)
   end
 
-  def filtered_units
+  # SQL condition of each status, on the units LEFT JOIN translations of the edited language.
+  # They partition the units : an outdated translation is neither "unreviewed" nor "reviewed".
+  def status_conditions
+    up_to_date = "translations.source_hash = units.source_hash"
+    {
+      "untranslated" => "translations.id IS NULL",
+      "outdated" => "translations.source_hash <> units.source_hash",
+      "unreviewed" => Unit.sanitize_sql_array(["translations.status = ? AND #{up_to_date}", Translation.statuses[:translated]]),
+      "reviewed" => Unit.sanitize_sql_array(["translations.status = ? AND #{up_to_date}", Translation.statuses[:reviewed]])
+    }
+  end
+
+  # Checked statuses, OR-ed (none = every unit)
+  def status_condition
+    statuses.any? ? statuses.map { |key| "(#{status_conditions[key]})" }.join(" OR ") : "1 = 1"
+  end
+
+  def open_question_condition
+    "units.id IN (#{Comment.open_questions.visible_in(@language).select(:unit_id).to_sql})"
+  end
+
+  def questions_condition
+    questions? ? open_question_condition : "1 = 1"
+  end
+
+  # In one query : each status's matches with the other filters (shown in the filters menu),
+  # the questions' ones, the listed units, and the search alone (for the empty list hint)
+  def filter_counts(scope)
+    conditions = STATUSES.to_h { |key| [key, "(#{status_conditions[key]}) AND (#{questions_condition})"] }
+                         .merge("questions" => "(#{status_condition}) AND #{open_question_condition}",
+                                list: "(#{status_condition}) AND (#{questions_condition})", searched: "1 = 1")
+    counts = scope.reorder(nil).pick(*conditions.values.map { |sql| Arel.sql("COUNT(CASE WHEN #{sql} THEN 1 END)") })
+    conditions.keys.zip(counts || Array.new(conditions.size, 0)).to_h
+  end
+
+  # Units matching the search text and fields (key, branch, index range but a single index),
+  # whatever the filters
+  def searched_units
     scope = Unit.active.joins(sanitize_join).reorder(:position, :id)
-    scope = case @filter
-            when "untranslated" then scope.where(translations: { id: nil })
-            when "outdated" then scope.where("translations.source_hash <> units.source_hash")
-            when "unreviewed" then scope.where(translations: { status: Translation.statuses[:translated] })
-            when "questions" then scope.where(id: Comment.open_questions.visible_in(@language).select(:unit_id))
-            when "todo" then scope.where("translations.id IS NULL OR translations.source_hash <> units.source_hash")
-            else scope
-            end
+    scope = scope.where("units.key LIKE ?", "%#{Unit.sanitize_sql_like(params[:key])}%") if params[:key].present?
     scope = scope.where("units.key = :p OR units.key LIKE :like", p: params[:prefix], like: "#{Unit.sanitize_sql_like(params[:prefix])}.%") if params[:prefix].present?
     if params[:q].present?
       like = "%#{Unit.sanitize_sql_like(params[:q])}%"
-      scope = scope.where("units.key LIKE :q OR units.source_text LIKE :q OR translations.text LIKE :q", q: like)
+      if @en_reference
+        scope = scope.joins(Unit.sanitize_sql_array(["LEFT JOIN translations refs ON refs.unit_id = units.id AND refs.language_id = ?", @en.id]))
+                     .where("units.source_text LIKE :q OR translations.text LIKE :q OR refs.text LIKE :q", q: like)
+      else
+        scope = scope.where("units.source_text LIKE :q OR translations.text LIKE :q", q: like)
+      end
     end
-    filter_by_index(scope)
+    single_index? ? scope : filter_by_index(scope)
   end
 
-  # ?at=120 starts the list at the key #120 of the flattened tree, ?at=120-180 keeps that range
   def filter_by_index(scope)
     return scope if params[:at].blank?
 
-    from, to = params[:at].to_s.delete("#").split("-", 2).map { |n| n.strip.presence&.to_i }
+    from, to = index_range
     if from
       first = unit_at_index(from)
       scope = first ? scope.where("(units.position, units.id) >= (?, ?)", first.position, first.id) : scope.none
@@ -103,8 +151,8 @@ class TranslationsController < ApplicationController
     # 1-based index of the key in the flattened tree (positions can have gaps and ties)
     ranked = Unit.active.reorder(nil).select("units.id, ROW_NUMBER() OVER (ORDER BY units.position, units.id) AS idx")
     @indexes = Unit.unscoped.from(ranked, :units).where(id: ids).pluck(:id, :idx).to_h
-    en = Language.find_by(code: "en")
-    @references = en && @languages.exclude?(en) ? Translation.where(unit_id: ids, language: en).pluck(:unit_id, :text).to_h : {}
+    @ref_texts = Unit.ref_texts(units)
+    @references = @en ? Translation.where(unit_id: ids, language: @en).includes(:unit).index_by(&:unit_id) : {}
     # Previous fr text, to show what changed on an outdated translation
     @previous_sources = Revision.where(unit_id: ids, kind: "source_major").group(:unit_id).maximum(:id)
                                 .then { |h| Revision.where(id: h.values).pluck(:unit_id, :old_value).to_h }

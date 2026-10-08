@@ -4,7 +4,7 @@ require "digest"
 # Syncing diffs the repo against this baseline (not against the database), so that what
 # the admins changed in the tool and not yet merged in the repo is never seen as a repo change.
 class Baseline < ApplicationRecord
-  # entries : [{ "key" =>, "value" =>, "unit_id" => }]
+  # entries : [{ "key" =>, "value" =>, "note" =>, "unit_id" => }] (no "note" in baselines recorded before notes were synced)
 
   def self.current
     order(:id).last
@@ -23,7 +23,7 @@ class Baseline < ApplicationRecord
     entries = I18nYaml::Reader.new(fr_text).entries.map do |e|
       unit_id = previous.dig(e.key, "unit_id")
       unit_id = units[e.key]&.id unless known.include?(unit_id)
-      { "key" => e.key, "value" => e.value, "unit_id" => unit_id }
+      { "key" => e.key, "value" => e.value, "note" => e.note, "unit_id" => unit_id }
     end
     create!(fr_hash: hash_text(fr_text), entries: entries, source: source)
   end

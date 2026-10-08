@@ -9,8 +9,11 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-stone-50 text-stone-900">
-    <header class="border-b border-stone-200 bg-white">
+  <%# unsaved-guard : asks before leaving a page with unsaved forms (dirty-form) %>
+  <body class="bg-stone-50 text-stone-900" data-controller="unsaved-guard tooltip"
+        data-unsaved-guard-message-value="<%= t("unsaved.confirm") %>" data-unsaved-guard-labels-value="<%= t("unsaved.count").to_json %>">
+    <%# Sticky : 3.5rem nav + 1px border, pages with their own sticky toolbar stick it below (top-[calc(3.5rem+1px)]) %>
+    <header class="sticky top-0 z-20 border-b border-stone-200 bg-white">
       <nav class="mx-auto max-w-6xl px-4 h-14 flex items-center gap-6 text-sm">
         <%= link_to "OpenCutList i18n", root_path, class: "text-base font-semibold" %>
         <% if current_user %>

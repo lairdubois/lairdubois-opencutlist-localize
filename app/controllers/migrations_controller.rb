@@ -12,7 +12,7 @@ class MigrationsController < ApplicationController
   def analyze
     @reports = TransifexImport.new.analyze
   rescue TransifexClient::Error => e
-    redirect_to migration_path, alert: e.message
+    redirect_to migration_path, alert: t("migrations.failed", error: e.message)
   end
 
   def apply
@@ -21,14 +21,14 @@ class MigrationsController < ApplicationController
     import.apply(reports)
     redirect_to migration_path, notice: t(".applied", texts: reports.sum { |r| r.updates.size }, reviews: reports.sum { |r| r.reviews.size })
   rescue TransifexClient::Error => e
-    redirect_to migration_path, alert: e.message
+    redirect_to migration_path, alert: t("migrations.failed", error: e.message)
   end
 
   def roster
     @roster = TransifexRoster.new.call
     @invited = User.where.not(transifex_username: nil).index_by(&:transifex_username)
   rescue TransifexClient::Error => e
-    redirect_to migration_path, alert: e.message
+    redirect_to migration_path, alert: t("migrations.failed", error: e.message)
   end
 
   # invites[username] = { email:, name: }

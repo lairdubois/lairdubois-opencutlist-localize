@@ -2,13 +2,14 @@
 # Nothing is applied blindly : the plan lists the changes and the admin decides for each
 # rename candidate (rename or delete+add) and each text change (minor or major).
 class SourceSync
-  Plan = Struct.new(:added, :removed, :changed, :renames, :conflicts, :order, keyword_init: true) do
+  Plan = Struct.new(:added, :removed, :changed, :renames, :conflicts, :notes, :note_conflicts, :order, keyword_init: true) do
     def empty?
-      added.empty? && removed.empty? && changed.empty?
+      added.empty? && removed.empty? && changed.empty? && notes.empty?
     end
   end
   # added : [Entry], removed : [Unit], changed : [[Unit, Entry]], renames : [[Unit, Entry]],
-  # conflicts : unit ids whose fr text was also changed in the tool
+  # conflicts : unit ids whose fr text was also changed in the tool,
+  # notes : [[Unit, Entry]] YAML comment changed in the repo, note_conflicts : unit ids whose comment was also changed in the tool
 
   def initialize(fr_text, author:)
     @fr_text = fr_text
@@ -41,13 +42,19 @@ class SourceSync
     added.reject! { |e| renamed_keys.exclude?(e.key) && (u = active_by_key[e.key]) && u.source_text == e.value }
     removed = removed.map(&:first).reject { |u| renamed_units.exclude?(u) && repo_keys.include?(u.key) }
 
-    Plan.new(added: added, removed: removed, changed: changed, renames: renames, conflicts: conflicts, order: @entries.map(&:key))
+    notes = note_changes(baseline, units, renames)
+    note_conflicts = notes.filter_map { |unit, _| unit.id if note(unit.note) != base_note(baseline, unit) }
+
+    Plan.new(added: added, removed: removed, changed: changed, renames: renames, conflicts: conflicts,
+             notes: notes, note_conflicts: note_conflicts, order: @entries.map(&:key))
   end
 
-  # decisions : { renames: [unit_id, ...] accepted, majors: [unit_id, ...] text changes that invalidate }
+  # decisions : { renames: [unit_id, ...] accepted, majors: [unit_id, ...] text changes that invalidate,
+  #               notes: [unit_id, ...] repo comments taken (the others keep the tool's one, written on publish) }
   def apply(plan, decisions = {})
     accepted = Array(decisions[:renames]).map(&:to_i)
     majors = Array(decisions[:majors]).map(&:to_i)
+    taken_notes = Array(decisions[:notes]).map(&:to_i)
     operations = UnitOperations.new(@author)
 
     ApplicationRecord.transaction do
@@ -65,6 +72,9 @@ class SourceSync
         operations.create(entry.key, entry.value, note: entry.note)
       end
       plan.changed.each { |unit, entry| operations.edit_source(unit, entry.value, major: majors.include?(unit.id)) }
+      plan.notes.each do |unit, entry|
+        operations.edit_note(unit, entry.note) if taken_notes.include?(unit.id) && !unit.reload.archived?
+      end
 
       # The repo's order is authoritative for the keys it has
       positions = plan.order.each_with_index.to_h
@@ -75,6 +85,31 @@ class SourceSync
   end
 
   private
+
+  # Units whose comment differs between the repo and the baseline (and not already the same in the tool).
+  # Renamed keys are compared through their unit ; a rename left unchecked creates a new unit with the repo's comment anyway.
+  def note_changes(baseline, units, renames)
+    pairs = @entries.filter_map do |e|
+      b = baseline.by_key[e.key]
+      unit = b && units[b["unit_id"]]
+      [unit, e] if unit && !unit.archived?
+    end
+    (pairs + renames).uniq { |unit, _| unit.id }.select do |unit, e|
+      repo = note(e.note)
+      repo != base_note(baseline, unit) && repo != note(unit.note)
+    end
+  end
+
+  # Baselines recorded before notes were synced have none : the tool's comment stands in for it
+  def base_note(baseline, unit)
+    @base_by_unit ||= baseline.entries.index_by { |e| e["unit_id"] }
+    b = @base_by_unit[unit.id]
+    b&.key?("note") ? note(b["note"]) : note(unit.note)
+  end
+
+  def note(text)
+    UnitOperations.normalize_note(text)
+  end
 
   # A removed unit and an added entry with the very same fr text are most likely a rename.
   # When a text is shared by several keys, pairs are told apart by the key segments they

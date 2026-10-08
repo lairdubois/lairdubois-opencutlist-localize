@@ -1,5 +1,6 @@
 # Brings fr.yml changes made by developers into the tool : preview the plan, then apply the admin's decisions.
-# The fr.yml comes from the repo checkout, or from an upload.
+# The fr.yml comes from a branch of the repo, or from an upload. Applying a branch's sync makes it the base branch
+# (the one published to) : the baseline is that branch's fr.yml.
 class SyncsController < ApplicationController
   before_action :require_admin
 
@@ -7,8 +8,9 @@ class SyncsController < ApplicationController
   end
 
   def repo
+    @branch = params[:branch].to_s.strip.presence || OclRepo.base_branch
     repo = OclRepo.new
-    repo.fetch!
+    repo.fetch!(@branch)
     preview_text(repo.fr_text)
   rescue OclRepo::Error => e
     redirect_to new_sync_path, alert: t(".failed", error: e.message)
@@ -23,7 +25,11 @@ class SyncsController < ApplicationController
   def apply
     path = upload_path(params.require(:token))
     sync = SourceSync.new(File.read(path), author: current_user)
-    sync.apply(sync.plan, renames: params[:renames], majors: params[:majors])
+    branch = params[:branch].presence
+    raise ActionController::BadRequest, "invalid branch" if branch && !OclRepo.valid_branch?(branch)
+
+    sync.apply(sync.plan, renames: params[:renames], majors: params[:majors], notes: params[:notes])
+    Setting["base_branch"] = branch if branch
     File.delete(path)
     Setting["repo_fr_changed_at"] = nil
     redirect_to units_path, notice: t(".applied")

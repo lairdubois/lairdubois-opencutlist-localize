@@ -2,26 +2,33 @@
 <% warnings = t ? TranslationChecks.call(unit.source_text, t.text) : [] %>
 <% fill = "const a = this.closest('turbo-frame').querySelector('textarea'); a.value = this.dataset.text; a.dispatchEvent(new Event('input'))" %>
 <%# Spans the row's 3 subgrid rows (header, box, extras) so its box shares the height of its neighbours %>
-<%= turbo_frame_tag dom_id(unit, language.code), class: "row-span-3 grid min-w-0 grid-rows-subgrid" do %>
+<%# group : the frame's parts follow the form's unsaved state (dirty-form) %>
+<%= turbo_frame_tag dom_id(unit, language.code), class: "group row-span-3 grid min-w-0 grid-rows-subgrid" do %>
   <div class="flex h-5 items-center gap-2 text-xs">
     <span class="font-medium text-stone-700"><%= language.name %></span>
-    <% if t.nil? %><span class="rounded bg-stone-100 px-1.5 text-stone-600"><%= t("status.untranslated") %></span>
-    <% elsif t.outdated? %><span class="rounded bg-amber-100 px-1.5 text-amber-800"><%= t("status.outdated") %></span>
-    <% elsif t.reviewed? %><span class="rounded bg-emerald-100 px-1.5 text-emerald-800"><%= t("status.reviewed") %></span>
-    <% else %><span class="rounded bg-emerald-50 px-1.5 text-emerald-700"><%= t("status.translated") %></span>
+    <% badge = "flex items-center gap-1 rounded px-1.5" %>
+    <% if t.nil? %><span class="<%= badge %> bg-stone-100 text-stone-600"><%= status_dot("untranslated") %><%= t("status.untranslated") %></span>
+    <% elsif t.outdated? %><span class="<%= badge %> bg-amber-100 text-amber-800"><%= status_dot("outdated") %><%= t("status.outdated") %></span>
+    <% elsif t.reviewed? %><span class="<%= badge %> bg-emerald-100 text-emerald-800"><%= status_dot("reviewed") %><%= t("status.reviewed") %></span>
+    <% else %><span class="<%= badge %> bg-sky-50 text-sky-800"><%= status_dot("unreviewed") %><%= t("status.translated") %></span>
     <% end %>
-    <% if local_assigns[:saved] %><span class="text-emerald-700">✓ <%= t(".saved") %></span><% end %>
+    <% if local_assigns[:saved] %><span class="text-emerald-700 group-has-data-dirty:hidden">✓ <%= t(".saved") %></span><% end %>
   </div>
-  <%= form_with url: translate_unit_path(language.code, unit), method: :patch, class: "contents" do %>
-    <%= text_area_tag :text, t&.text, rows: 1, dir: language.rtl ? "rtl" : "ltr",
-                      data: { controller: "autosize", action: "input->autosize#resize" },
-                      class: "block w-full resize-none overflow-hidden rounded border px-2 py-1.5 font-mono text-sm #{t&.outdated? ? 'border-amber-300' : 'border-stone-300'}" %>
+  <%# i18n-text swaps the textarea for a CodeMirror editor (source invariants locked), keeping it in sync for the form %>
+  <%= form_with url: translate_unit_path(language.code, unit), method: :patch, class: "contents",
+                data: { controller: "i18n-text dirty-form", i18n_text_source_value: unit.source_text, i18n_text_refs_value: @ref_texts[unit.id].to_json } do %>
+    <%= text_area_tag :text, t&.text, rows: 1, dir: language.rtl ? "rtl" : "ltr", lang: language.code,
+                      data: { i18n_text_target: "field" },
+                      class: "block w-full resize-none overflow-hidden rounded border bg-white px-2 py-1.5 font-mono text-sm #{t&.outdated? ? 'border-amber-300' : 'border-stone-300'} group-has-data-dirty:border-sky-500" %>
     <div class="pb-3 md:pb-0">
+      <div class="mt-1 flex flex-wrap gap-1" data-i18n-text-target="chips" hidden></div>
       <% warnings.each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
       <div class="mt-1 flex items-center justify-end gap-2">
-        <%= submit_tag t(".save"), class: "rounded bg-stone-800 px-2.5 py-1 text-sm text-white" %>
+        <span class="hidden text-xs text-sky-700 group-has-data-dirty:inline">● <%= t("unsaved.marker") %></span>
+        <%= submit_tag t(".save"), title: t("unsaved.save_shortcut"), class: "rounded border border-stone-800 bg-stone-800 px-2 py-0.5 text-xs text-white" %>
         <% if current_user.can_review?(language) %>
-          <%= button_tag t(".save_and_review"), name: "reviewed", value: "1", class: "rounded border border-emerald-600 px-2.5 py-1 text-sm text-emerald-700" %>
+          <%= button_tag t(".save_and_review"), name: "reviewed", value: "1", title: t("unsaved.review_shortcut"),
+                         data: { i18n_text_target: "review" }, class: "rounded border border-emerald-600 px-2 py-0.5 text-xs text-emerald-700" %>
         <% end %>
       </div>
       <% if (machine = data[:machine][unit.id]) && (t.nil? || t.outdated?) %>

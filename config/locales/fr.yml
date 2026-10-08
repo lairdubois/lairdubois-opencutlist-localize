@@ -3,6 +3,14 @@ fr:
   loading: "chargement…"
   save: "Enregistrer"
   cancel: "Annuler"
+  unsaved:
+    marker: "non enregistré"
+    confirm: "Des modifications ne sont pas enregistrées. Quitter la page quand même ?"
+    count:
+      one: "%{count} modification non enregistrée"
+      other: "%{count} modifications non enregistrées"
+    save_shortcut: "⌘/Ctrl + Entrée"
+    review_shortcut: "⌘/Ctrl + Maj + Entrée"
   status:
     untranslated: "non traduit"
     translated: "traduit"
@@ -20,6 +28,7 @@ fr:
     rename: "renommage"
     source_minor: "correction fr"
     source_major: "changement fr"
+    note: "commentaire YAML"
     translate: "traduction"
     review: "relecture"
     archive: "suppression"
@@ -29,12 +38,50 @@ fr:
     no_language_access: "Tu n'as pas accès à cette langue."
 
   shared:
-    search_form:
-      placeholders:
-        at: "# 120 ou 120-180"
-        prefix: "branche (tab.cutlist)"
-        q: "Rechercher…"
+    search_bar:
+      placeholder: "Rechercher dans les textes..."
       clear: "Effacer"
+      shortcuts: |
+        ⌘/Ctrl + F : aller à la recherche (2e fois : celle du navigateur)
+        Entrée : rechercher
+        Échap : quitter le champ
+        Maj + Échap : tout effacer, texte et filtres
+        Dans le texte, avant Entrée :
+        #120, #120-180 : par numéro
+        key:… : par clé
+        branch:… : par branche
+      remove: "Retirer"
+      remove_all: "Retirer tous les filtres"
+      count:
+        one: "%{formatted} chaîne"
+        other: "%{formatted} chaînes"
+      filters: "Filtres"
+      or: "ou"
+      status: "Statut"
+      status_header: "Statut (l'un des cochés)"
+      fields:
+        key: "Clé"
+        prefix: "Branche"
+        at: "#"
+      placeholders:
+        key: "contient…"
+        prefix: "tab.cutlist"
+        at: "120, 120-180, 120-…"
+      statuses:
+        untranslated: "Non traduites"
+        outdated: "À revoir"
+        unreviewed: "Non relues"
+        reviewed: "Relues"
+      questions: "Questions ouvertes"
+      with: "Avec"
+      questions_chip: "question ouverte"
+    empty_list:
+      filtered: "Aucune chaîne avec ces filtres."
+      show_unfiltered:
+        one: "Voir la chaîne sans filtre →"
+        other: "Voir les %{formatted} chaînes sans filtre →"
+      searched: "Aucune chaîne ne correspond à la recherche."
+      empty: "Aucune chaîne."
 
   activerecord:
     attributes:
@@ -88,23 +135,17 @@ fr:
 
   translations:
     index:
+      reference: "Référence :"
       second_language: "+ 2e langue"
-      filters:
-        todo: "À traduire ou revoir"
-        untranslated: "Non traduites"
-        outdated: "À revoir"
-        unreviewed: "Non relues"
-        questions: "Questions ouvertes"
-        all: "Toutes"
-      count:
-        one: "%{count} chaîne"
-        other: "%{count} chaînes"
+      show_whitespace: "Afficher les espaces et retours à la ligne"
       pretranslate:
         one: "🤖 Proposer des traductions (%{language}) pour la première chaîne à faire"
         other: "🤖 Proposer des traductions (%{language}) pour les %{count} premières chaînes à faire"
-      empty: "Aucune chaîne."
     row:
       source: "source"
+      reference: "référence"
+      en_outdated: "en obsolète, le fr fait foi"
+      en_missing: "en manquant"
       before: "avant :"
       comments:
         one: "%{count} commentaire"
@@ -147,14 +188,7 @@ fr:
   units:
     index:
       title: "Clés"
-      filters_hint: "Dans au moins une langue"
-      filters:
-        all: "Toutes"
-        todo: "À traduire ou revoir"
-        untranslated: "Non traduites"
-        outdated: "À revoir"
-        unreviewed: "Non relues"
-        questions: "Questions ouvertes"
+      status_hint: "Dans au moins une langue (Relues : dans toutes)"
     node:
       continued: "(suite)"
       rename: "renommer / déplacer"
@@ -162,8 +196,17 @@ fr:
         one: "Déplacer la clé de %{path} ?"
         other: "Déplacer les %{count} clés de %{path} ?"
     show:
+      previous: "Précédente : %{key}"
+      next: "Suivante : %{key}"
+      list_hint: "Précédente / Suivante restent dans la liste filtrée"
+      unfiltered: "Parcourir toutes les clés"
+      position_filtered: "Position dans la liste filtrée"
+      position_all: "Position parmi toutes les clés"
+      not_listed: "Cette clé n'est plus dans la liste filtrée"
       rename: "Renommer"
       source: "Source (fr)"
+      note: "Commentaire YAML"
+      note_hint: "Écrit au-dessus de la clé dans chaque fichier de langue, sans le « # ». Vide = aucun."
       minor: "Correction mineure : garder les traductions"
       major: "Changement de sens : traductions à revoir"
       translations: "Traductions"
@@ -176,6 +219,8 @@ fr:
     source:
       minor: "Texte corrigé, traductions conservées."
       major: "Texte modifié, traductions à revoir."
+    note:
+      saved: "Commentaire enregistré, il sera écrit à la prochaine publication."
     archive:
       archived: "%{key} supprimée (historique conservé)."
 
@@ -216,17 +261,24 @@ fr:
     new:
       title: "Synchroniser avec le fr.yml du repo"
       intro: "Seuls les changements faits par les développeurs depuis la dernière synchronisation sont repris ; ce que tu as changé ici et qui n'est pas encore mergé n'est pas touché. Rien n'est appliqué avant ta validation."
-      analyze_repo: "Analyser le fr.yml de la branche %{branch}"
+      analyze_repo: "Analyser le fr.yml du repo"
+      branch: "Branche"
+      branch_hint: "C'est aussi la branche vers laquelle on publie ; elle ne change qu'une fois la synchronisation appliquée."
       upload: "ou téléverser un fichier"
       analyze: "Analyser"
     preview:
       title: "Changements faits dans le repo"
+      branch_switch_html: "Appliquer fera de <code>%{branch}</code> la branche de référence, à la place de <code>%{current}</code> : les publications partiront de cette branche."
       empty: "Aucun changement : l'outil est à jour avec ce fr.yml."
       renames: "Renommages probables (%{count})"
       renames_hint: "décoché = suppression + nouvelle clé, traductions perdues"
       changed: "Textes fr modifiés (%{count})"
       changed_hint: "coché = changement de sens, traductions à revoir"
       conflict: "aussi modifié ici, le repo l'emporte"
+      notes: "Commentaires YAML modifiés (%{count})"
+      notes_hint: "décoché = garder celui de l'outil, réécrit à la publication"
+      note_removed: "(supprimé)"
+      note_conflict: "aussi modifié ici"
       added: "Nouvelles clés (%{count})"
       removed: "Clés supprimées (%{count})"
       translations: "%{count} trad."
@@ -283,9 +335,15 @@ fr:
     revoked: "connexion GitHub révoquée ou expirée (%{error}) : reconnecte ton compte"
   ocl_repo:
     no_access: "aucun accès GitHub configuré (GitHub App ou OCL_GITHUB_TOKEN)"
+    invalid_branch: "nom de branche invalide : %{branch}"
+  publisher:
+    warnings:
+      leftover: "Usage restant de l'ancienne branche `%{prefix}` (dynamique ?) : `%{ref}`"
+      deleted_key: "Clé supprimée `%{key}` encore utilisée : %{path}:%{line}"
 
   migrations:
     not_configured: "Transifex n'est pas configuré."
+    failed: "Échec de l'appel : %{error}"
     show:
       title: "Migration depuis Transifex"
       connection: "Connexion"

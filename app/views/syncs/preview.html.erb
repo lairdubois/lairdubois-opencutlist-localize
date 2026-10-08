@@ -1,9 +1,13 @@
 <% renamed_units = @plan.renames.map(&:first) %>
 <% renamed_keys = @plan.renames.map { |_, e| e.key } %>
-<h1 class="mb-4 text-lg font-semibold"><%= t(".title") %></h1>
+<h1 class="mb-4 text-lg font-semibold"><%= t(".title") %><% if @branch %> <span class="font-mono text-base font-normal text-stone-500">· <%= @branch %></span><% end %></h1>
+<% if @branch && @branch != OclRepo.base_branch %>
+  <p class="mb-4 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900"><%= t(".branch_switch_html", branch: @branch, current: OclRepo.base_branch) %></p>
+<% end %>
 <% if @plan.empty? %><p class="mb-4 text-stone-600"><%= t(".empty") %></p><% end %>
 <%= form_with url: sync_apply_path do %>
   <%= hidden_field_tag :token, @token %>
+  <%= hidden_field_tag :branch, @branch if @branch %>
 
   <% if @plan.renames.any? %>
     <section class="mb-6 rounded border border-stone-200 bg-white">
@@ -27,6 +31,21 @@
           <span class="w-72 shrink-0 truncate font-mono text-xs"><%= unit.key %></span>
           <span><del class="text-stone-400"><%= unit.source_text %></del> → <%= entry.value %>
             <% if @plan.conflicts.include?(unit.id) %><span class="ml-1 rounded bg-red-100 px-1 text-xs text-red-800"><%= t(".conflict") %></span><% end %></span>
+        </label>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if @plan.notes.any? %>
+    <section class="mb-6 rounded border border-stone-200 bg-white">
+      <h2 class="border-b border-stone-200 px-4 py-2 font-semibold"><%= t(".notes", count: @plan.notes.size) %> <span class="text-sm font-normal text-stone-500">: <%= t(".notes_hint") %></span></h2>
+      <% @plan.notes.each do |unit, entry| %>
+        <% conflict = @plan.note_conflicts.include?(unit.id) %>
+        <label class="flex gap-3 border-b border-stone-100 px-4 py-1.5 text-sm last:border-0">
+          <%= check_box_tag "notes[]", unit.id, !conflict %>
+          <span class="w-72 shrink-0 truncate font-mono text-xs"><%= unit.key %></span>
+          <span class="font-mono text-xs whitespace-pre-wrap"><% if unit.note %><del class="text-stone-400"># <%= unit.note %></del> → <% end %><%= entry.note ? "# #{entry.note}" : t(".note_removed") %>
+            <% if conflict %><span class="ml-1 rounded bg-red-100 px-1 font-sans text-red-800"><%= t(".note_conflict") %></span><% end %></span>
         </label>
       <% end %>
     </section>

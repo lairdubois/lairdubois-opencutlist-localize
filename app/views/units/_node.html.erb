@@ -1,6 +1,7 @@
 <% count, translated, outdated = node.stats %>
 <% if node.branch? %>
-  <details class="border-b border-stone-100 last:border-0" <%= "open" if open %>>
+  <details class="border-b border-stone-100 last:border-0" <%= "open" if open %>
+           data-branch-tree-target="branch" data-path="<%= node.path %>">
     <summary class="flex cursor-pointer items-center gap-3 px-3 py-1.5 hover:bg-stone-50">
       <span class="font-medium"><%= node.name %></span>
       <% if node.continued %><span class="text-xs text-stone-400"><%= t(".continued") %></span><% end %>
@@ -8,7 +9,7 @@
       <%= render "progress", value: translated, max: count * languages, outdated: outdated %>
       <details class="ml-auto" onclick="event.stopPropagation()">
         <summary class="cursor-pointer text-xs text-stone-500 hover:text-stone-900"><%= t(".rename") %></summary>
-        <%= form_with url: rename_branch_path, method: :patch, class: "mt-1 flex gap-2" do %>
+        <%= form_with url: rename_branch_path, method: :patch, class: "mt-1 flex gap-2", data: { controller: "dirty-form" } do %>
           <%= hidden_field_tag :prefix, node.path %>
           <%= text_field_tag :new_prefix, node.path, class: "w-96 rounded border border-stone-300 px-2 py-1 font-mono text-xs" %>
           <%= submit_tag "OK", class: "rounded bg-stone-800 px-2 py-1 text-xs text-white",

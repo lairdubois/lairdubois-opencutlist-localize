@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_150000) do
   create_table "baselines", force: :cascade do |t|
     t.string "fr_hash"
     t.json "entries"
@@ -138,6 +138,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_120000) do
     t.text "github_refresh_token"
     t.datetime "github_refresh_token_expires_at"
     t.string "locale"
+    t.string "reference_language", default: "fr", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["github_id"], name: "index_users_on_github_id", unique: true
     t.index ["transifex_username"], name: "index_users_on_transifex_username", unique: true

@@ -15,7 +15,7 @@ class GithubWebhooksController < ActionController::Base
     fr = "#{OclRepo::I18N_SRC}/fr.yml"
     touched = Array(payload["commits"]).any? { |c| (Array(c["added"]) + Array(c["modified"]) + Array(c["removed"])).include?(fr) }
     i18n_bot = Array(payload["commits"]).all? { |c| c.dig("author", "name") == "OCL i18n" }
-    if payload["ref"] == "refs/heads/#{Rails.configuration.x.ocl.base_branch}" && touched && !i18n_bot
+    if payload["ref"] == "refs/heads/#{OclRepo.base_branch}" && touched && !i18n_bot
       Setting["repo_fr_changed_at"] = Time.current.iso8601
     end
     head :ok

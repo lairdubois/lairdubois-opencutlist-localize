@@ -5,19 +5,35 @@
     <span class="font-mono text-stone-500"><%= unit.key %></span>
   </div>
   <% if unit.note %>
-    <p class="border-b border-stone-100 bg-stone-50 px-3 py-1 font-mono text-xs whitespace-pre-wrap text-stone-500"># <%= unit.note %></p>
+    <p class="border-b border-sky-100 bg-sky-50 px-3 py-1 font-mono text-xs whitespace-pre-wrap text-sky-800"># <%= unit.note %></p>
   <% end %>
   <%# Each column is a 3-row subgrid (header, box, extras) : the source box and the textareas share one height %>
   <div class="grid grid-cols-1 gap-x-3 gap-y-1 p-3 <%= @languages.size > 1 ? 'md:grid-cols-3' : 'md:grid-cols-2' %>">
+    <%# Main reference : the fr source, or the en translation when the user chose it (fr stays the official source) %>
+    <% en = @references[unit.id] %>
+    <% en_main = @en_reference && en.present? %>
     <div class="row-span-3 grid min-w-0 grid-rows-subgrid text-sm">
-      <div class="flex h-5 items-center text-xs font-medium text-stone-700"><%= Language::SOURCE_CODE %> · <%= t(".source") %></div>
-      <p class="rounded border border-stone-200 bg-stone-50 px-2 py-1.5 font-mono whitespace-pre-wrap"><%= unit.source_text %></p>
-      <div class="pb-3 md:pb-0">
-        <% if (previous = @previous_sources[unit.id]) && outdated %>
-          <p class="mt-1 whitespace-pre-wrap text-xs text-stone-500"><%= t(".before") %> <del><%= previous %></del></p>
+      <div class="flex h-5 items-center gap-2 text-xs font-medium text-stone-700">
+        <% if en_main %>
+          <span>en · <%= t(".reference") %></span>
+          <% if en.outdated? %><span class="rounded bg-amber-100 px-1.5 font-normal text-amber-800"><%= t(".en_outdated") %></span><% end %>
+        <% else %>
+          <span><%= Language::SOURCE_CODE %> · <%= t(".source") %></span>
+          <% if @en_reference %><span class="rounded bg-stone-100 px-1.5 font-normal text-stone-600"><%= t(".en_missing") %></span><% end %>
         <% end %>
-        <% if (en = @references[unit.id]) %>
-          <p class="mt-2 whitespace-pre-wrap text-xs text-stone-500"><span class="font-medium">en</span> · <%= en %></p>
+      </div>
+      <% reference = en_main ? en.text : unit.source_text %>
+      <div class="rounded border px-2 py-1.5 font-mono whitespace-pre-wrap <%= en_main && en.outdated? ? 'border-amber-200 bg-amber-50' : 'border-stone-200 bg-stone-50' %>"
+           data-controller="i18n-text" data-i18n-text-text-value="<%= reference %>" data-i18n-text-refs-value="<%= @ref_texts[unit.id].to_json %>"><%= reference %></div>
+      <div class="pb-3 md:pb-0">
+        <% if en_main %>
+          <p class="mt-2 whitespace-pre-wrap text-xs <%= en.outdated? ? 'text-stone-800' : 'text-stone-500' %>"><span class="font-medium"><%= Language::SOURCE_CODE %> · <%= t(".source") %></span> · <%= unit.source_text %></p>
+        <% end %>
+        <% if (previous = @previous_sources[unit.id]) && outdated %>
+          <p class="mt-1 whitespace-pre-wrap text-xs text-stone-500"><%= "#{Language::SOURCE_CODE} " if en_main %><%= t(".before") %> <del><%= previous %></del></p>
+        <% end %>
+        <% if en && !en_main %>
+          <p class="mt-2 whitespace-pre-wrap text-xs text-stone-500"><span class="font-medium">en</span> · <%= en.text %></p>
         <% end %>
       </div>
     </div>

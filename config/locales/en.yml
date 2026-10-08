@@ -3,6 +3,14 @@ en:
   loading: "loading…"
   save: "Save"
   cancel: "Cancel"
+  unsaved:
+    marker: "not saved"
+    confirm: "Some changes are not saved. Leave the page anyway?"
+    count:
+      one: "%{count} unsaved change"
+      other: "%{count} unsaved changes"
+    save_shortcut: "⌘/Ctrl + Enter"
+    review_shortcut: "⌘/Ctrl + Shift + Enter"
   status:
     untranslated: "untranslated"
     translated: "translated"
@@ -20,6 +28,7 @@ en:
     rename: "rename"
     source_minor: "fr fix"
     source_major: "fr change"
+    note: "YAML comment"
     translate: "translation"
     review: "review"
     archive: "deletion"
@@ -29,12 +38,50 @@ en:
     no_language_access: "You don't have access to this language."
 
   shared:
-    search_form:
-      placeholders:
-        at: "# 120 or 120-180"
-        prefix: "branch (tab.cutlist)"
-        q: "Search…"
+    search_bar:
+      placeholder: "Search the texts..."
       clear: "Clear"
+      shortcuts: |
+        ⌘/Ctrl + F: go to the search (twice: the browser's find)
+        Enter: search
+        Esc: leave the field
+        Shift + Esc: clear everything, text and filters
+        In the text, before Enter:
+        #120, #120-180: by number
+        key:…: by key
+        branch:…: by branch
+      remove: "Remove"
+      remove_all: "Remove every filter"
+      count:
+        one: "%{formatted} string"
+        other: "%{formatted} strings"
+      filters: "Filters"
+      or: "or"
+      status: "Status"
+      status_header: "Status (any of the checked ones)"
+      fields:
+        key: "Key"
+        prefix: "Branch"
+        at: "#"
+      placeholders:
+        key: "contains…"
+        prefix: "tab.cutlist"
+        at: "120, 120-180, 120-…"
+      statuses:
+        untranslated: "Untranslated"
+        outdated: "To review"
+        unreviewed: "Not reviewed"
+        reviewed: "Reviewed"
+      questions: "Open questions"
+      with: "With"
+      questions_chip: "open question"
+    empty_list:
+      filtered: "No strings with these filters."
+      show_unfiltered:
+        one: "Show the string without filters →"
+        other: "Show the %{formatted} strings without filters →"
+      searched: "No strings match the search."
+      empty: "No strings."
 
   activerecord:
     attributes:
@@ -88,23 +135,17 @@ en:
 
   translations:
     index:
+      reference: "Reference:"
       second_language: "+ 2nd language"
-      filters:
-        todo: "To translate or review"
-        untranslated: "Untranslated"
-        outdated: "To review"
-        unreviewed: "Not reviewed"
-        questions: "Open questions"
-        all: "All"
-      count:
-        one: "%{count} string"
-        other: "%{count} strings"
+      show_whitespace: "Show spaces and line breaks"
       pretranslate:
         one: "🤖 Suggest translations (%{language}) for the first string to do"
         other: "🤖 Suggest translations (%{language}) for the first %{count} strings to do"
-      empty: "No strings."
     row:
       source: "source"
+      reference: "reference"
+      en_outdated: "en outdated, fr prevails"
+      en_missing: "en missing"
       before: "before:"
       comments:
         one: "%{count} comment"
@@ -147,14 +188,7 @@ en:
   units:
     index:
       title: "Keys"
-      filters_hint: "In at least one language"
-      filters:
-        all: "All"
-        todo: "To translate or review"
-        untranslated: "Untranslated"
-        outdated: "To review"
-        unreviewed: "Not reviewed"
-        questions: "Open questions"
+      status_hint: "In at least one language (Reviewed: in all of them)"
     node:
       continued: "(continued)"
       rename: "rename / move"
@@ -162,8 +196,17 @@ en:
         one: "Move the key of %{path}?"
         other: "Move the %{count} keys of %{path}?"
     show:
+      previous: "Previous: %{key}"
+      next: "Next: %{key}"
+      list_hint: "Previous / Next stay within the filtered list"
+      unfiltered: "Walk through every key"
+      position_filtered: "Position in the filtered list"
+      position_all: "Position among every key"
+      not_listed: "This key is no longer in the filtered list"
       rename: "Rename"
       source: "Source (fr)"
+      note: "YAML comment"
+      note_hint: "Written above the key in every language file, without the \"#\". Empty = none."
       minor: "Minor fix: keep the translations"
       major: "Meaning changed: translations to review"
       translations: "Translations"
@@ -176,6 +219,8 @@ en:
     source:
       minor: "Text fixed, translations kept."
       major: "Text changed, translations to review."
+    note:
+      saved: "Comment saved, it will be written on the next publication."
     archive:
       archived: "%{key} deleted (history kept)."
 
@@ -216,17 +261,24 @@ en:
     new:
       title: "Sync with the repo's fr.yml"
       intro: "Only the changes made by developers since the last sync are taken; what you changed here and isn't merged yet is left alone. Nothing is applied before you confirm."
-      analyze_repo: "Analyze the fr.yml of the %{branch} branch"
+      analyze_repo: "Analyze the repo's fr.yml"
+      branch: "Branch"
+      branch_hint: "It is also the branch published to; it only changes once the sync is applied."
       upload: "or upload a file"
       analyze: "Analyze"
     preview:
       title: "Changes made in the repo"
+      branch_switch_html: "Applying makes <code>%{branch}</code> the reference branch instead of <code>%{current}</code>: publications will start from that branch."
       empty: "No changes: the tool is up to date with this fr.yml."
       renames: "Likely renames (%{count})"
       renames_hint: "unchecked = deletion + new key, translations lost"
       changed: "Changed fr texts (%{count})"
       changed_hint: "checked = meaning changed, translations to review"
       conflict: "also changed here, the repo wins"
+      notes: "YAML comments changed (%{count})"
+      notes_hint: "unchecked = keep the tool's one, written back on publish"
+      note_removed: "(removed)"
+      note_conflict: "also changed here"
       added: "New keys (%{count})"
       removed: "Deleted keys (%{count})"
       translations: "%{count} transl."
@@ -283,9 +335,15 @@ en:
     revoked: "GitHub connection revoked or expired (%{error}): reconnect your account"
   ocl_repo:
     no_access: "no GitHub access configured (GitHub App or OCL_GITHUB_TOKEN)"
+    invalid_branch: "invalid branch name: %{branch}"
+  publisher:
+    warnings:
+      leftover: "Remaining use of the old branch `%{prefix}` (dynamic?): `%{ref}`"
+      deleted_key: "Deleted key `%{key}` still used: %{path}:%{line}"
 
   migrations:
     not_configured: "Transifex is not configured."
+    failed: "Call failed: %{error}"
     show:
       title: "Migrating from Transifex"
       connection: "Connection"

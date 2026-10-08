@@ -17,7 +17,7 @@ class GithubPulls
            request(:patch, "/repos/#{@config.github_repo}/pulls/#{existing['number']}", title: title, body: body)
          else
            request(:post, "/repos/#{@config.github_repo}/pulls", title: title, body: body,
-                                                                 head: @config.i18n_branch, base: @config.base_branch)
+                                                                 head: @config.i18n_branch, base: OclRepo.base_branch(@config))
          end
     pr["html_url"]
   end

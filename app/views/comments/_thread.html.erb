@@ -20,15 +20,15 @@
         <p class="whitespace-pre-wrap"><%= c.body %></p>
       </div>
     <% end %>
-    <%= form_with url: unit_comments_path(unit, lang: language&.code), class: "flex flex-col gap-1" do %>
+    <%= form_with url: unit_comments_path(unit, lang: language&.code), class: "flex flex-col gap-1", data: { controller: "dirty-form" } do %>
       <%= text_area_tag :body, nil, rows: 2, required: true, placeholder: t(".placeholder"),
                         data: { controller: "autosize", action: "input->autosize#resize" },
                         class: "block w-full resize-none overflow-hidden rounded border border-stone-300 px-2 py-1" %>
       <div class="flex items-center gap-3 text-xs">
-        <label><%= check_box_tag :question, "1" %> <%= t(".is_question") %></label>
+        <label><%= check_box_tag :question, "1", false, data: { dirty_ignore: true } %> <%= t(".is_question") %></label>
         <% if language %>
-          <label><%= radio_button_tag :scope, "language", true %> <%= language.name %></label>
-          <label><%= radio_button_tag :scope, "all" %> <%= t(".all_languages") %></label>
+          <label><%= radio_button_tag :scope, "language", true, data: { dirty_ignore: true } %> <%= language.name %></label>
+          <label><%= radio_button_tag :scope, "all", false, data: { dirty_ignore: true } %> <%= t(".all_languages") %></label>
         <% end %>
         <%= submit_tag t(".send"), class: "ml-auto rounded bg-stone-800 px-2 py-1 text-white" %>
       </div>

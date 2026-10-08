@@ -10,6 +10,16 @@ class OclRepo
                 ":(exclude)src/ladb_opencutlist/ruby/lib"].freeze
 
   Error = Class.new(StandardError)
+  BRANCH_FORMAT = %r{\A(?!-)(?!.*\.\.)[A-Za-z0-9._/-]+\z}
+
+  # The branch synced with and published to : chosen on the sync page, OCL_BASE_BRANCH until then
+  def self.base_branch(config = Rails.configuration.x.ocl)
+    Setting["base_branch"].presence || config.base_branch
+  end
+
+  def self.valid_branch?(name)
+    name.to_s.match?(BRANCH_FORMAT)
+  end
 
   def initialize(config = Rails.configuration.x.ocl, auth: GithubAuth.new(config))
     @config = config
@@ -22,9 +32,10 @@ class OclRepo
     local? || @auth.configured?
   end
 
-  # Brings the checkout to the tip of the base branch, returns its sha
-  def fetch!
-    base = @config.base_branch
+  # Brings the checkout to the tip of the base branch (or of another one, to analyze it), returns its sha
+  def fetch!(base = base_branch)
+    raise Error, I18n.t("ocl_repo.invalid_branch", branch: base) unless self.class.valid_branch?(base)
+
     if File.directory?(File.join(@dir, ".git"))
       git(*auth, "fetch", "-q", "--depth", "1", "origin", "+#{base}:refs/remotes/origin/#{base}")
     else
@@ -57,7 +68,7 @@ class OclRepo
     raise Error, I18n.t("ocl_repo.no_access") unless can_push?
 
     branch = @config.i18n_branch
-    git("checkout", "-q", "-B", branch, "origin/#{@config.base_branch}")
+    git("checkout", "-q", "-B", branch, "origin/#{base_branch}")
     files.each { |path, content| File.write(File.join(@dir, path), content) }
     rewrite_code(renames)
     git("add", "-A")
@@ -72,7 +83,11 @@ class OclRepo
     git(*auth, "push", "-q", "--force", "origin", "#{branch}:refs/heads/#{branch}")
     Published.new(sha: git("rev-parse", "HEAD").strip, files: changed, leftovers: leftovers)
   ensure
-    git("checkout", "-q", @config.base_branch) rescue nil
+    git("checkout", "-q", base_branch) rescue nil
+  end
+
+  def base_branch
+    self.class.base_branch(@config)
   end
 
   private

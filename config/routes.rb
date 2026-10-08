@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   # Translators
   get "translate", to: "languages#index", as: :translate_root
   get "translate/:lang", to: "translations#index", as: :translate
+  patch "translate/reference", to: "reference_languages#update", as: :reference_language
   patch "translate/:lang/:unit_id", to: "translations#update", as: :translate_unit
   post "translate/:lang/pretranslate", to: "translations#pretranslate", as: :pretranslate
 
@@ -18,6 +19,7 @@ Rails.application.routes.draw do
     member do
       patch :rename
       patch :source
+      patch :note
       patch :archive
     end
   end

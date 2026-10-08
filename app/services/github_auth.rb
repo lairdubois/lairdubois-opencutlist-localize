@@ -6,7 +6,7 @@ require "monitor"
 # else short-lived installation tokens of the OCL i18n GitHub App when it is configured (pushes, PRs
 # and commits then show as <app>[bot]), else the static OCL_GITHUB_TOKEN
 class GithubAuth
-  DEFAULT_COMMITTER = ["OCL i18n", "i18n@opencutlist.org"].freeze
+  DEFAULT_COMMITTER = ["OCL i18n", "opencutlist@lairdubois.fr"].freeze
 
   LOCK = Monitor.new
   CACHE = {} # rubocop:disable Style/MutableConstant -- per-process token cache

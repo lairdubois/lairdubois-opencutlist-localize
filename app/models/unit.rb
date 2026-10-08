@@ -20,6 +20,13 @@ class Unit < ApplicationRecord
   default_scope { order(:position) }
   scope :active, -> { where(archived_at: nil) }
 
+  # unit id => { key => fr text } of the $t(key) in each source (tooltips in the text views)
+  def self.ref_texts(units)
+    keys = units.to_h { |u| [u.id, u.source_text.to_s.scan(/\$t\(([^),\n]+)/).flatten.map(&:strip).uniq] }
+    texts = active.where(key: keys.values.flatten.uniq).pluck(:key, :source_text).to_h
+    keys.transform_values { |k| texts.slice(*k) }
+  end
+
   def self.hash_text(text)
     Digest::SHA256.hexdigest(text.to_s)[0, 16]
   end

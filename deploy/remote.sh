@@ -24,7 +24,7 @@ sudo -u ocl-i18n bash -c "
   # Propshaft only adds the app/assets/* directories that exist at boot : the Tailwind build goes here
   mkdir -p app/assets/builds
   bundle config set --local deployment true
-  bundle config set --local without 'development test'
+  bundle config set --local without development:test
   bundle install --quiet
   bin/rails assets:precompile
   bin/rails db:prepare

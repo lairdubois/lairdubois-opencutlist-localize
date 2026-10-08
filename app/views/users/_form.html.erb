@@ -1,11 +1,11 @@
-<%= form_with model: @user, class: "max-w-2xl rounded border border-stone-200 bg-white p-4" do |f| %>
+<%= form_with model: @user, class: "max-w-2xl rounded border border-stone-200 bg-white p-4", data: { controller: "dirty-form" } do |f| %>
   <% if @user.errors.any? %><p class="mb-3 text-sm text-red-700"><%= @user.errors.full_messages.to_sentence %></p><% end %>
   <div class="mb-3 grid grid-cols-2 gap-3">
     <label class="text-sm"><%= User.human_attribute_name(:name) %><%= f.text_field :name, required: true, class: "mt-1 w-full rounded border border-stone-300 px-2 py-1.5" %></label>
     <label class="text-sm"><%= User.human_attribute_name(:email) %><%= f.email_field :email, required: true, class: "mt-1 w-full rounded border border-stone-300 px-2 py-1.5" %></label>
   </div>
   <label class="mb-3 block text-sm"><%= User.human_attribute_name(:locale) %>
-    <%= f.select :locale, [["—", ""], ["Français", "fr"], ["English", "en"]], {}, class: "ml-2 rounded border border-stone-300 px-1 py-0.5 text-xs" %>
+    <%= f.select :locale, [["—", ""], ["Français", "fr"], ["English", "en"]], {}, class: "ml-2 rounded border border-stone-300 py-0.5 pl-1.5 text-xs hover:border-stone-400" %>
   </label>
   <label class="mb-4 block text-sm"><%= f.check_box :admin %> <%= t(".admin") %></label>
 
@@ -16,7 +16,7 @@
       <label class="flex items-center justify-between gap-2">
         <span><%= language.name %></span>
         <%= select_tag "roles[#{language.id}]", options_for_select([["—", ""], [t("roles.translator"), "translator"], [t("roles.reviewer"), "reviewer"]], roles[language.id]),
-                       class: "rounded border border-stone-300 px-1 py-0.5 text-xs" %>
+                       class: "rounded border border-stone-300 py-0.5 pl-1.5 text-xs hover:border-stone-400" %>
       </label>
     <% end %>
   </div>
