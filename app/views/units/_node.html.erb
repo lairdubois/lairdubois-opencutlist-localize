@@ -1,0 +1,37 @@
+<% count, translated, outdated = node.stats %>
+<% if node.branch? %>
+  <details class="border-b border-stone-100 last:border-0" <%= "open" if open %>>
+    <summary class="flex cursor-pointer items-center gap-3 px-3 py-1.5 hover:bg-stone-50">
+      <span class="font-medium"><%= node.name %></span>
+      <% if node.continued %><span class="text-xs text-stone-400"><%= t(".continued") %></span><% end %>
+      <span class="text-xs text-stone-500"><%= count %></span>
+      <%= render "progress", value: translated, max: count * languages, outdated: outdated %>
+      <details class="ml-auto" onclick="event.stopPropagation()">
+        <summary class="cursor-pointer text-xs text-stone-500 hover:text-stone-900"><%= t(".rename") %></summary>
+        <%= form_with url: rename_branch_path, method: :patch, class: "mt-1 flex gap-2" do %>
+          <%= hidden_field_tag :prefix, node.path %>
+          <%= text_field_tag :new_prefix, node.path, class: "w-96 rounded border border-stone-300 px-2 py-1 font-mono text-xs" %>
+          <%= submit_tag "OK", class: "rounded bg-stone-800 px-2 py-1 text-xs text-white",
+                         data: { turbo_confirm: t(".rename_confirm", count: count, path: node.path) } %>
+        <% end %>
+      </details>
+    </summary>
+    <div class="pl-5">
+      <% if open %>
+        <%= render partial: "units/node", collection: node.children.values, locals: { languages: languages, open: true } %>
+      <% else %>
+        <%# Loaded when the branch is opened : a lazy frame isn't visible inside a closed <details> %>
+        <%= turbo_frame_tag "branch_#{node.path}", src: units_path(branch: node.path), loading: :lazy, target: "_top" do %>
+          <p class="px-3 py-1 text-xs text-stone-400"><%= t("loading") %></p>
+        <% end %>
+      <% end %>
+    </div>
+  </details>
+<% else %>
+  <%= link_to node.unit, class: "flex items-center gap-3 border-b border-stone-100 px-3 py-1 last:border-0 hover:bg-stone-50" do %>
+    <span class="w-12 shrink-0 text-right text-xs text-stone-400 tabular-nums">#<%= @indexes[node.unit.id] %></span>
+    <span class="w-72 shrink-0 truncate font-mono text-xs text-stone-600"><%= node.name %></span>
+    <span class="flex-1 truncate font-mono text-xs"><%= node.unit.source_text %></span>
+    <%= render "progress", value: translated, max: languages, outdated: outdated %>
+  <% end %>
+<% end %>

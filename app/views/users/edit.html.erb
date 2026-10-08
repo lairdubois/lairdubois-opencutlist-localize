@@ -1,0 +1,4 @@
+<h1 class="mb-4 text-lg font-semibold"><%= @user.name %></h1>
+<%= render "form" %>
+<%= button_to t(".destroy"), @user, method: :delete, class: "mt-4 text-sm text-red-700 hover:underline",
+              form: { data: { turbo_confirm: t(".destroy_confirm", name: @user.name) } } %>

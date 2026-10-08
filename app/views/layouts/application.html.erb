@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="<%= I18n.locale %>">
+  <head>
+    <title><%= content_for(:title) || "OpenCutList i18n" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-stone-50 text-stone-900">
+    <header class="border-b border-stone-200 bg-white">
+      <nav class="mx-auto max-w-6xl px-4 h-14 flex items-center gap-6 text-sm">
+        <%= link_to "OpenCutList i18n", root_path, class: "text-base font-semibold" %>
+        <% if current_user %>
+          <%= link_to t(".translate"), translate_root_path, class: "text-stone-600 hover:text-stone-900" %>
+          <% if current_user.admin? %>
+            <%= link_to t(".keys"), units_path, class: "text-stone-600 hover:text-stone-900" %>
+            <%= link_to t(".sync"), new_sync_path, class: "text-stone-600 hover:text-stone-900" %>
+            <%= link_to t(".users"), users_path, class: "text-stone-600 hover:text-stone-900" %>
+            <%= link_to t(".migration"), migration_path, class: "text-stone-600 hover:text-stone-900" %>
+            <%= link_to t(".publish"), publications_path, class: "ml-auto rounded bg-stone-800 px-3 py-1.5 text-white hover:bg-stone-700" %>
+          <% end %>
+          <span class="<%= 'ml-auto' unless current_user.admin? %> flex gap-1 text-xs">
+            <% I18n.available_locales.each do |locale| %>
+              <%= button_to locale.upcase, locale_path, method: :patch, params: { locale: locale },
+                            class: "rounded px-1.5 py-0.5 #{locale == I18n.locale ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-200'}" %>
+            <% end %>
+          </span>
+          <%# User menu : native popover (light dismiss, Esc), placed under its button by popover_controller %>
+          <div data-controller="popover">
+            <button type="button" popovertarget="user-menu" data-popover-target="anchor"
+                    class="flex items-center gap-1 rounded px-2 py-1 text-stone-600 hover:bg-stone-100 hover:text-stone-900">
+              <%= current_user.name %> <span class="text-xs text-stone-400">▾</span>
+            </button>
+            <div id="user-menu" popover data-popover-target="panel" data-action="beforetoggle->popover#place"
+                 class="m-0 min-w-48 rounded border border-stone-200 bg-white p-1 text-sm shadow-lg">
+              <p class="truncate px-3 py-1.5 text-xs text-stone-500"><%= current_user.email %></p>
+              <%= button_to t(".logout"), session_path, method: :delete,
+                            class: "w-full rounded px-3 py-1.5 text-left text-stone-700 hover:bg-stone-100" %>
+            </div>
+          </div>
+        <% end %>
+      </nav>
+    </header>
+    <main class="mx-auto <%= content_for?(:wide) ? 'max-w-[96rem]' : 'max-w-6xl' %> px-4 py-6">
+      <% if current_user&.admin? && Setting["repo_fr_changed_at"].present? %>
+        <p class="mb-4 rounded bg-sky-50 px-3 py-2 text-sky-900"><%= t(".repo_changed") %> <%= link_to t(".sync_now"), new_sync_path, class: "underline" %></p>
+      <% end %>
+      <% if notice %><p class="mb-4 rounded bg-emerald-50 px-3 py-2 text-emerald-800"><%= notice %></p><% end %>
+      <% if alert %><p class="mb-4 rounded bg-red-50 px-3 py-2 text-red-800"><%= alert %></p><% end %>
+      <%= yield %>
+    </main>
+  </body>
+</html>

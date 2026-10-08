@@ -1,0 +1,49 @@
+<% renamed_units = @plan.renames.map(&:first) %>
+<% renamed_keys = @plan.renames.map { |_, e| e.key } %>
+<h1 class="mb-4 text-lg font-semibold"><%= t(".title") %></h1>
+<% if @plan.empty? %><p class="mb-4 text-stone-600"><%= t(".empty") %></p><% end %>
+<%= form_with url: sync_apply_path do %>
+  <%= hidden_field_tag :token, @token %>
+
+  <% if @plan.renames.any? %>
+    <section class="mb-6 rounded border border-stone-200 bg-white">
+      <h2 class="border-b border-stone-200 px-4 py-2 font-semibold"><%= t(".renames", count: @plan.renames.size) %> <span class="text-sm font-normal text-stone-500">: <%= t(".renames_hint") %></span></h2>
+      <% @plan.renames.each do |unit, entry| %>
+        <label class="flex gap-3 border-b border-stone-100 px-4 py-1.5 text-sm last:border-0">
+          <%= check_box_tag "renames[]", unit.id, true %>
+          <span class="font-mono text-xs"><del class="text-stone-400"><%= unit.key %></del> → <%= entry.key %></span>
+          <span class="ml-auto truncate text-stone-500"><%= unit.source_text %></span>
+        </label>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if @plan.changed.any? %>
+    <section class="mb-6 rounded border border-stone-200 bg-white">
+      <h2 class="border-b border-stone-200 px-4 py-2 font-semibold"><%= t(".changed", count: @plan.changed.size) %> <span class="text-sm font-normal text-stone-500">: <%= t(".changed_hint") %></span></h2>
+      <% @plan.changed.each do |unit, entry| %>
+        <label class="flex gap-3 border-b border-stone-100 px-4 py-1.5 text-sm last:border-0">
+          <%= check_box_tag "majors[]", unit.id, false %>
+          <span class="w-72 shrink-0 truncate font-mono text-xs"><%= unit.key %></span>
+          <span><del class="text-stone-400"><%= unit.source_text %></del> → <%= entry.value %>
+            <% if @plan.conflicts.include?(unit.id) %><span class="ml-1 rounded bg-red-100 px-1 text-xs text-red-800"><%= t(".conflict") %></span><% end %></span>
+        </label>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% added = @plan.added.reject { |e| e.key.in?(renamed_keys) } %>
+  <% removed = @plan.removed - renamed_units %>
+  <section class="mb-6 grid grid-cols-2 gap-4 text-sm">
+    <div class="rounded border border-stone-200 bg-white p-4">
+      <h2 class="mb-2 font-semibold"><%= t(".added", count: added.size) %></h2>
+      <% added.each do |e| %><p class="truncate font-mono text-xs"><%= e.key %></p><% end %>
+    </div>
+    <div class="rounded border border-stone-200 bg-white p-4">
+      <h2 class="mb-2 font-semibold"><%= t(".removed", count: removed.size) %></h2>
+      <% removed.each do |u| %><p class="truncate font-mono text-xs"><%= u.key %> <span class="text-stone-400">(<%= t(".translations", count: u.translations.size) %>)</span></p><% end %>
+    </div>
+  </section>
+
+  <%= submit_tag t(".apply"), class: "rounded bg-stone-800 px-4 py-2 text-white" %>
+<% end %>

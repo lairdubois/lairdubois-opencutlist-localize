@@ -1,0 +1,38 @@
+<% content_for :title, "#{@languages.map(&:name).join(' + ')} · OCL i18n" %>
+<% content_for :wide, "1" if @second_language %>
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <h1 class="text-lg font-semibold"><%= @language.name %></h1>
+  <% others = current_user.editable_languages.where.not(id: @language.id) %>
+  <% if others.any? %>
+    <%= form_with url: translate_path(@language.code), method: :get, class: "text-sm" do %>
+      <%= hidden_field_tag :filter, @filter %>
+      <%= hidden_field_tag :q, params[:q] if params[:q].present? %>
+      <%= hidden_field_tag :prefix, params[:prefix] if params[:prefix].present? %>
+      <%= hidden_field_tag :at, params[:at] if params[:at].present? %>
+      <%= select_tag :also, options_from_collection_for_select(others, :code, :name, @second_language&.code),
+                     include_blank: t(".second_language"), onchange: "this.form.requestSubmit()",
+                     class: "rounded border border-stone-300 bg-white px-2 py-1" %>
+    <% end %>
+  <% end %>
+  <nav class="flex gap-1 text-sm">
+    <% TranslationsController::FILTERS.each do |key| %>
+      <%= link_to t(".filters.#{key}"), translate_path(@language.code, filter: key, q: params[:q], prefix: params[:prefix], at: params[:at], also: @second_language&.code),
+                  class: "rounded px-2 py-1 #{key == @filter ? 'bg-stone-800 text-white' : 'text-stone-600 hover:bg-stone-200'}" %>
+    <% end %>
+  </nav>
+</div>
+
+<div class="mb-2 flex flex-wrap items-center gap-3 text-sm text-stone-500">
+  <span><%= t(".count", count: @count) %></span>
+  <% todo = @units.select { |u| (t = @data[@language.id][:translations][u.id]).nil? || t.outdated? } %>
+  <% if Pretranslator.enabled? && todo.any? %>
+    <%= button_to t(".pretranslate", language: @language.name, count: todo.size), pretranslate_path(@language.code),
+                  params: { unit_ids: todo.map(&:id) }, class: "rounded border border-violet-300 bg-violet-50 px-2 py-0.5 text-violet-900" %>
+  <% end %>
+  <%= render "shared/search_form", url: translate_path(@language.code), hidden: { filter: @filter, also: @second_language&.code } %>
+</div>
+
+<div class="flex flex-col gap-3">
+  <%= render "page" %>
+</div>
+<% if @units.empty? %><p class="text-sm text-stone-500"><%= t(".empty") %></p><% end %>

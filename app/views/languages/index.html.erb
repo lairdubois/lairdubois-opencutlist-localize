@@ -1,0 +1,26 @@
+<h1 class="mb-4 text-lg font-semibold"><%= t(".title") %></h1>
+<% if @languages.empty? %>
+  <p class="text-stone-600"><%= t(".none") %></p>
+<% end %>
+<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+  <% @languages.each do |language| %>
+    <% s = @stats[language] %>
+    <%= link_to translate_path(language.code), class: "block rounded border border-stone-200 bg-white p-4 hover:border-stone-400" do %>
+      <div class="mb-2 flex items-baseline justify-between">
+        <span class="font-medium"><%= language.name %></span>
+        <span class="text-sm text-stone-500"><%= language.code %></span>
+      </div>
+      <div class="mb-2 h-2 overflow-hidden rounded bg-stone-200">
+        <div class="flex h-full">
+          <span class="bg-emerald-600" style="width: <%= 100.0 * s[:reviewed] / s[:total] %>%"></span>
+          <span class="bg-emerald-300" style="width: <%= 100.0 * (s[:translated] - s[:reviewed]) / s[:total] %>%"></span>
+        </div>
+      </div>
+      <p class="text-sm text-stone-600">
+        <%= t(".translated", percent: number_to_percentage(100.0 * s[:translated] / s[:total], precision: 0)) %> ·
+        <%= t(".todo", count: s[:total] - s[:translated]) %>
+        <% if s[:outdated] > 0 %>· <span class="text-amber-700"><%= t("status.outdated_count", count: s[:outdated]) %></span><% end %>
+      </p>
+    <% end %>
+  <% end %>
+</div>

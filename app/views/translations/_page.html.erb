@@ -1,0 +1,9 @@
+<% @units.each do |unit| %>
+  <%= render "row", unit: unit %>
+<% end %>
+<% if @more %>
+  <%= turbo_frame_tag "page_#{@page + 1}", src: translate_path(@language.code, request.query_parameters.merge("page" => @page + 1)),
+                      loading: :lazy, class: "flex flex-col gap-3" do %>
+    <p class="py-4 text-center text-sm text-stone-400"><%= t("loading") %></p>
+  <% end %>
+<% end %>

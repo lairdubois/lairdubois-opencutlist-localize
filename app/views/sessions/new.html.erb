@@ -1,0 +1,10 @@
+<div class="mx-auto mt-16 max-w-sm rounded border border-stone-200 bg-white p-6">
+  <h1 class="mb-4 text-lg font-semibold"><%= t(".title") %></h1>
+  <%= form_with url: session_path, class: "flex flex-col gap-3" do %>
+    <%= email_field_tag :email, nil, required: true, autofocus: true, placeholder: t(".email_placeholder"), class: "rounded border border-stone-300 px-3 py-2" %>
+    <%= submit_tag t(".submit"), class: "rounded bg-stone-800 px-3 py-2 text-white" %>
+  <% end %>
+  <% if flash[:dev_login_url] %>
+    <p class="mt-4 break-all text-xs text-stone-500">Dev : <%= link_to flash[:dev_login_url], flash[:dev_login_url], class: "underline", data: { turbo_prefetch: false } %></p>
+  <% end %>
+</div>

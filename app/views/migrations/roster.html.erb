@@ -1,0 +1,24 @@
+<h1 class="mb-2 text-lg font-semibold"><%= t(".title") %></h1>
+<p class="mb-4 text-sm text-stone-600"><%= t(".intro") %></p>
+<%= form_with url: migration_invite_path do %>
+  <div class="mb-4 rounded border border-stone-200 bg-white text-sm">
+    <% @roster.each do |username, langs| %>
+      <% user = @invited[username] %>
+      <div class="flex items-center gap-3 border-b border-stone-100 px-4 py-1.5 last:border-0">
+        <span class="w-40 font-medium"><%= username %></span>
+        <span class="flex flex-1 flex-wrap gap-1">
+          <% langs.each do |code, role| %>
+            <span class="rounded px-1.5 text-xs <%= role == 'reviewer' ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100' %>"><%= code %><%= " ✓" if role == "reviewer" %></span>
+          <% end %>
+        </span>
+        <% if user %>
+          <span class="text-xs text-emerald-700"><%= t(".invited", email: user.email) %></span>
+        <% else %>
+          <%= text_field_tag "invites[#{username}][name]", nil, placeholder: User.human_attribute_name(:name), class: "w-32 rounded border border-stone-300 px-2 py-0.5 text-xs" %>
+          <%= email_field_tag "invites[#{username}][email]", nil, placeholder: User.human_attribute_name(:email), class: "w-56 rounded border border-stone-300 px-2 py-0.5 text-xs" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  <%= submit_tag t("users.index.invite"), class: "rounded bg-stone-800 px-3 py-1.5 text-white" %>
+<% end %>

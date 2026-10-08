@@ -1,0 +1,43 @@
+<% t = data[:translations][unit.id] %>
+<% warnings = t ? TranslationChecks.call(unit.source_text, t.text) : [] %>
+<% fill = "const a = this.closest('turbo-frame').querySelector('textarea'); a.value = this.dataset.text; a.dispatchEvent(new Event('input'))" %>
+<%# Spans the row's 3 subgrid rows (header, box, extras) so its box shares the height of its neighbours %>
+<%= turbo_frame_tag dom_id(unit, language.code), class: "row-span-3 grid min-w-0 grid-rows-subgrid" do %>
+  <div class="flex h-5 items-center gap-2 text-xs">
+    <span class="font-medium text-stone-700"><%= language.name %></span>
+    <% if t.nil? %><span class="rounded bg-stone-100 px-1.5 text-stone-600"><%= t("status.untranslated") %></span>
+    <% elsif t.outdated? %><span class="rounded bg-amber-100 px-1.5 text-amber-800"><%= t("status.outdated") %></span>
+    <% elsif t.reviewed? %><span class="rounded bg-emerald-100 px-1.5 text-emerald-800"><%= t("status.reviewed") %></span>
+    <% else %><span class="rounded bg-emerald-50 px-1.5 text-emerald-700"><%= t("status.translated") %></span>
+    <% end %>
+    <% if local_assigns[:saved] %><span class="text-emerald-700">✓ <%= t(".saved") %></span><% end %>
+  </div>
+  <%= form_with url: translate_unit_path(language.code, unit), method: :patch, class: "contents" do %>
+    <%= text_area_tag :text, t&.text, rows: 1, dir: language.rtl ? "rtl" : "ltr",
+                      data: { controller: "autosize", action: "input->autosize#resize" },
+                      class: "block w-full resize-none overflow-hidden rounded border px-2 py-1.5 font-mono text-sm #{t&.outdated? ? 'border-amber-300' : 'border-stone-300'}" %>
+    <div class="pb-3 md:pb-0">
+      <% warnings.each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
+      <div class="mt-1 flex items-center justify-end gap-2">
+        <%= submit_tag t(".save"), class: "rounded bg-stone-800 px-2.5 py-1 text-sm text-white" %>
+        <% if current_user.can_review?(language) %>
+          <%= button_tag t(".save_and_review"), name: "reviewed", value: "1", class: "rounded border border-emerald-600 px-2.5 py-1 text-sm text-emerald-700" %>
+        <% end %>
+      </div>
+      <% if (machine = data[:machine][unit.id]) && (t.nil? || t.outdated?) %>
+        <p class="mt-2 text-xs text-stone-500">🤖 <%= t(".machine") %>
+          <button type="button" class="ml-1 whitespace-pre-wrap rounded bg-violet-50 px-1.5 text-left text-violet-900 hover:bg-violet-100"
+                  onclick="<%= fill %>" data-text="<%= machine %>"><%= machine %></button>
+        </p>
+      <% end %>
+      <% if (suggestions = data[:suggestions][unit.source_text]).present? && t.nil? %>
+        <p class="mt-2 text-xs text-stone-500"><%= t(".same_text") %>
+          <% suggestions.each do |s| %>
+            <button type="button" class="ml-1 rounded bg-sky-50 px-1.5 text-sky-800 hover:bg-sky-100"
+                    onclick="<%= fill %>" data-text="<%= s %>"><%= s %></button>
+          <% end %>
+        </p>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

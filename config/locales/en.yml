@@ -1,0 +1,351 @@
+en:
+  # Shared
+  loading: "loading…"
+  save: "Save"
+  cancel: "Cancel"
+  status:
+    untranslated: "untranslated"
+    translated: "translated"
+    reviewed: "reviewed"
+    outdated: "fr changed, to review"
+    outdated_count:
+      one: "%{count} to review"
+      other: "%{count} to review"
+  roles:
+    translator: "translator"
+    reviewer: "reviewer"
+  revision_kinds:
+    import: "import"
+    create: "creation"
+    rename: "rename"
+    source_minor: "fr fix"
+    source_major: "fr change"
+    translate: "translation"
+    review: "review"
+    archive: "deletion"
+    restore: "restore"
+  flash:
+    admin_only: "Admins only."
+    no_language_access: "You don't have access to this language."
+
+  shared:
+    search_form:
+      placeholders:
+        at: "# 120 or 120-180"
+        prefix: "branch (tab.cutlist)"
+        q: "Search…"
+      clear: "Clear"
+
+  activerecord:
+    attributes:
+      user:
+        name: "Name"
+        email: "E-mail"
+        locale: "Interface language"
+      unit:
+        key: "Key"
+        source_text: "fr text"
+    errors:
+      models:
+        unit:
+          attributes:
+            key:
+              overlapping_branch: "overlaps an existing branch or string"
+
+  layouts:
+    application:
+      translate: "Translate"
+      keys: "Keys"
+      sync: "Sync fr.yml"
+      users: "Users"
+      migration: "Migration"
+      publish: "Publish"
+      logout: "Log out"
+      repo_changed: "The repo's fr.yml has changed."
+      sync_now: "Sync"
+
+  sessions:
+    rate_limited: "Too many requests, try again later."
+    invalid_link: "Invalid or expired link."
+    new:
+      title: "Log in"
+      email_placeholder: "you@example.org"
+      submit: "Send me a login link"
+    create:
+      sent: "If this address is known, a login link has just been sent to it."
+    show:
+      question_html: "Log in as <strong>%{name}</strong>?"
+      submit: "Log in"
+
+  languages:
+    index:
+      title: "Languages"
+      none: "No language has been assigned to you yet. Ask an administrator."
+      translated: "%{percent} translated"
+      todo:
+        one: "%{count} to translate"
+        other: "%{count} to translate"
+
+  translations:
+    index:
+      second_language: "+ 2nd language"
+      filters:
+        todo: "To translate or review"
+        untranslated: "Untranslated"
+        outdated: "To review"
+        unreviewed: "Not reviewed"
+        questions: "Open questions"
+        all: "All"
+      count:
+        one: "%{count} string"
+        other: "%{count} strings"
+      pretranslate:
+        one: "🤖 Suggest translations (%{language}) for the first string to do"
+        other: "🤖 Suggest translations (%{language}) for the first %{count} strings to do"
+      empty: "No strings."
+    row:
+      source: "source"
+      before: "before:"
+      comments:
+        one: "%{count} comment"
+        other: "%{count} comments"
+      open_question: "open question"
+    editor:
+      saved: "saved"
+      save: "Save"
+      save_and_review: "Save and approve"
+      machine: "Suggestion:"
+      same_text: "Same text elsewhere:"
+    pretranslate:
+      started:
+        one: "Pre-translation of %{count} string started: reload the page in a moment."
+        other: "Pre-translation of %{count} strings started: reload the page in a moment."
+
+  translation_checks:
+    missing:
+      variable: "missing variable: %{token}"
+      reference: "missing reference: %{token}"
+      tag: "missing tag: %{token}"
+    extra:
+      variable: "extra variable: %{token}"
+      reference: "extra reference: %{token}"
+      tag: "extra tag: %{token}"
+    bold: "different number of **bold** markers"
+    lines: "different number of lines"
+    spaces: "leading or trailing space"
+
+  comments:
+    thread:
+      all_languages: "all languages"
+      resolved: "resolved question"
+      open: "open question"
+      resolve: "mark resolved"
+      placeholder: "Write a comment…"
+      is_question: "This is a question"
+      send: "Send"
+
+  units:
+    index:
+      title: "Keys"
+      filters_hint: "In at least one language"
+      filters:
+        all: "All"
+        todo: "To translate or review"
+        untranslated: "Untranslated"
+        outdated: "To review"
+        unreviewed: "Not reviewed"
+        questions: "Open questions"
+    node:
+      continued: "(continued)"
+      rename: "rename / move"
+      rename_confirm:
+        one: "Move the key of %{path}?"
+        other: "Move the %{count} keys of %{path}?"
+    show:
+      rename: "Rename"
+      source: "Source (fr)"
+      minor: "Minor fix: keep the translations"
+      major: "Meaning changed: translations to review"
+      translations: "Translations"
+      comments: "Comments"
+      history: "History"
+      archive: "Delete this key"
+      archive_confirm: "Delete %{key} from every language? (history is kept)"
+    rename:
+      renamed: "Key renamed."
+    source:
+      minor: "Text fixed, translations kept."
+      major: "Text changed, translations to review."
+    archive:
+      archived: "%{key} deleted (history kept)."
+
+  branches:
+    rename:
+      moved:
+        one: "%{count} key moved from %{from} to %{to}."
+        other: "%{count} keys moved from %{from} to %{to}."
+
+  exports:
+    create:
+      no_dir: "OCL_I18N_EXPORT_DIR is not set."
+      written:
+        one: "%{count} file written to %{dir}."
+        other: "%{count} files written to %{dir}."
+
+  users:
+    index:
+      invite: "Invite"
+      edit: "Edit"
+      legend: "✓ = reviewer for the language"
+    form:
+      admin: "Administrator (every language + key management)"
+      languages: "Languages"
+      send_link: "Send a login link"
+    edit:
+      destroy: "Delete this user"
+      destroy_confirm: "Delete %{name}?"
+    create:
+      created: "%{name} added."
+    update:
+      updated: "%{name} updated."
+    destroy:
+      self: "You can't delete yourself."
+      destroyed: "%{name} deleted (their history stays attributed by name)."
+
+  syncs:
+    new:
+      title: "Sync with the repo's fr.yml"
+      intro: "Only the changes made by developers since the last sync are taken; what you changed here and isn't merged yet is left alone. Nothing is applied before you confirm."
+      analyze_repo: "Analyze the fr.yml of the %{branch} branch"
+      upload: "or upload a file"
+      analyze: "Analyze"
+    preview:
+      title: "Changes made in the repo"
+      empty: "No changes: the tool is up to date with this fr.yml."
+      renames: "Likely renames (%{count})"
+      renames_hint: "unchecked = deletion + new key, translations lost"
+      changed: "Changed fr texts (%{count})"
+      changed_hint: "checked = meaning changed, translations to review"
+      conflict: "also changed here, the repo wins"
+      added: "New keys (%{count})"
+      removed: "Deleted keys (%{count})"
+      translations: "%{count} transl."
+      apply: "Apply"
+    repo:
+      failed: "Can't read the repo: %{error}"
+    apply:
+      applied: "Sync applied."
+
+  publications:
+    index:
+      title: "Publish to the OCL repo"
+      intro_html: "Regenerates the 18 <code>i18n-src</code> files, rewrites the keys renamed here in the code, and pushes everything to the <code>%{branch}</code> branch"
+      intro_pr: " with a pull request to %{base}"
+      connected_html: "GitHub account connected: <strong>@%{login}</strong>"
+      disconnect: "Disconnect"
+      connect_hint: "Connect your GitHub account so that the commits and the pull request are in your name."
+      connect: "Connect GitHub"
+      access: "GitHub access:"
+      access_user: "your account @%{login} (commits and PR in your name)"
+      access_app: "GitHub App (commits and PR as the bot)"
+      access_token: "OCL_GITHUB_TOKEN token"
+      access_none: "none (local repo, branch only)"
+      publish: "Publish"
+      publish_confirm: "Publish now?"
+      disabled_html: "Publishing disabled: no GitHub access configured (connected GitHub account, <code>OCL_GITHUB_APP_ID</code> + <code>OCL_GITHUB_APP_PRIVATE_KEY</code>, or <code>OCL_GITHUB_TOKEN</code>)."
+      history: "History"
+      pull_request: "pull request"
+      empty: "No publications."
+    show:
+      title: "Published"
+      commit_html: "Commit <code>%{sha}</code> on <code>%{branch}</code>"
+      see_pr: "see the pull request"
+      warnings: "To check by hand (%{count})"
+      files: "Changed files (%{count})"
+      renames: "Renamed keys (%{count})"
+    create:
+      needs_sync: "The repo's fr.yml changed since the last sync: sync first."
+      unchanged: "Nothing to publish: the repo is already up to date."
+      failed: "Can't publish: %{error}"
+
+  github_accounts:
+    not_configured: "GitHub connection is not configured."
+    callback:
+      denied: "GitHub authorization denied."
+      bad_state: "Invalid GitHub connection (state): try again."
+      connected: "GitHub account @%{login} connected."
+      failed: "Can't connect GitHub: %{error}"
+    disconnect:
+      disconnected: "GitHub account disconnected."
+  github_oauth:
+    no_push: "%{login} has no write access to %{repo}"
+    expired: "GitHub connection expired: reconnect your account"
+    revoked: "GitHub connection revoked or expired (%{error}): reconnect your account"
+  ocl_repo:
+    no_access: "no GitHub access configured (GitHub App or OCL_GITHUB_TOKEN)"
+
+  migrations:
+    not_configured: "Transifex is not configured."
+    show:
+      title: "Migrating from Transifex"
+      connection: "Connection"
+      resource: "Resource"
+      language_map: "mappings"
+      analyze: "1. Analyze the Transifex translations"
+      invite: "2. Invite the translators"
+      not_configured_html: "Set <code>TRANSIFEX_TOKEN</code> and <code>TRANSIFEX_RESOURCE</code> (and if needed <code>TRANSIFEX_ORGANIZATION</code>, <code>TRANSIFEX_PROJECT</code>, <code>TRANSIFEX_LANGUAGE_MAP</code>), then restart."
+      switch: "Switchover"
+      step1: "Tell the translators the switchover date; on that day, make the Transifex project read-only."
+      step2_html: "Sync the repo's fr.yml, then <strong>analyze</strong> and <strong>apply</strong> the Transifex import (latest texts, review statuses, authors)."
+      step3: "Invite the translators (Transifex doesn't provide their e-mails: enter them)."
+      invited:
+        one: "%{count} already invited."
+        other: "%{count} already invited."
+      step4_html: "<strong>Publish</strong> the first PR from the tool and merge it: it replaces the “Updated translations” commits."
+      step5: "Turn off the Transifex integration (webhook, GitHub sync, links in the “for translators” docs)."
+    analyze:
+      title: "Transifex analysis"
+      dry_run: "nothing is written yet"
+      columns:
+        language: "Language"
+        found: "Found"
+        matched: "Matched"
+        updates: "Texts to update"
+        reviews: "Review statuses"
+        conflicts: "Conflicts"
+        unmatched: "Unknown keys"
+        translators: "Translators"
+      none_found: "No translations found for some languages: check TRANSIFEX_LANGUAGE_MAP (e.g. zh=zh_CN)."
+      examples: "Examples of updated texts"
+      conflicts: "Conflicts: changed here and on Transifex, the version from here is kept"
+      transifex_version: "Transifex (%{who}):"
+      unmatched:
+        one: "%{count} Transifex key with no matching string (ignored)"
+        other: "%{count} Transifex keys with no matching string (ignored)"
+      apply: "Apply the import"
+      apply_confirm: "Apply the Transifex import?"
+    roster:
+      title: "Transifex translators"
+      intro: "Transifex doesn't provide e-mails: enter the ones you know, each person receives a login link with their languages and role."
+      invited: "invited: %{email}"
+    apply:
+      applied: "Transifex import applied: %{texts} text(s), %{reviews} review status(es)."
+    invite:
+      sent:
+        one: "%{count} invitation sent."
+        other: "%{count} invitations sent."
+
+  login_mailer:
+    link:
+      subject: "Log in to OCL i18n"
+      hello: "Hello %{name},"
+      body: "Here is your login link to OCL i18n (valid for 30 minutes, single use):"
+      ignore: "If you didn't ask for anything, ignore this message."
+  comment_mailer:
+    posted:
+      subject_question: "Question about %{key}"
+      subject_comment: "Comment on %{key}"
+      asked: "%{name} asks a question about %{key}%{language}:"
+      commented: "%{name} commented on %{key}%{language}:"
+      source: "fr text:"
+      reply: "Reply:"

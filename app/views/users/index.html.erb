@@ -1,0 +1,19 @@
+<div class="mb-4 flex items-center">
+  <h1 class="text-lg font-semibold"><%= t("layouts.application.users") %></h1>
+  <%= link_to t(".invite"), new_user_path, class: "ml-auto rounded bg-stone-800 px-3 py-1.5 text-sm text-white" %>
+</div>
+<div class="rounded border border-stone-200 bg-white text-sm">
+  <% @users.each do |user| %>
+    <div class="flex items-center gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
+      <span class="w-40 font-medium"><%= user.name %><%= " (admin)" if user.admin? %></span>
+      <span class="w-64 text-stone-500"><%= user.email %></span>
+      <span class="flex flex-1 flex-wrap gap-1">
+        <% user.memberships.each do |m| %>
+          <span class="rounded px-1.5 text-xs <%= m.reviewer? ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-700' %>"><%= m.language.code %><%= " ✓" if m.reviewer? %></span>
+        <% end %>
+      </span>
+      <%= link_to t(".edit"), edit_user_path(user), class: "text-stone-600 underline" %>
+    </div>
+  <% end %>
+</div>
+<p class="mt-2 text-xs text-stone-500"><%= t(".legend") %></p>

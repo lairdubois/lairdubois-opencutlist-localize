@@ -1,0 +1,22 @@
+<h1 class="mb-4 text-lg font-semibold"><%= t(".title") %></h1>
+<p class="mb-4 text-sm"><%= t(".commit_html", sha: @result.sha.first(8), branch: Rails.configuration.x.ocl.i18n_branch) %>
+  <% if @result.pr_url %>· <%= link_to t(".see_pr"), @result.pr_url, class: "underline", target: "_blank" %><% end %></p>
+
+<% if @result.warnings.any? %>
+  <section class="mb-6 rounded border border-amber-300 bg-amber-50 p-4 text-sm">
+    <h2 class="mb-2 font-semibold text-amber-900"><%= t(".warnings", count: @result.warnings.size) %></h2>
+    <% @result.warnings.each do |w| %><p class="mb-1 break-all font-mono text-xs"><%= w %></p><% end %>
+  </section>
+<% end %>
+
+<section class="mb-6 rounded border border-stone-200 bg-white p-4 text-sm">
+  <h2 class="mb-2 font-semibold"><%= t(".files", count: @result.files.size) %></h2>
+  <% @result.files.each do |f| %><p class="font-mono text-xs"><%= f %></p><% end %>
+</section>
+
+<% if @result.renames.any? %>
+  <section class="rounded border border-stone-200 bg-white p-4 text-sm">
+    <h2 class="mb-2 font-semibold"><%= t(".renames", count: @result.renames.size) %></h2>
+    <% @result.renames.each do |o, n| %><p class="font-mono text-xs"><del class="text-stone-400"><%= o %></del> → <%= n %></p><% end %>
+  </section>
+<% end %>

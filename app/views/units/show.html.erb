@@ -1,0 +1,57 @@
+<% content_for :title, @unit.key %>
+<p class="mb-1 text-sm"><%= link_to "← #{t('layouts.application.keys')}", units_list_url, class: "text-stone-500 hover:text-stone-900" %></p>
+
+<%= form_with url: rename_unit_path(@unit), method: :patch, class: "mb-6 flex items-center gap-2" do %>
+  <% if @index %><span class="text-stone-400 tabular-nums">#<%= @index %></span><% end %>
+  <%= text_field_tag :key, @unit.key, class: "flex-1 rounded border border-stone-300 px-3 py-1.5 font-mono" %>
+  <%= submit_tag t(".rename"), class: "rounded border border-stone-300 bg-white px-3 py-1.5" %>
+<% end %>
+
+<section class="mb-8 rounded border border-stone-200 bg-white p-4">
+  <h2 class="mb-2 font-semibold"><%= t(".source") %></h2>
+  <% if @unit.note %><p class="mb-2 text-sm text-stone-500"># <%= @unit.note %></p><% end %>
+  <%= form_with url: source_unit_path(@unit), method: :patch do %>
+    <%= text_area_tag :source_text, @unit.source_text, rows: [@unit.source_text.lines.size + 1, 2].max, class: "w-full rounded border border-stone-300 px-3 py-2 font-mono text-sm" %>
+    <div class="mt-2 flex items-center gap-4 text-sm">
+      <label><%= radio_button_tag :change, "minor", true %> <%= t(".minor") %></label>
+      <label><%= radio_button_tag :change, "major" %> <%= t(".major") %></label>
+      <%= submit_tag t("save"), class: "ml-auto rounded bg-stone-800 px-3 py-1.5 text-white" %>
+    </div>
+  <% end %>
+</section>
+
+<section class="mb-8 rounded border border-stone-200 bg-white">
+  <h2 class="border-b border-stone-200 px-4 py-2 font-semibold"><%= t(".translations") %></h2>
+  <% @languages.each do |language| %>
+    <% t = @translations[language] %>
+    <div class="flex gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
+      <span class="w-24 shrink-0 text-sm text-stone-500"><%= language.name %></span>
+      <% if t %>
+        <span class="flex-1 whitespace-pre-wrap font-mono text-sm" dir="<%= language.rtl ? "rtl" : "ltr" %>"><%= t.text %></span>
+        <% if t.outdated? %><span class="h-fit rounded bg-amber-100 px-1.5 text-xs text-amber-800"><%= t("status.outdated") %></span><% end %>
+      <% else %>
+        <span class="flex-1 text-sm italic text-stone-400"><%= t("status.untranslated") %></span>
+      <% end %>
+    </div>
+  <% end %>
+</section>
+
+<section class="mb-8 rounded border border-stone-200 bg-white p-4">
+  <h2 class="mb-2 font-semibold"><%= t(".comments") %></h2>
+  <%= render "comments/thread", unit: @unit, language: nil %>
+</section>
+
+<section class="mb-8 rounded border border-stone-200 bg-white">
+  <h2 class="border-b border-stone-200 px-4 py-2 font-semibold"><%= t(".history") %></h2>
+  <% @unit.revisions.includes(:language).reverse_each do |r| %>
+    <div class="flex gap-4 border-b border-stone-100 px-4 py-2 text-sm last:border-0">
+      <span class="w-36 shrink-0 text-stone-500"><%= l r.created_at, format: :short %></span>
+      <span class="w-28 shrink-0"><%= t("revision_kinds.#{r.kind}", default: r.kind) %><%= " (#{r.language.code})" if r.language %></span>
+      <span class="flex-1"><% if r.old_value %><del class="text-stone-400"><%= r.old_value %></del> → <% end %><%= r.new_value %></span>
+      <span class="text-stone-500"><%= r.author %></span>
+    </div>
+  <% end %>
+</section>
+
+<%= button_to t(".archive"), archive_unit_path(@unit), method: :patch, class: "text-sm text-red-700 hover:underline",
+              form: { data: { turbo_confirm: t(".archive_confirm", key: @unit.key) } } %>

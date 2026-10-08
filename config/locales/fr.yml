@@ -1,0 +1,351 @@
+fr:
+  # Shared
+  loading: "chargement…"
+  save: "Enregistrer"
+  cancel: "Annuler"
+  status:
+    untranslated: "non traduit"
+    translated: "traduit"
+    reviewed: "relu"
+    outdated: "fr modifié, à revoir"
+    outdated_count:
+      one: "%{count} à revoir"
+      other: "%{count} à revoir"
+  roles:
+    translator: "traducteur"
+    reviewer: "relecteur"
+  revision_kinds:
+    import: "import"
+    create: "création"
+    rename: "renommage"
+    source_minor: "correction fr"
+    source_major: "changement fr"
+    translate: "traduction"
+    review: "relecture"
+    archive: "suppression"
+    restore: "restauration"
+  flash:
+    admin_only: "Réservé aux administrateurs."
+    no_language_access: "Tu n'as pas accès à cette langue."
+
+  shared:
+    search_form:
+      placeholders:
+        at: "# 120 ou 120-180"
+        prefix: "branche (tab.cutlist)"
+        q: "Rechercher…"
+      clear: "Effacer"
+
+  activerecord:
+    attributes:
+      user:
+        name: "Nom"
+        email: "E-mail"
+        locale: "Langue de l'interface"
+      unit:
+        key: "Clé"
+        source_text: "Texte fr"
+    errors:
+      models:
+        unit:
+          attributes:
+            key:
+              overlapping_branch: "chevauche une branche ou une chaîne existante"
+
+  layouts:
+    application:
+      translate: "Traduire"
+      keys: "Clés"
+      sync: "Synchroniser fr.yml"
+      users: "Utilisateurs"
+      migration: "Migration"
+      publish: "Publier"
+      logout: "Déconnexion"
+      repo_changed: "Le fr.yml du repo a changé."
+      sync_now: "Synchroniser"
+
+  sessions:
+    rate_limited: "Trop de demandes, réessaie plus tard."
+    invalid_link: "Lien invalide ou expiré."
+    new:
+      title: "Connexion"
+      email_placeholder: "ton@adresse.org"
+      submit: "Recevoir un lien de connexion"
+    create:
+      sent: "Si cette adresse est connue, un lien de connexion vient d'y être envoyé."
+    show:
+      question_html: "Se connecter en tant que <strong>%{name}</strong> ?"
+      submit: "Se connecter"
+
+  languages:
+    index:
+      title: "Langues"
+      none: "Aucune langue ne t'est encore attribuée. Demande à un administrateur."
+      translated: "%{percent} traduit"
+      todo:
+        one: "%{count} à traduire"
+        other: "%{count} à traduire"
+
+  translations:
+    index:
+      second_language: "+ 2e langue"
+      filters:
+        todo: "À traduire ou revoir"
+        untranslated: "Non traduites"
+        outdated: "À revoir"
+        unreviewed: "Non relues"
+        questions: "Questions ouvertes"
+        all: "Toutes"
+      count:
+        one: "%{count} chaîne"
+        other: "%{count} chaînes"
+      pretranslate:
+        one: "🤖 Proposer des traductions (%{language}) pour la première chaîne à faire"
+        other: "🤖 Proposer des traductions (%{language}) pour les %{count} premières chaînes à faire"
+      empty: "Aucune chaîne."
+    row:
+      source: "source"
+      before: "avant :"
+      comments:
+        one: "%{count} commentaire"
+        other: "%{count} commentaires"
+      open_question: "question ouverte"
+    editor:
+      saved: "enregistré"
+      save: "Enregistrer"
+      save_and_review: "Enregistrer et valider"
+      machine: "Proposition :"
+      same_text: "Même texte ailleurs :"
+    pretranslate:
+      started:
+        one: "Pré-traduction de %{count} chaîne lancée : recharge la page dans un moment."
+        other: "Pré-traduction de %{count} chaînes lancée : recharge la page dans un moment."
+
+  translation_checks:
+    missing:
+      variable: "variable manquante : %{token}"
+      reference: "référence manquante : %{token}"
+      tag: "balise manquante : %{token}"
+    extra:
+      variable: "variable en trop : %{token}"
+      reference: "référence en trop : %{token}"
+      tag: "balise en trop : %{token}"
+    bold: "nombre de **gras** différent"
+    lines: "nombre de lignes différent"
+    spaces: "espace en début ou fin"
+
+  comments:
+    thread:
+      all_languages: "toutes les langues"
+      resolved: "question résolue"
+      open: "question ouverte"
+      resolve: "marquer résolue"
+      placeholder: "Écrire un commentaire…"
+      is_question: "C'est une question"
+      send: "Envoyer"
+
+  units:
+    index:
+      title: "Clés"
+      filters_hint: "Dans au moins une langue"
+      filters:
+        all: "Toutes"
+        todo: "À traduire ou revoir"
+        untranslated: "Non traduites"
+        outdated: "À revoir"
+        unreviewed: "Non relues"
+        questions: "Questions ouvertes"
+    node:
+      continued: "(suite)"
+      rename: "renommer / déplacer"
+      rename_confirm:
+        one: "Déplacer la clé de %{path} ?"
+        other: "Déplacer les %{count} clés de %{path} ?"
+    show:
+      rename: "Renommer"
+      source: "Source (fr)"
+      minor: "Correction mineure : garder les traductions"
+      major: "Changement de sens : traductions à revoir"
+      translations: "Traductions"
+      comments: "Commentaires"
+      history: "Historique"
+      archive: "Supprimer cette clé"
+      archive_confirm: "Supprimer %{key} de toutes les langues ? (l'historique est conservé)"
+    rename:
+      renamed: "Clé renommée."
+    source:
+      minor: "Texte corrigé, traductions conservées."
+      major: "Texte modifié, traductions à revoir."
+    archive:
+      archived: "%{key} supprimée (historique conservé)."
+
+  branches:
+    rename:
+      moved:
+        one: "%{count} clé déplacée de %{from} vers %{to}."
+        other: "%{count} clés déplacées de %{from} vers %{to}."
+
+  exports:
+    create:
+      no_dir: "OCL_I18N_EXPORT_DIR n'est pas défini."
+      written:
+        one: "%{count} fichier écrit dans %{dir}."
+        other: "%{count} fichiers écrits dans %{dir}."
+
+  users:
+    index:
+      invite: "Inviter"
+      edit: "Modifier"
+      legend: "✓ = relecteur pour la langue"
+    form:
+      admin: "Administrateur (toutes les langues + gestion des clés)"
+      languages: "Langues"
+      send_link: "Envoyer un lien de connexion"
+    edit:
+      destroy: "Supprimer cet utilisateur"
+      destroy_confirm: "Supprimer %{name} ?"
+    create:
+      created: "%{name} ajouté(e)."
+    update:
+      updated: "%{name} mis(e) à jour."
+    destroy:
+      self: "Tu ne peux pas te supprimer toi-même."
+      destroyed: "%{name} supprimé(e) (son historique reste attribué par nom)."
+
+  syncs:
+    new:
+      title: "Synchroniser avec le fr.yml du repo"
+      intro: "Seuls les changements faits par les développeurs depuis la dernière synchronisation sont repris ; ce que tu as changé ici et qui n'est pas encore mergé n'est pas touché. Rien n'est appliqué avant ta validation."
+      analyze_repo: "Analyser le fr.yml de la branche %{branch}"
+      upload: "ou téléverser un fichier"
+      analyze: "Analyser"
+    preview:
+      title: "Changements faits dans le repo"
+      empty: "Aucun changement : l'outil est à jour avec ce fr.yml."
+      renames: "Renommages probables (%{count})"
+      renames_hint: "décoché = suppression + nouvelle clé, traductions perdues"
+      changed: "Textes fr modifiés (%{count})"
+      changed_hint: "coché = changement de sens, traductions à revoir"
+      conflict: "aussi modifié ici, le repo l'emporte"
+      added: "Nouvelles clés (%{count})"
+      removed: "Clés supprimées (%{count})"
+      translations: "%{count} trad."
+      apply: "Appliquer"
+    repo:
+      failed: "Lecture du repo impossible : %{error}"
+    apply:
+      applied: "Synchronisation appliquée."
+
+  publications:
+    index:
+      title: "Publier vers le repo OCL"
+      intro_html: "Régénère les 18 fichiers <code>i18n-src</code>, réécrit dans le code les clés renommées ici, et pousse le tout sur la branche <code>%{branch}</code>"
+      intro_pr: " avec une pull request vers %{base}"
+      connected_html: "Compte GitHub connecté : <strong>@%{login}</strong>"
+      disconnect: "Déconnecter"
+      connect_hint: "Connecte ton compte GitHub pour que les commits et la pull request soient à ton nom."
+      connect: "Connecter GitHub"
+      access: "Accès GitHub :"
+      access_user: "ton compte @%{login} (commits et PR à ton nom)"
+      access_app: "GitHub App (commits et PR au nom du bot)"
+      access_token: "token OCL_GITHUB_TOKEN"
+      access_none: "aucun (repo local, branche seulement)"
+      publish: "Publier"
+      publish_confirm: "Publier maintenant ?"
+      disabled_html: "Publication désactivée : aucun accès GitHub configuré (compte GitHub connecté, <code>OCL_GITHUB_APP_ID</code> + <code>OCL_GITHUB_APP_PRIVATE_KEY</code>, ou <code>OCL_GITHUB_TOKEN</code>)."
+      history: "Historique"
+      pull_request: "pull request"
+      empty: "Aucune publication."
+    show:
+      title: "Publié"
+      commit_html: "Commit <code>%{sha}</code> sur <code>%{branch}</code>"
+      see_pr: "voir la pull request"
+      warnings: "À vérifier à la main (%{count})"
+      files: "Fichiers modifiés (%{count})"
+      renames: "Clés renommées (%{count})"
+    create:
+      needs_sync: "Le fr.yml du repo a changé depuis la dernière synchronisation : synchronise d'abord."
+      unchanged: "Rien à publier : le repo est déjà à jour."
+      failed: "Publication impossible : %{error}"
+
+  github_accounts:
+    not_configured: "Connexion GitHub non configurée."
+    callback:
+      denied: "Autorisation GitHub refusée."
+      bad_state: "Connexion GitHub invalide (state) : recommence."
+      connected: "Compte GitHub @%{login} connecté."
+      failed: "Connexion GitHub impossible : %{error}"
+    disconnect:
+      disconnected: "Compte GitHub déconnecté."
+  github_oauth:
+    no_push: "%{login} n'a pas les droits d'écriture sur %{repo}"
+    expired: "connexion GitHub expirée : reconnecte ton compte"
+    revoked: "connexion GitHub révoquée ou expirée (%{error}) : reconnecte ton compte"
+  ocl_repo:
+    no_access: "aucun accès GitHub configuré (GitHub App ou OCL_GITHUB_TOKEN)"
+
+  migrations:
+    not_configured: "Transifex n'est pas configuré."
+    show:
+      title: "Migration depuis Transifex"
+      connection: "Connexion"
+      resource: "Ressource"
+      language_map: "correspondances"
+      analyze: "1. Analyser les traductions Transifex"
+      invite: "2. Inviter les traducteurs"
+      not_configured_html: "Définir <code>TRANSIFEX_TOKEN</code> et <code>TRANSIFEX_RESOURCE</code> (et au besoin <code>TRANSIFEX_ORGANIZATION</code>, <code>TRANSIFEX_PROJECT</code>, <code>TRANSIFEX_LANGUAGE_MAP</code>), puis redémarrer."
+      switch: "Bascule"
+      step1: "Prévenir les traducteurs de la date de bascule ; ce jour-là, passer le projet Transifex en lecture seule."
+      step2_html: "Synchroniser le fr.yml du repo, puis <strong>analyser</strong> et <strong>appliquer</strong> l'import Transifex (derniers textes, statuts relus, auteurs)."
+      step3: "Inviter les traducteurs (leurs e-mails ne sont pas fournis par Transifex : à saisir)."
+      invited:
+        one: "%{count} déjà invité."
+        other: "%{count} déjà invités."
+      step4_html: "<strong>Publier</strong> la première PR depuis l'outil et la merger : elle remplace les commits « Updated translations »."
+      step5: "Couper l'intégration Transifex (webhook, synchro GitHub, liens dans la doc « for translators »)."
+    analyze:
+      title: "Analyse Transifex"
+      dry_run: "rien n'est encore écrit"
+      columns:
+        language: "Langue"
+        found: "Trouvées"
+        matched: "Reliées"
+        updates: "Textes à mettre à jour"
+        reviews: "Statuts relu"
+        conflicts: "Conflits"
+        unmatched: "Clés inconnues"
+        translators: "Traducteurs"
+      none_found: "Aucune traduction trouvée pour certaines langues : vérifier TRANSIFEX_LANGUAGE_MAP (ex. zh=zh_CN)."
+      examples: "Exemples de textes mis à jour"
+      conflicts: "Conflits : modifié ici et sur Transifex, la version d'ici est gardée"
+      transifex_version: "Transifex (%{who}) :"
+      unmatched:
+        one: "%{count} clé Transifex sans chaîne correspondante (ignorée)"
+        other: "%{count} clés Transifex sans chaîne correspondante (ignorées)"
+      apply: "Appliquer l'import"
+      apply_confirm: "Appliquer l'import Transifex ?"
+    roster:
+      title: "Traducteurs Transifex"
+      intro: "Transifex ne fournit pas les e-mails : saisis ceux que tu connais, chaque personne reçoit un lien de connexion avec ses langues et son rôle."
+      invited: "invité : %{email}"
+    apply:
+      applied: "Import Transifex appliqué : %{texts} texte(s), %{reviews} statut(s) relu."
+    invite:
+      sent:
+        one: "%{count} invitation envoyée."
+        other: "%{count} invitations envoyées."
+
+  login_mailer:
+    link:
+      subject: "Connexion à OCL i18n"
+      hello: "Bonjour %{name},"
+      body: "Voici ton lien de connexion à OCL i18n (valable 30 minutes, une seule fois) :"
+      ignore: "Si tu n'as rien demandé, ignore ce message."
+  comment_mailer:
+    posted:
+      subject_question: "Question sur %{key}"
+      subject_comment: "Commentaire sur %{key}"
+      asked: "%{name} pose une question sur %{key}%{language} :"
+      commented: "%{name} a commenté %{key}%{language} :"
+      source: "Texte fr :"
+      reply: "Répondre :"

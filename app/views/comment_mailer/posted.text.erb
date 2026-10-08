@@ -1,0 +1,8 @@
+<%= t(@comment.question ? ".asked" : ".commented", name: @comment.user.name, key: @comment.unit.key,
+      language: (" (#{@comment.language.name})" if @comment.language)) %>
+
+<%= @comment.body %>
+
+<%= t(".source") %> <%= @comment.unit.source_text %>
+
+<%= t(".reply") %> <%= @url %>

@@ -1,0 +1,11 @@
+<h1 class="mb-2 text-lg font-semibold"><%= t(".title") %></h1>
+<p class="mb-4 text-sm text-stone-600"><%= t(".intro") %></p>
+<%= button_to t(".analyze_repo", branch: Rails.configuration.x.ocl.base_branch), sync_repo_path, class: "mb-6 rounded bg-stone-800 px-3 py-1.5 text-white",
+              form: { data: { turbo: false } } %>
+<details class="text-sm">
+  <summary class="cursor-pointer text-stone-600"><%= t(".upload") %></summary>
+  <%= form_with url: sync_preview_path, multipart: true, class: "mt-2 flex gap-2", data: { turbo: false } do %>
+    <%= file_field_tag :fr_file, accept: ".yml", required: true, class: "rounded border border-stone-300 bg-white px-3 py-1.5" %>
+    <%= submit_tag t(".analyze"), class: "rounded border border-stone-300 bg-white px-3 py-1.5" %>
+  <% end %>
+</details>

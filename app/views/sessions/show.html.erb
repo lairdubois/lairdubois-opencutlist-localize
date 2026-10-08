@@ -1,0 +1,4 @@
+<div class="mx-auto mt-16 max-w-sm rounded border border-stone-200 bg-white p-6 text-center">
+  <p class="mb-4"><%= t(".question_html", name: @user.name) %></p>
+  <%= button_to t(".submit"), login_path(params[:token]), class: "w-full rounded bg-stone-800 px-3 py-2 text-white" %>
+</div>

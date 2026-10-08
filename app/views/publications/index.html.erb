@@ -1,0 +1,44 @@
+<h1 class="mb-2 text-lg font-semibold"><%= t(".title") %></h1>
+<p class="mb-4 text-sm text-stone-600">
+  <%= t(".intro_html", branch: Rails.configuration.x.ocl.i18n_branch) %><%= t(".intro_pr", base: Rails.configuration.x.ocl.base_branch) if @auth.configured? %>.
+</p>
+<% if @oauth.enabled? %>
+  <div class="mb-4 flex items-center gap-3 rounded border border-stone-200 bg-white px-4 py-2 text-sm">
+    <% if current_user.github_connected? %>
+      <span><%= t(".connected_html", login: current_user.github_login) %></span>
+      <%= button_to t(".disconnect"), disconnect_github_path, method: :delete, class: "rounded border border-stone-300 px-3 py-1",
+                    form: { data: { turbo: false } } %>
+    <% else %>
+      <span class="text-stone-600"><%= t(".connect_hint") %></span>
+      <%= button_to t(".connect"), connect_github_path, class: "rounded border border-stone-300 px-3 py-1",
+                    form: { data: { turbo: false } } %>
+    <% end %>
+  </div>
+<% end %>
+<% if @can_push %>
+  <p class="mb-4 text-sm text-stone-600">
+    <%= t(".access") %> <%= if @auth.user? then t(".access_user", login: @auth.login)
+                            elsif @auth.app? then t(".access_app")
+                            elsif @auth.configured? then t(".access_token")
+                            else t(".access_none") end %>.
+  </p>
+  <%= button_to t(".publish"), publications_path, class: "mb-8 rounded bg-stone-800 px-4 py-2 text-white",
+                form: { data: { turbo: false }, onsubmit: "return confirm(#{t('.publish_confirm').to_json})" } %>
+<% else %>
+  <p class="mb-8 rounded border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+    <%= t(".disabled_html") %>
+  </p>
+<% end %>
+
+<h2 class="mb-2 font-semibold"><%= t(".history") %></h2>
+<div class="rounded border border-stone-200 bg-white text-sm">
+  <% @publications.each do |p| %>
+    <div class="flex gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
+      <span class="w-36 text-stone-500"><%= l p.created_at, format: :short %></span>
+      <span class="w-28"><%= p.user&.name %></span>
+      <code class="text-xs"><%= p.commit_sha&.first(8) %></code>
+      <% if p.pr_url %><%= link_to t(".pull_request"), p.pr_url, class: "ml-auto underline", target: "_blank" %><% end %>
+    </div>
+  <% end %>
+  <% if @publications.empty? %><p class="px-4 py-2 text-stone-500"><%= t(".empty") %></p><% end %>
+</div>

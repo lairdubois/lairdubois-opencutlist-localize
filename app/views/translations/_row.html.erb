@@ -1,0 +1,43 @@
+<% outdated = @languages.any? { |l| @data[l.id][:translations][unit.id]&.outdated? } %>
+<div id="<%= dom_id(unit) %>" class="rounded border bg-white <%= outdated ? 'border-amber-300' : 'border-stone-200' %>">
+  <div class="border-b border-stone-100 px-3 py-1.5 text-xs">
+    <span class="mr-1 text-stone-400 tabular-nums">#<%= @indexes[unit.id] %></span>
+    <span class="font-mono text-stone-500"><%= unit.key %></span>
+  </div>
+  <% if unit.note %>
+    <p class="border-b border-stone-100 bg-stone-50 px-3 py-1 font-mono text-xs whitespace-pre-wrap text-stone-500"># <%= unit.note %></p>
+  <% end %>
+  <%# Each column is a 3-row subgrid (header, box, extras) : the source box and the textareas share one height %>
+  <div class="grid grid-cols-1 gap-x-3 gap-y-1 p-3 <%= @languages.size > 1 ? 'md:grid-cols-3' : 'md:grid-cols-2' %>">
+    <div class="row-span-3 grid min-w-0 grid-rows-subgrid text-sm">
+      <div class="flex h-5 items-center text-xs font-medium text-stone-700"><%= Language::SOURCE_CODE %> · <%= t(".source") %></div>
+      <p class="rounded border border-stone-200 bg-stone-50 px-2 py-1.5 font-mono whitespace-pre-wrap"><%= unit.source_text %></p>
+      <div class="pb-3 md:pb-0">
+        <% if (previous = @previous_sources[unit.id]) && outdated %>
+          <p class="mt-1 whitespace-pre-wrap text-xs text-stone-500"><%= t(".before") %> <del><%= previous %></del></p>
+        <% end %>
+        <% if (en = @references[unit.id]) %>
+          <p class="mt-2 whitespace-pre-wrap text-xs text-stone-500"><span class="font-medium">en</span> · <%= en %></p>
+        <% end %>
+      </div>
+    </div>
+    <% @languages.each do |language| %>
+      <%= render "editor", unit: unit, language: language, data: @data[language.id] %>
+    <% end %>
+    <%# Comments : auto-placed on the next row, each under its language's column %>
+    <div class="mt-2 hidden border-t border-stone-100 md:block"></div>
+    <% @languages.each do |language| %>
+      <% data = @data[language.id] %>
+      <details class="mt-2 min-w-0 border-t border-stone-100 pt-1 text-xs">
+        <summary class="cursor-pointer <%= data[:open_questions].include?(unit.id) ? 'font-medium text-sky-700' : 'text-stone-500' %>">
+          💬 <%= "#{language.name} · " if @languages.size > 1 %><%= t(".comments", count: data[:comment_counts][unit.id] || 0) %><%= " · #{t('.open_question')}" if data[:open_questions].include?(unit.id) %>
+        </summary>
+        <div class="py-2">
+          <%= turbo_frame_tag "comments_#{unit.id}_#{language.code}", src: unit_comments_path(unit, lang: language.code), loading: :lazy do %>
+            <span class="text-stone-400"><%= t("loading") %></span>
+          <% end %>
+        </div>
+      </details>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+<%= form_with model: @user, class: "max-w-2xl rounded border border-stone-200 bg-white p-4" do |f| %>
+  <% if @user.errors.any? %><p class="mb-3 text-sm text-red-700"><%= @user.errors.full_messages.to_sentence %></p><% end %>
+  <div class="mb-3 grid grid-cols-2 gap-3">
+    <label class="text-sm"><%= User.human_attribute_name(:name) %><%= f.text_field :name, required: true, class: "mt-1 w-full rounded border border-stone-300 px-2 py-1.5" %></label>
+    <label class="text-sm"><%= User.human_attribute_name(:email) %><%= f.email_field :email, required: true, class: "mt-1 w-full rounded border border-stone-300 px-2 py-1.5" %></label>
+  </div>
+  <label class="mb-3 block text-sm"><%= User.human_attribute_name(:locale) %>
+    <%= f.select :locale, [["—", ""], ["Français", "fr"], ["English", "en"]], {}, class: "ml-2 rounded border border-stone-300 px-1 py-0.5 text-xs" %>
+  </label>
+  <label class="mb-4 block text-sm"><%= f.check_box :admin %> <%= t(".admin") %></label>
+
+  <h2 class="mb-2 text-sm font-semibold"><%= t(".languages") %></h2>
+  <div class="mb-4 grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
+    <% roles = @user.memberships.to_h { |m| [m.language_id, m.role] } %>
+    <% Language.targets.each do |language| %>
+      <label class="flex items-center justify-between gap-2">
+        <span><%= language.name %></span>
+        <%= select_tag "roles[#{language.id}]", options_for_select([["—", ""], [t("roles.translator"), "translator"], [t("roles.reviewer"), "reviewer"]], roles[language.id]),
+                       class: "rounded border border-stone-300 px-1 py-0.5 text-xs" %>
+      </label>
+    <% end %>
+  </div>
+  <% if @user.new_record? %>
+    <label class="mb-4 block text-sm"><%= check_box_tag :send_link, "1", true %> <%= t(".send_link") %></label>
+  <% end %>
+  <div class="flex items-center gap-3">
+    <%= f.submit t("save"), class: "rounded bg-stone-800 px-3 py-1.5 text-white" %>
+    <%= link_to t("cancel"), users_path, class: "text-sm text-stone-600" %>
+  </div>
+<% end %>
