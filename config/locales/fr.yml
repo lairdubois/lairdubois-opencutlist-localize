@@ -38,6 +38,9 @@ fr:
     no_language_access: "Tu n'as pas accès à cette langue."
 
   shared:
+    copy_button:
+      label: "Copier le texte"
+      copied: "Copié dans le presse-papier"
     search_bar:
       placeholder: "Rechercher dans les textes..."
       clear: "Effacer"

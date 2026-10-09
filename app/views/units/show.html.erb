@@ -106,8 +106,8 @@
   <% end %>
 </section>
 
-<%# Translations and history fold from their header, as the user left them (collapsible's cookie) %>
-<% unfolded = section_open?("unit_translations", default: true) %>
+<%# Translations, comments and history fold from their header, as the user left them (collapsible's cookie), folded by default %>
+<% unfolded = section_open?("unit_translations", default: false) %>
 <section class="mb-3 rounded border border-stone-200 bg-white" data-controller="collapsible" data-collapsible-name-value="unit_translations">
   <h2>
     <button type="button" data-collapsible-target="button" data-action="collapsible#toggle" aria-expanded="<%= unfolded %>"
@@ -127,7 +127,7 @@
   <div data-collapsible-target="panel" class="border-t border-stone-200" <%= "hidden" unless unfolded %>>
     <% @languages.each do |language| %>
       <% t = @translations[language] %>
-      <div class="flex gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
+      <div class="group/copy flex gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
         <span class="w-24 shrink-0 text-sm text-stone-500"><%= language.name %></span>
         <% if t %>
           <div class="min-w-0 flex-1">
@@ -136,6 +136,7 @@
                  data-i18n-text-refs-value="<%= @refs.to_json %>"><%= t.text %></div>
             <% TranslationChecks.call(@unit.source_text, t.text).each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
           </div>
+          <%= render "shared/copy_button", text: t.text, class: "h-fit shrink-0" %>
           <% if t.outdated? %><span class="h-fit rounded bg-amber-100 px-1.5 text-xs text-amber-800"><%= t("status.outdated") %></span><% end %>
         <% else %>
           <span class="flex-1 text-sm italic text-stone-400"><%= t("status.untranslated") %></span>
@@ -146,7 +147,7 @@
 </section>
 
 <%# Comments : rendered with the page when unfolded, else loaded once unfolded (lazy frame of the thread's id) %>
-<% unfolded = section_open?("unit_comments", default: true) %>
+<% unfolded = section_open?("unit_comments", default: false) %>
 <section class="mb-3 rounded border border-stone-200 bg-white" data-controller="collapsible" data-collapsible-name-value="unit_comments">
   <h2>
     <button type="button" data-collapsible-target="button" data-action="collapsible#toggle" aria-expanded="<%= unfolded %>"
