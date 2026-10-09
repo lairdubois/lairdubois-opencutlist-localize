@@ -62,7 +62,8 @@ Weblate was evaluated and rejected.
   enqueues `RepoFrCheckJob`, which reads the pushed fr.yml through the contents API (never the shared checkout,
   publish / sync may be using it) and sets or clears `Setting["repo_fr_changed_at"]` (admins' sync banner,
   first date kept) on `SourceSync#plan.empty?`, Publisher's test : judged on content, not on commit authors,
-  so merging the tool's PR (any method) isn't a change. Applying a sync clears it.
+  so merging the tool's PR (any method) isn't a change. A 404 (`GithubApi::NotFound`, fr.yml deleted or moved)
+  flags too ; `OclRepo#fr_text` then raises `OclRepo::Error`, shown by the sync / publish pages. Applying a sync clears it.
 - `TranslationChecks` : non-blocking warnings, text rules (any text, fr included) and comparison with the fr
   source ; `SourceDuplicates` (`/units/duplicates`) : fr texts repeated over several keys, with their
   translations in a language, to factor them into `$t()`. Both ported from a Python lint by mobilarte.

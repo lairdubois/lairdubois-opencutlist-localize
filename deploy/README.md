@@ -95,7 +95,8 @@ hand over. Testers' accounts are created from the users page.
    - What it does : after each push to the base branch, a job (`RepoFrCheckJob`, run by Solid Queue in
      Puma, `SOLID_QUEUE_IN_PUMA=1`) reads the pushed fr.yml through the GitHub API and shows admins a
      "sync" banner when it has changes to sync, or clears it when it has none (merging the tool's own
-     pull request, for instance). It only warns : nothing is synced automatically.
+     pull request, for instance). A fr.yml missing from the push (deleted or moved) shows the banner too,
+     and the sync page then says it is not found. It only warns : nothing is synced automatically.
 4. `deploy/deploy.sh` (recreates the databases, restarts ; not `setup` : it would re-clone the
    sandbox repo), first data load from a clone of the real repo, Transifex import.
 

@@ -48,7 +48,10 @@ class OclRepo
   end
 
   def fr_text
-    File.read(File.join(@dir, I18N_SRC, "#{Language::SOURCE_CODE}.yml"))
+    path = File.join(I18N_SRC, "#{Language::SOURCE_CODE}.yml")
+    raise Error, I18n.t("ocl_repo.missing_fr", path: path) unless File.file?(File.join(@dir, path))
+
+    File.read(File.join(@dir, path))
   end
 
   # Quoted literal uses of each key in the code : { key => [[path, line_number, line]] }

@@ -388,6 +388,7 @@ fr:
   ocl_repo:
     no_access: "aucun accès GitHub configuré (GitHub App ou OCL_GITHUB_TOKEN)"
     invalid_branch: "nom de branche invalide : %{branch}"
+    missing_fr: "%{path} introuvable dans la branche"
   publisher:
     warnings:
       leftover: "Usage restant de l'ancienne branche `%{prefix}` (dynamique ?) : `%{ref}`"
