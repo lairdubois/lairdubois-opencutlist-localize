@@ -19,7 +19,7 @@
       <p class="text-sm text-stone-600">
         <%= t(".translated", percent: number_to_percentage(100.0 * s[:translated] / s[:total], precision: 0)) %> ·
         <%= t(".todo", count: s[:total] - s[:translated]) %>
-        <% if s[:outdated] > 0 %>· <span class="text-amber-700"><%= t("status.outdated_count", count: s[:outdated]) %></span><% end %>
+        <% if s[:outdated] > 0 %>· <span class="text-orange-700"><%= t("status.outdated_count", count: s[:outdated]) %></span><% end %>
       </p>
     <% end %>
   <% end %>

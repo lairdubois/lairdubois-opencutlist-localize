@@ -51,6 +51,20 @@
     </section>
   <% end %>
 
+  <% if @plan.branch_notes.any? %>
+    <section class="mb-6 rounded border border-stone-200 bg-white">
+      <h2 class="border-b border-stone-200 px-4 py-2 font-semibold"><%= t(".branch_notes", count: @plan.branch_notes.size) %> <span class="text-sm font-normal text-stone-500">: <%= t(".notes_hint") %></span></h2>
+      <% @plan.branch_notes.each do |change| %>
+        <label class="flex gap-3 border-b border-stone-100 px-4 py-1.5 text-sm last:border-0">
+          <%= check_box_tag "branch_notes[]", change.path, !change.conflict, id: nil %>
+          <span class="w-72 shrink-0 truncate font-mono text-xs"><%= change.path %>.*</span>
+          <span class="font-mono text-xs whitespace-pre-wrap"><% if change.tool_note %><del class="text-stone-400"># <%= change.tool_note %></del> → <% end %><%= change.note ? "# #{change.note}" : t(".note_removed") %>
+            <% if change.conflict %><span class="ml-1 rounded bg-red-100 px-1 font-sans text-red-800"><%= t(".note_conflict") %></span><% end %></span>
+        </label>
+      <% end %>
+    </section>
+  <% end %>
+
   <% added = @plan.added.reject { |e| e.key.in?(renamed_keys) } %>
   <% removed = @plan.removed - renamed_units %>
   <section class="mb-6 grid grid-cols-2 gap-4 text-sm">

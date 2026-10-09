@@ -10,13 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_09_090000) do
   create_table "baselines", force: :cascade do |t|
     t.string "fr_hash"
     t.json "entries"
     t.string "source"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "branch_notes"
+  end
+
+  create_table "branch_notes", force: :cascade do |t|
+    t.string "path", null: false
+    t.text "note", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["path"], name: "index_branch_notes_on_path", unique: true
   end
 
   create_table "comments", force: :cascade do |t|
@@ -121,6 +130,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_150000) do
     t.datetime "archived_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "translatable", default: true, null: false
     t.index ["key"], name: "index_units_on_key", unique: true, where: "archived_at IS NULL"
   end
 

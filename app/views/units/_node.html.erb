@@ -1,13 +1,34 @@
-<% count, translated, outdated = node.stats %>
+<% count, translated, outdated, translatable = node.stats %>
+<% notranslate = capture do %><span class="rounded bg-stone-200 px-1 font-mono text-xs text-stone-600" title="<%= t(".notranslate_hint") %>">@no-translate</span><% end %>
 <% if node.branch? %>
   <details class="border-b border-stone-100 last:border-0" <%= "open" if open %>
-           data-branch-tree-target="branch" data-path="<%= node.path %>">
+           data-branch-tree-target="branch" data-path="<%= node.path %>" <%= "data-continued" if node.continued %>>
     <summary class="flex cursor-pointer items-center gap-3 px-3 py-1.5 hover:bg-stone-50">
       <span class="font-medium"><%= node.name %></span>
       <% if node.continued %><span class="text-xs text-stone-400"><%= t(".continued") %></span><% end %>
       <span class="text-xs text-stone-500"><%= count %></span>
-      <%= render "progress", value: translated, max: count * languages, outdated: outdated %>
-      <details class="ml-auto" onclick="event.stopPropagation()">
+      <%# Badge : every key of the branch is @no-translate (whatever the filters). No progress for a branch listing none
+          to translate (a parent of @no-translate keys, under the notranslate filter) %>
+      <% if @notranslate_branches.include?(node.path) %>
+        <%= notranslate %>
+      <% elsif translatable.positive? %>
+        <%= render "progress", value: translated, max: translatable * languages, outdated: outdated %>
+      <% end %>
+      <% if (note = @branch_notes[node.path]) %>
+        <span class="min-w-0 truncate font-mono text-xs text-stone-400" title="<%= note %>"># <%= note.lines.map(&:strip).join(" · ") %></span>
+      <% end %>
+      <details class="ml-auto shrink-0" onclick="event.stopPropagation()">
+        <summary class="cursor-pointer text-xs text-stone-500 hover:text-stone-900"><%= t(".note") %></summary>
+        <%= form_with url: branch_note_path, method: :patch, class: "group mt-1 flex items-start gap-2", data: { controller: "dirty-form" } do %>
+          <%= hidden_field_tag :path, node.path, id: nil %>
+          <%= text_area_tag :note, note, rows: [note.to_s.lines.size, 1].max, id: nil, placeholder: t(".note_placeholder"),
+                            data: { controller: "autosize", action: "input->autosize#resize" },
+                            class: "w-96 resize-none rounded border border-stone-300 bg-stone-50 px-2 py-1 font-mono text-xs group-data-dirty:border-sky-500" %>
+          <%= submit_tag "OK", disabled: true, data: { dirty_form_target: "submit" },
+                         class: "rounded bg-stone-800 px-2 py-1 text-xs text-white disabled:cursor-not-allowed disabled:opacity-50" %>
+        <% end %>
+      </details>
+      <details class="shrink-0" onclick="event.stopPropagation()">
         <summary class="cursor-pointer text-xs text-stone-500 hover:text-stone-900"><%= t(".rename") %></summary>
         <%= form_with url: rename_branch_path, method: :patch, class: "mt-1 flex gap-2", data: { controller: "dirty-form" } do %>
           <%= hidden_field_tag :prefix, node.path %>
@@ -17,7 +38,7 @@
         <% end %>
       </details>
     </summary>
-    <div class="pl-5">
+    <div class="pl-5" data-children>
       <% if open %>
         <%= render partial: "units/node", collection: node.children.values, locals: { languages: languages, open: true } %>
       <% else %>
@@ -33,6 +54,10 @@
     <span class="w-12 shrink-0 text-right text-xs text-stone-400 tabular-nums">#<%= @indexes[node.unit.id] %></span>
     <span class="w-72 shrink-0 truncate font-mono text-xs text-stone-600"><%= node.name %></span>
     <span class="flex-1 truncate font-mono text-xs"><%= node.unit.source_text %></span>
-    <%= render "progress", value: translated, max: languages, outdated: outdated %>
+    <% if node.unit.translatable %>
+      <%= render "progress", value: translated, max: languages, outdated: outdated %>
+    <% else %>
+      <%= notranslate %>
+    <% end %>
   <% end %>
 <% end %>

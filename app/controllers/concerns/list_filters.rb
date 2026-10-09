@@ -3,6 +3,8 @@
 #   status[]   translation statuses, combined with OR (none = every status)
 #   questions  "1" : with an open question, combined with AND
 #   warnings   "1" : with a TranslationChecks warning, combined with AND
+#   notranslate "1" : the keys out of the translators' work (@no-translate), instead of the others on the translator's
+#              list (admins only), among them on the keys list ; combined with AND
 #   days       one of PERIODS : changed (a revision) in the last n days, combined with AND
 #   key        substring of the key
 #   prefix     branch : the key itself or anything under it
@@ -24,7 +26,7 @@ module ListFilters
 
   # The params above, read from a request's params or from a remembered list url
   class Query
-    NAMES = ["q", "status", "questions", "warnings", "days", *FIELDS, "sort", "dir"].freeze
+    NAMES = ["q", "status", "questions", "warnings", "notranslate", "days", *FIELDS, "sort", "dir"].freeze
 
     def self.from_url(url)
       new(Rack::Utils.parse_nested_query(URI(url.to_s).query.to_s))
@@ -56,6 +58,10 @@ module ListFilters
       self[:warnings] == "1"
     end
 
+    def notranslate?
+      self[:notranslate] == "1"
+    end
+
     # The picked period, in days (nil when none)
     def days
       self[:days].to_i if PERIODS.include?(self[:days])
@@ -70,9 +76,9 @@ module ListFilters
       %w[asc desc].include?(self[:dir]) ? self[:dir] : SORTS.fetch(sort || "index")
     end
 
-    # Narrowed by a status, the questions or the warnings flag, a period (the search fields aside)
+    # Narrowed by a status, the questions, warnings or notranslate flag, a period (the search fields aside)
     def filtered?
-      statuses.any? || questions? || warnings? || days.present?
+      statuses.any? || questions? || warnings? || notranslate? || days.present?
     end
 
     def searched?
@@ -85,7 +91,8 @@ module ListFilters
 
     # As link params
     def to_params
-      { q: self[:q], status: statuses.presence, questions: ("1" if questions?), warnings: ("1" if warnings?), days: days&.to_s }
+      { q: self[:q], status: statuses.presence, questions: ("1" if questions?), warnings: ("1" if warnings?),
+        notranslate: ("1" if notranslate?), days: days&.to_s }
         .merge(FIELDS.to_h { |name| [name.to_sym, self[name]] }, sort: sort, dir: (sort_dir if sort)).compact
     end
 
@@ -106,7 +113,7 @@ module ListFilters
   end
 
   included do
-    helper_method :list_params, :statuses, :questions?, :warnings?, :list_days, :list_sort, :list_sort_dir
+    helper_method :list_params, :statuses, :questions?, :warnings?, :notranslate?, :list_days, :list_sort, :list_sort_dir
     before_action :exclusive_index
   end
 
@@ -116,7 +123,7 @@ module ListFilters
     @list_query ||= Query.new(params)
   end
 
-  delegate :single_index?, :statuses, :questions?, :warnings?, :filtered?, :searched?, :index_range, to: :list_query, private: true
+  delegate :single_index?, :statuses, :questions?, :warnings?, :notranslate?, :filtered?, :searched?, :index_range, to: :list_query, private: true
 
   def list_days
     list_query.days
@@ -134,7 +141,7 @@ module ListFilters
   def exclusive_index
     return unless single_index?
 
-    [:q, :status, :questions, :warnings, :days, *(FIELDS - ["at"])].each { |name| params.delete(name) }
+    [:q, :status, :questions, :warnings, :notranslate, :days, *(FIELDS - ["at"])].each { |name| params.delete(name) }
   end
 
   # The current list, as link params

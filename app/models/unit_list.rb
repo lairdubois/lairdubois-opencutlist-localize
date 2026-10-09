@@ -22,6 +22,21 @@ class UnitList
                .to_h { |id, n, outdated, unreviewed, reviewed| [id, [n, outdated.to_i, unreviewed.to_i, reviewed.to_i]] }
   end
 
+  # Paths of the branches whose keys are all @no-translate, among every key (not only the listed ones)
+  def notranslate_branches
+    @notranslate_branches ||= begin
+      translated = Set.new
+      all = Set.new
+      units.each do |unit|
+        parts = unit.key.split(".")
+        paths = (1...parts.size).map { |n| parts.first(n).join(".") }
+        all.merge(paths)
+        translated.merge(paths) if unit.translatable
+      end
+      all - translated
+    end
+  end
+
   # Units matching the search text and fields (key, branch, user, index range but a single index),
   # whatever the filters
   def searched
@@ -49,14 +64,15 @@ class UnitList
     @listed ||= (query.single_index? ? filter_by_index(searched) : searched).select { |u| match?(u) }
   end
 
-  # Each status's matches with the other filters (shown in the filters menu), the questions', warnings'
-  # and periods' ones, and the search alone (for the empty list hint). A single index drops the other
+  # Each status's matches with the other filters (shown in the filters menu), the questions', warnings',
+  # notranslate's and periods' ones, and the search alone (for the empty list hint). A single index drops the other
   # filters when applied (ListFilters) and they drop it : the counts leave it out.
   def counts
-    ListFilters::STATUSES.to_h { |key| [key, searched.count { |u| status?(key, u) && questions_match?(u) && warnings_match?(u) && days_match?(u) }] }
-                         .merge("questions" => searched.count { |u| status_match?(u) && question_ids.include?(u.id) && warnings_match?(u) && days_match?(u) },
-                                "warnings" => searched.count { |u| status_match?(u) && questions_match?(u) && warning_ids.include?(u.id) && days_match?(u) })
-                         .merge(ListFilters::PERIODS.to_h { |days| ["days_#{days}", searched.count { |u| status_match?(u) && questions_match?(u) && warnings_match?(u) && revised_ids(days.to_i).include?(u.id) }] })
+    ListFilters::STATUSES.to_h { |key| [key, searched.count { |u| status?(key, u) && questions_match?(u) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) }] }
+                         .merge("questions" => searched.count { |u| status_match?(u) && question_ids.include?(u.id) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) },
+                                "warnings" => searched.count { |u| status_match?(u) && questions_match?(u) && warning_ids.include?(u.id) && notranslate_match?(u) && days_match?(u) },
+                                "notranslate" => searched.count { |u| status_match?(u) && questions_match?(u) && warnings_match?(u) && !u.translatable && days_match?(u) })
+                         .merge(ListFilters::PERIODS.to_h { |days| ["days_#{days}", searched.count { |u| status_match?(u) && questions_match?(u) && warnings_match?(u) && notranslate_match?(u) && revised_ids(days.to_i).include?(u.id) }] })
                          .merge(searched: searched.size)
   end
 
@@ -69,7 +85,11 @@ class UnitList
   private
 
   def match?(unit)
-    status_match?(unit) && questions_match?(unit) && warnings_match?(unit) && days_match?(unit)
+    status_match?(unit) && questions_match?(unit) && warnings_match?(unit) && notranslate_match?(unit) && days_match?(unit)
+  end
+
+  def notranslate_match?(unit)
+    !query.notranslate? || !unit.translatable
   end
 
   def days_match?(unit)

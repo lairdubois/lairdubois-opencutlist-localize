@@ -7,20 +7,24 @@ class UnitTree
     end
   end
 
-  # stats per unit id : [translated count, outdated count]
+  # stats per unit id : [translated count, outdated count]. A node's stats : [keys, translated, outdated, translatable keys],
+  # the translations counted on the translatable keys only (the @no-translate ones are out of the progress)
   def initialize(units, stats)
-    @root = Node.new(name: nil, path: nil, children: {}, stats: [0, 0, 0], first: units.first)
+    @root = Node.new(name: nil, path: nil, children: {}, stats: [0, 0, 0, 0], first: units.first)
     units.each do |unit|
       parts = unit.key.split(".")
       node = parts.each_with_index.reduce(@root) do |parent, (part, i)|
-        parent.children[part] ||= Node.new(name: part, path: parts.first(i + 1).join("."), children: {}, stats: [0, 0, 0], first: unit)
+        parent.children[part] ||= Node.new(name: part, path: parts.first(i + 1).join("."), children: {}, stats: [0, 0, 0, 0], first: unit)
       end
       node.unit = unit
       translated, outdated = stats.fetch(unit.id, [0, 0])
       ([@root] + parts.each_index.map { |i| dig(parts.first(i + 1)) }).each do |n|
         n.stats[0] += 1
+        next unless unit.translatable
+
         n.stats[1] += translated
         n.stats[2] += outdated
+        n.stats[3] += 1
       end
     end
   end

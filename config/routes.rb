@@ -28,6 +28,7 @@ Rails.application.routes.draw do
   end
   patch "comments/:id/resolve", to: "comments#resolve", as: :resolve_comment
   patch "branches/rename", to: "branches#rename", as: :rename_branch
+  patch "branches/note", to: "branches#note", as: :branch_note
   resources :users, except: [:show]
 
   get "sync", to: "syncs#new", as: :new_sync

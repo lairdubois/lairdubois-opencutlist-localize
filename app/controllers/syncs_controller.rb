@@ -28,7 +28,7 @@ class SyncsController < ApplicationController
     branch = params[:branch].presence
     raise ActionController::BadRequest, "invalid branch" if branch && !OclRepo.valid_branch?(branch)
 
-    sync.apply(sync.plan, renames: params[:renames], majors: params[:majors], notes: params[:notes])
+    sync.apply(sync.plan, renames: params[:renames], majors: params[:majors], notes: params[:notes], branch_notes: params[:branch_notes])
     Setting["base_branch"] = branch if branch
     File.delete(path)
     Setting["repo_fr_changed_at"] = nil

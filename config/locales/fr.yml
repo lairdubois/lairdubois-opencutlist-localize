@@ -83,6 +83,8 @@ fr:
       questions_chip: "question ouverte"
       warnings: "Avertissements"
       warnings_chip: "avertissement"
+      notranslate: "Clés @no-translate"
+      notranslate_chip: "@no-translate"
       days_header: "Modifiées dans les…"
       days_chip: "Modifiées dans les"
       periods:
@@ -252,6 +254,9 @@ fr:
         other: "%{count} clés"
       divergent: "traductions différentes"
     node:
+      note: "commentaire"
+      note_placeholder: "# commentaire YAML, @no-translate pour retirer la branche de la traduction"
+      notranslate_hint: "Hors du travail des traducteurs : @no-translate dans le commentaire de la clé ou d'une branche parente"
       continued: "(suite)"
       rename: "renommer / déplacer"
       rename_confirm:
@@ -276,7 +281,9 @@ fr:
       rename: "Renommer"
       source: "Source (FR)"
       note: "Commentaire YAML"
-      note_hint: "Écrit au-dessus de la clé dans chaque fichier de langue, sans le « # ». Vide = aucun."
+      note_hint: "Écrit au-dessus de la clé dans chaque fichier de langue, sans le « # ». Vide = aucun. Une ligne @no-translate retire la clé du travail des traducteurs, @translate l'y remet dans une branche @no-translate."
+      notranslate_self: "hors du travail des traducteurs (commentaire de la clé)"
+      notranslate_branch_html: "hors du travail des traducteurs (commentaire de la branche %{path})"
       minor: "Correction mineure : garder les traductions"
       major: "Changement de sens : traductions à revoir"
       translations: "Traductions"
@@ -298,6 +305,8 @@ fr:
       archived: "%{key} supprimée (historique conservé)."
 
   branches:
+    note:
+      saved: "Commentaire de %{path} enregistré."
     rename:
       moved:
         one: "%{count} clé déplacée de %{from} vers %{to}."
@@ -351,6 +360,7 @@ fr:
       notes: "Commentaires YAML modifiés (%{count})"
       notes_hint: "décoché = garder celui de l'outil, réécrit à la publication"
       note_removed: "(supprimé)"
+      branch_notes: "Commentaires YAML de branches modifiés (%{count})"
       note_conflict: "aussi modifié ici"
       added: "Nouvelles clés (%{count})"
       removed: "Clés supprimées (%{count})"

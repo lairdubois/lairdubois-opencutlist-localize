@@ -26,8 +26,8 @@ class TranslationsController < ApplicationController
     # the menu's counts leave it out
     @counts = filter_counts(searched)
     searched = filter_by_index(searched) if single_index?
-    @count = single_index? ? searched.count : @counts[:list]
-    scope = sorted(searched.where(status_condition).where(questions_condition).where(warnings_condition).where(days_condition))
+    @count = single_index? ? searched.where(translatable_condition).count : @counts[:list]
+    scope = sorted(searched.where(translatable_condition).where(status_condition).where(questions_condition).where(warnings_condition).where(days_condition))
     @page = [params[:page].to_i, 1].max
     @units = scope.offset((@page - 1) * PER_PAGE).limit(PER_PAGE).to_a
     @more = @page * PER_PAGE < @count
@@ -63,8 +63,21 @@ class TranslationsController < ApplicationController
     @en_reference = @en.present? && current_user.reference_language == "en"
   end
 
+  # Keys out of the translators' work (@no-translate) : admins only
   def set_unit
-    @unit = Unit.active.find(params[:unit_id])
+    @unit = (current_user.admin? ? Unit.active : Unit.active.translatable).find(params[:unit_id])
+  end
+
+  # The @no-translate keys instead of the others : an admin's filter
+  def notranslate?
+    current_user.admin? && list_query.notranslate?
+  end
+
+  # The translators' keys, or (notranslate) the others. An admin's single index shows its key either way.
+  def translatable_condition
+    return "1 = 1" if single_index? && current_user.admin?
+
+    Unit.sanitize_sql_array(["units.translatable = ?", !notranslate?])
   end
 
   def operations
@@ -119,13 +132,17 @@ class TranslationsController < ApplicationController
   end
 
   # In one query : each status's matches with the other filters (shown in the filters menu),
-  # the questions', warnings' and periods' ones, the listed units, and the search alone (for the empty list hint)
+  # the questions', warnings', notranslate's (admins) and periods' ones, the listed units, and the search alone
+  # (for the empty list hint). All of them among the translators' keys or, notranslate, the others.
   def filter_counts(scope)
+    others = "(#{status_condition}) AND (#{questions_condition}) AND (#{warnings_condition}) AND (#{days_condition})"
     conditions = STATUSES.to_h { |key| [key, "(#{status_conditions[key]}) AND (#{questions_condition}) AND (#{warnings_condition}) AND (#{days_condition})"] }
                          .merge("questions" => "(#{status_condition}) AND #{open_question_condition} AND (#{warnings_condition}) AND (#{days_condition})",
                                 "warnings" => "(#{status_condition}) AND (#{questions_condition}) AND #{warning_condition} AND (#{days_condition})")
                          .merge(PERIODS.to_h { |days| ["days_#{days}", "(#{status_condition}) AND (#{questions_condition}) AND (#{warnings_condition}) AND #{period_condition(days.to_i)}"] })
-                         .merge(list: "(#{status_condition}) AND (#{questions_condition}) AND (#{warnings_condition}) AND (#{days_condition})", searched: "1 = 1")
+                         .merge(list: others, searched: "1 = 1")
+                         .transform_values { |sql| "(#{sql}) AND #{translatable_condition}" }
+    conditions["notranslate"] = "#{others} AND units.translatable = FALSE" if current_user.admin?
     counts = scope.reorder(nil).pick(*conditions.values.map { |sql| Arel.sql("COUNT(CASE WHEN #{sql} THEN 1 END)") })
     conditions.keys.zip(counts || Array.new(conditions.size, 0)).to_h
   end

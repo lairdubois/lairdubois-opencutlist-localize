@@ -1,9 +1,9 @@
-# Home : the languages the user can work on, with their progress
+# Home : the languages the user can work on, with their progress (the @no-translate keys left out)
 class LanguagesController < ApplicationController
   def index
     @languages = current_user.editable_languages.to_a
-    total = Unit.active.count
-    counts = Translation.joins(:unit).merge(Unit.active).where(language: @languages).group(:language_id)
+    total = Unit.active.translatable.count
+    counts = Translation.joins(:unit).merge(Unit.active.translatable).where(language: @languages).group(:language_id)
                         .pluck(:language_id, Arel.sql("COUNT(*)"),
                                Arel.sql("SUM(translations.source_hash <> units.source_hash)"),
                                Arel.sql("SUM(translations.status = 1)"))

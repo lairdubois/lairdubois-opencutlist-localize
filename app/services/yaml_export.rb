@@ -3,6 +3,7 @@ class YamlExport
   # { "fr.yml" => "...", ... }
   def files
     units = Unit.active.to_a
+    branch_notes = BranchNote.to_map
     Language.all.to_h do |language|
       entries = if language.source?
                   units.map { |u| I18nYaml::Entry.new(key: u.key, value: u.source_text, note: u.note) }
@@ -10,7 +11,7 @@ class YamlExport
                   texts = language.translations.where(unit: units).pluck(:unit_id, :text).to_h
                   units.filter_map { |u| I18nYaml::Entry.new(key: u.key, value: texts[u.id], note: u.note) if texts[u.id] }
                 end
-      ["#{language.code}.yml", I18nYaml::Writer.write(entries)]
+      ["#{language.code}.yml", I18nYaml::Writer.write(entries, branch_notes: branch_notes)]
     end
   end
 

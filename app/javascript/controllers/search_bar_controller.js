@@ -12,7 +12,7 @@ import { Controller } from "@hotwired/stimulus"
 // its arrow reversing it.
 export default class extends Controller {
   static targets = ["chips", "field", "menu"]
-  static FILTERS = ["q", "status[]", "questions", "warnings", "days", "key", "prefix", "user", "at"]
+  static FILTERS = ["q", "status[]", "questions", "warnings", "notranslate", "days", "key", "prefix", "user", "at"]
   static KEYWORDS = { at: /^#(\d+(?:-\d*)?|-\d+)$/, key: /^(?:key|cl[eé]):(.+)$/i, prefix: /^(?:branch|branche):(.+)$/i, user: /^(?:user|utilisateur):(.+)$/i }
   static REFOCUS = "search-bar:refocus"
 

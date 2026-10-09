@@ -5,7 +5,7 @@ import { createI18nView, replaceText, insertText, missingInvariants } from "lib/
 // On a form with a `field` textarea : an editor, the textarea kept hidden and in sync. With a `source`
 // value (translator's editor), the source's {{ variables }}, $t() and tags are locked and the missing ones
 // offered as chips ; without (fr source editor), nothing is locked. Mod-Enter submits, Shift-Mod-Enter
-// through the `review` button.
+// through the `review` button, hidden while the text is blank (a blank save removes the translation).
 // On any other element : a read-only view of the `text` value, invariants missing from `source` (if
 // given) flagged.
 export default class extends Controller {
@@ -52,9 +52,9 @@ export default class extends Controller {
       // Takes the textarea's place (and classes) in the row's grid
       className: field.className,
       // Announced for dirty-form : setting the value doesn't fire `input`
-      onChange: (text) => { field.value = text; this.renderChips(); this.dispatch("change") },
-      // Without a review button (not a reviewer), Shift-Mod-Enter is a plain save
-      onSubmit: ({ review } = {}) => this.element.requestSubmit(review && this.hasReviewTarget ? this.reviewTarget : undefined),
+      onChange: (text) => { field.value = text; this.renderChips(); this.toggleReview(); this.dispatch("change") },
+      // Without a review button (not a reviewer, or a blank text), Shift-Mod-Enter is a plain save
+      onSubmit: ({ review } = {}) => this.element.requestSubmit(review && this.hasReviewTarget && !this.reviewTarget.hidden ? this.reviewTarget : undefined),
     })
     field.after(this.view.dom)
     field.hidden = true
@@ -62,6 +62,11 @@ export default class extends Controller {
     this.pull = () => replaceText(this.view, field.value)
     field.addEventListener("input", this.pull)
     this.renderChips()
+    this.toggleReview()
+  }
+
+  toggleReview() {
+    if (this.hasReviewTarget) this.reviewTarget.hidden = this.fieldTarget.value.trim() === ""
   }
 
   renderChips() {

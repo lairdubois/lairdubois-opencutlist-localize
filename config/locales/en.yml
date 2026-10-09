@@ -83,6 +83,8 @@ en:
       questions_chip: "open question"
       warnings: "Warnings"
       warnings_chip: "warning"
+      notranslate: "@no-translate keys"
+      notranslate_chip: "@no-translate"
       days_header: "Changed in the…"
       days_chip: "Changed in the"
       periods:
@@ -252,6 +254,9 @@ en:
         other: "%{count} keys"
       divergent: "different translations"
     node:
+      note: "comment"
+      note_placeholder: "# YAML comment, @no-translate to take the branch out of translation"
+      notranslate_hint: "Out of the translators' work : @no-translate in the comment of the key or of a parent branch"
       continued: "(continued)"
       rename: "rename / move"
       rename_confirm:
@@ -276,7 +281,9 @@ en:
       rename: "Rename"
       source: "Source (FR)"
       note: "YAML comment"
-      note_hint: "Written above the key in every language file, without the \"#\". Empty = none."
+      note_hint: "Written above the key in every language file, without the \"#\". Empty = none. A @no-translate line takes the key out of the translators' work, @translate puts it back inside a @no-translate branch."
+      notranslate_self: "out of the translators' work (the key's comment)"
+      notranslate_branch_html: "out of the translators' work (comment of the branch %{path})"
       minor: "Minor fix: keep the translations"
       major: "Meaning changed: translations to review"
       translations: "Translations"
@@ -298,6 +305,8 @@ en:
       archived: "%{key} deleted (history kept)."
 
   branches:
+    note:
+      saved: "Comment of %{path} saved."
     rename:
       moved:
         one: "%{count} key moved from %{from} to %{to}."
@@ -351,6 +360,7 @@ en:
       notes: "YAML comments changed (%{count})"
       notes_hint: "unchecked = keep the tool's one, written back on publish"
       note_removed: "(removed)"
+      branch_notes: "Branch YAML comments changed (%{count})"
       note_conflict: "also changed here"
       added: "New keys (%{count})"
       removed: "Deleted keys (%{count})"

@@ -2,18 +2,22 @@
 # Nothing is applied blindly : the plan lists the changes and the admin decides for each
 # rename candidate (rename or delete+add) and each text change (minor or major).
 class SourceSync
-  Plan = Struct.new(:added, :removed, :changed, :renames, :conflicts, :notes, :note_conflicts, :order, keyword_init: true) do
+  Plan = Struct.new(:added, :removed, :changed, :renames, :conflicts, :notes, :note_conflicts, :branch_notes, :order, keyword_init: true) do
     def empty?
-      added.empty? && removed.empty? && changed.empty? && notes.empty?
+      added.empty? && removed.empty? && changed.empty? && notes.empty? && branch_notes.empty?
     end
   end
   # added : [Entry], removed : [Unit], changed : [[Unit, Entry]], renames : [[Unit, Entry]],
   # conflicts : unit ids whose fr text was also changed in the tool,
-  # notes : [[Unit, Entry]] YAML comment changed in the repo, note_conflicts : unit ids whose comment was also changed in the tool
+  # notes : [[Unit, Entry]] YAML comment changed in the repo, note_conflicts : unit ids whose comment was also changed in the tool,
+  # branch_notes : [BranchChange] comments above branches changed in the repo
+  BranchChange = Struct.new(:path, :note, :tool_note, :conflict, keyword_init: true)
 
   def initialize(fr_text, author:)
     @fr_text = fr_text
-    @entries = I18nYaml::Reader.new(fr_text).entries
+    reader = I18nYaml::Reader.new(fr_text)
+    @entries = reader.entries
+    @branch_notes = reader.branch_notes
     @author = author
   end
 
@@ -46,15 +50,17 @@ class SourceSync
     note_conflicts = notes.filter_map { |unit, _| unit.id if note(unit.note) != base_note(baseline, unit) }
 
     Plan.new(added: added, removed: removed, changed: changed, renames: renames, conflicts: conflicts,
-             notes: notes, note_conflicts: note_conflicts, order: @entries.map(&:key))
+             notes: notes, note_conflicts: note_conflicts, branch_notes: branch_note_changes(baseline), order: @entries.map(&:key))
   end
 
   # decisions : { renames: [unit_id, ...] accepted, majors: [unit_id, ...] text changes that invalidate,
-  #               notes: [unit_id, ...] repo comments taken (the others keep the tool's one, written on publish) }
+  #               notes: [unit_id, ...] repo comments taken (the others keep the tool's one, written on publish),
+  #               branch_notes: [path, ...] same for the branches' comments }
   def apply(plan, decisions = {})
     accepted = Array(decisions[:renames]).map(&:to_i)
     majors = Array(decisions[:majors]).map(&:to_i)
     taken_notes = Array(decisions[:notes]).map(&:to_i)
+    taken_branch_notes = Array(decisions[:branch_notes]).map(&:to_s)
     operations = UnitOperations.new(@author)
 
     ApplicationRecord.transaction do
@@ -75,6 +81,7 @@ class SourceSync
       plan.notes.each do |unit, entry|
         operations.edit_note(unit, entry.note) if taken_notes.include?(unit.id) && !unit.reload.archived?
       end
+      plan.branch_notes.each { |change| operations.edit_branch_note(change.path, change.note) if taken_branch_notes.include?(change.path) }
 
       # The repo's order is authoritative for the keys it has
       positions = plan.order.each_with_index.to_h
@@ -97,6 +104,18 @@ class SourceSync
     (pairs + renames).uniq { |unit, _| unit.id }.select do |unit, e|
       repo = note(e.note)
       repo != base_note(baseline, unit) && repo != note(unit.note)
+    end
+  end
+
+  # Branch comments that differ between the repo and the baseline (and not already the same in the tool).
+  # A branch moved in the repo shows as its comment removed from the old path and added on the new one.
+  def branch_note_changes(baseline)
+    tool = BranchNote.to_map
+    # Baselines recorded before branch notes were synced have none : the tool had none either then
+    base = baseline.branch_notes || {}
+    (@branch_notes.keys | base.keys).filter_map do |path|
+      repo, before, current = note(@branch_notes[path]), note(base[path]), note(tool[path])
+      BranchChange.new(path: path, note: repo, tool_note: current, conflict: current != before) if repo != before && repo != current
     end
   end
 

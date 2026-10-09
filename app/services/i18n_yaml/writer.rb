@@ -6,11 +6,13 @@ module I18nYaml
   class Writer
     INDENT = "  ".freeze
 
-    def self.write(entries)
-      new(entries).to_s
+    # branch_notes : { "dotted.path" => comment } written above the branches still holding entries
+    def self.write(entries, branch_notes: {})
+      new(entries, branch_notes: branch_notes).to_s
     end
 
-    def initialize(entries)
+    def initialize(entries, branch_notes: {})
+      @branch_notes = branch_notes
       @tree = {}
       entries.each do |entry|
         *parents, leaf = entry.key.split(".")
@@ -22,23 +24,28 @@ module I18nYaml
 
     def to_s
       out = +""
-      emit(@tree, 0, out)
+      emit(@tree, [], out)
       out
     end
 
     private
 
-    def emit(node, depth, out)
-      pad = INDENT * depth
+    def emit(node, path, out)
+      pad = INDENT * path.size
       node.each do |key, child|
         if child.is_a?(Hash)
+          comment(@branch_notes[(path + [key]).join(".")], pad, out)
           out << "#{pad}#{format_key(key)}:\n"
-          emit(child, depth + 1, out)
+          emit(child, path + [key], out)
         else
-          child.note.to_s.each_line { |l| out << "#{pad}# #{l.chomp}".rstrip << "\n" } if child.note
+          comment(child.note, pad, out)
           out << "#{pad}#{format_key(key)}:#{format_value(child.value, pad + INDENT)}\n"
         end
       end
+    end
+
+    def comment(note, pad, out)
+      note.to_s.each_line { |l| out << "#{pad}# #{l.chomp}".rstrip << "\n" }
     end
 
     def format_key(key)

@@ -17,26 +17,39 @@
   <%# i18n-text swaps the textarea for a CodeMirror editor (source invariants locked), keeping it in sync for the form %>
   <%= form_with url: translate_unit_path(language.code, unit), method: :patch, class: "contents",
                 data: { controller: "i18n-text dirty-form", i18n_text_source_value: unit.source_text, i18n_text_refs_value: @ref_texts[unit.id].to_json } do %>
-    <%= text_area_tag :text, t&.text, rows: 1, dir: language.rtl ? "rtl" : "ltr", lang: language.code,
-                      data: { i18n_text_target: "field" },
-                      class: "block w-full resize-none overflow-hidden border-y border-stone-200 px-3 py-2 font-mono text-sm md:border-l #{t&.outdated? ? 'bg-amber-50' : 'bg-white'} group-has-data-dirty:bg-sky-50" %>
+    <%# The box : the editor, then the proposals under it, so they grow the row (the source box beside follows).
+        Its background, the translation's status (or unsaved), runs under both %>
+    <div class="flex min-w-0 flex-col border-y border-stone-200 md:border-l <%= t.nil? ? 'bg-yellow-50' : t.outdated? ? 'bg-orange-50' : 'bg-white' %> group-has-data-dirty:bg-sky-50">
+      <%= text_area_tag :text, t&.text, rows: 1, dir: language.rtl ? "rtl" : "ltr", lang: language.code,
+                        data: { i18n_text_target: "field" },
+                        class: "block w-full flex-1 resize-none overflow-hidden px-3 py-2 font-mono text-sm bg-transparent" %>
+      <% machine = data[:machine][unit.id] if t.nil? || t.outdated? %>
+      <% suggestions = data[:suggestions][unit.source_text] if t.nil? %>
+      <%# One section per kind, each under a dashed line. Hidden while empty : the chips come and go with the text (i18n-text) %>
+      <div class="flex flex-col not-has-[>:not([hidden])]:hidden *:border-t *:border-dashed *:border-stone-200 *:px-3 *:py-1.5">
+        <div class="flex flex-wrap gap-1" data-i18n-text-target="chips" hidden></div>
+        <% if warnings.any? %>
+          <div class="flex flex-col gap-1">
+            <% warnings.each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
+          </div>
+        <% end %>
+        <% if machine %>
+          <p class="text-xs text-stone-500">🤖 <%= t(".machine") %>
+            <button type="button" class="ml-1 whitespace-pre-wrap rounded bg-violet-50 px-1.5 text-left text-violet-900 hover:bg-violet-100"
+                    onclick="<%= fill %>" data-text="<%= machine %>"><%= machine %></button>
+          </p>
+        <% end %>
+        <% if suggestions.present? %>
+          <p class="text-xs text-stone-500"><%= t(".same_text") %>
+            <% suggestions.each do |s| %>
+              <button type="button" class="ml-1 rounded bg-sky-50 px-1.5 text-sky-800 hover:bg-sky-100"
+                      onclick="<%= fill %>" data-text="<%= s %>"><%= s %></button>
+            <% end %>
+          </p>
+        <% end %>
+      </div>
+    </div>
     <div class="flex flex-col gap-1 px-3 py-1.5">
-      <div class="flex flex-wrap gap-1" data-i18n-text-target="chips" hidden></div>
-      <% warnings.each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
-      <% if (machine = data[:machine][unit.id]) && (t.nil? || t.outdated?) %>
-        <p class="text-xs text-stone-500">🤖 <%= t(".machine") %>
-          <button type="button" class="ml-1 whitespace-pre-wrap rounded bg-violet-50 px-1.5 text-left text-violet-900 hover:bg-violet-100"
-                  onclick="<%= fill %>" data-text="<%= machine %>"><%= machine %></button>
-        </p>
-      <% end %>
-      <% if (suggestions = data[:suggestions][unit.source_text]).present? && t.nil? %>
-        <p class="text-xs text-stone-500"><%= t(".same_text") %>
-          <% suggestions.each do |s| %>
-            <button type="button" class="ml-1 rounded bg-sky-50 px-1.5 text-sky-800 hover:bg-sky-100"
-                    onclick="<%= fill %>" data-text="<%= s %>"><%= s %></button>
-          <% end %>
-        </p>
-      <% end %>
       <div class="flex items-center justify-end gap-2">
         <% if current_user.admin? %>
           <button type="button" data-disclosure-target="button" data-action="disclosure#toggle" data-disclosure-panel-param="history"
@@ -55,9 +68,10 @@
         <%= submit_tag t(".save"), title: t("unsaved.save_shortcut"), disabled: clean_save, data: { dirty_form_target: ("submit" if clean_save) },
                        class: "rounded border border-stone-800 bg-stone-800 px-2 py-0.5 text-xs text-white disabled:hidden" %>
         <% if current_user.can_review?(language) %>
-          <%# Already reviewed and up to date : nothing to approve until edited (disabled and hidden like the save) %>
+          <%# Already reviewed and up to date : nothing to approve until edited (disabled and hidden like the save).
+              Hidden while the text is blank, which removes the translation (i18n-text follows the edits) %>
           <% clean_review = t&.reviewed? && !t.outdated? %>
-          <%= button_tag t(".save_and_review"), name: "reviewed", value: "1", title: t("unsaved.review_shortcut"), disabled: clean_review,
+          <%= button_tag t(".save_and_review"), name: "reviewed", value: "1", title: t("unsaved.review_shortcut"), disabled: clean_review, hidden: t.nil?,
                          data: { i18n_text_target: "review", dirty_form_target: ("submit" if clean_review) },
                          class: "rounded border border-emerald-600 px-2 py-0.5 text-xs text-emerald-700 disabled:hidden" %>
         <% end %>

@@ -13,6 +13,8 @@ class UnitsController < ApplicationController
     @languages = Language.targets.to_a
     list = UnitList.new(list_query, languages: @languages.size)
     @indexes = list.indexes
+    @branch_notes = BranchNote.to_map
+    @notranslate_branches = list.notranslate_branches
     return render_branch(UnitTree.new(list.units, list.stats)) if params[:branch].present?
 
     @counts = list.counts
@@ -51,6 +53,7 @@ class UnitsController < ApplicationController
     @languages = Language.targets
     @refs = Unit.ref_texts([@unit])[@unit.id]
     @history_count = @unit.revisions.count
+    @notranslate_source = Unit.directive_source(@unit.key, @unit.note, BranchNote.to_map) unless @unit.translatable
     return if @unit.archived_at # out of the tree
 
     # Walked within the keys list the page was opened from (a single index aside : it lists one key)

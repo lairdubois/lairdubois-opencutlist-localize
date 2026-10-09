@@ -14,23 +14,36 @@ module I18nYaml
     end
 
     def entries
-      return [] unless @document && @document.root.is_a?(Psych::Nodes::Mapping)
+      parse
+      @entries
+    end
 
-      out = []
-      walk(@document.root, [], out)
-      out
+    # { "dotted.path" => comment } of the branches (mapping keys) with a comment right above them
+    def branch_notes
+      parse
+      @branch_notes
     end
 
     private
 
-    def walk(mapping, path, out)
+    def parse
+      return if @entries
+
+      @entries = []
+      @branch_notes = {}
+      walk(@document.root, []) if @document && @document.root.is_a?(Psych::Nodes::Mapping)
+    end
+
+    def walk(mapping, path)
       mapping.children.each_slice(2) do |key_node, value_node|
         key_path = path + [key_node.value]
         case value_node
         when Psych::Nodes::Mapping
-          walk(value_node, key_path, out)
+          note = note_before(key_node.start_line)
+          @branch_notes[key_path.join(".")] = note if note
+          walk(value_node, key_path)
         when Psych::Nodes::Scalar
-          out << Entry.new(key: key_path.join("."), value: value_node.value, note: note_before(key_node.start_line))
+          @entries << Entry.new(key: key_path.join("."), value: value_node.value, note: note_before(key_node.start_line))
         else
           raise ArgumentError, "Unsupported YAML node #{value_node.class} at #{key_path.join('.')}"
         end

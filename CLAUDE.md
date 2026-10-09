@@ -47,6 +47,12 @@ Weblate was evaluated and rejected.
   baseline (three-way) ; `Baseline.record!` keeps the previous unit id per repo key (archived
   units included) so pending tool renames / deletions survive a sync. YAML comments (`Unit#note`,
   edited on the key page) are three-way synced too ; baselines without `"note"` fall back to the tool's.
+- Branch comments (above a mapping key) : `BranchNote(path, note)`, read / written by `I18nYaml::Reader#branch_notes` /
+  `Writer`, three-way synced through `Baseline#branch_notes` (nil = recorded before : none), moved by `rename_branch`,
+  edited on the keys list's branch rows (no revision). A `@no-translate` line in a key's or branch's note takes the keys
+  out of the translators' work, `@translate` puts one back, the closest wins : denormalized as `Unit#translatable`
+  (`Unit.refresh_translatable!`, called by every `UnitOperations` touching keys or notes). Translations are kept and
+  exported ; excluded from the translator's list, saves, progress (home, tree) ; admins see them with the `notranslate=1` filter.
 - Rename detection : same fr text, disambiguated by key similarity (trailing segments ×100 +
   leading) ; ambiguous pairs are skipped.
 - `Publisher` refuses while the repo fr.yml has unsynced changes ; rewrites quoted key literals in

@@ -39,7 +39,11 @@ class BootstrapImport
           end
         end
       end
-      Baseline.record!(File.read(File.join(@dir, "#{Language::SOURCE_CODE}.yml")), source: "bootstrap")
+      fr_text = File.read(File.join(@dir, "#{Language::SOURCE_CODE}.yml"))
+      operations = UnitOperations.new(@author)
+      I18nYaml::Reader.new(fr_text).branch_notes.each { |path, note| operations.edit_branch_note(path, note) }
+      Unit.refresh_translatable!
+      Baseline.record!(fr_text, source: "bootstrap")
     end
     result
   end

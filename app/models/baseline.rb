@@ -5,6 +5,7 @@ require "digest"
 # the admins changed in the tool and not yet merged in the repo is never seen as a repo change.
 class Baseline < ApplicationRecord
   # entries : [{ "key" =>, "value" =>, "note" =>, "unit_id" => }] (no "note" in baselines recorded before notes were synced)
+  # branch_notes : { path => note } (nil in baselines recorded before branch notes were synced)
 
   def self.current
     order(:id).last
@@ -20,12 +21,13 @@ class Baseline < ApplicationRecord
     previous = current&.by_key || {}
     known = Unit.where(id: previous.values.map { |e| e["unit_id"] }.compact).pluck(:id).to_set # archived = deletion pending in the repo
     units = Unit.active.index_by(&:key)
-    entries = I18nYaml::Reader.new(fr_text).entries.map do |e|
+    reader = I18nYaml::Reader.new(fr_text)
+    entries = reader.entries.map do |e|
       unit_id = previous.dig(e.key, "unit_id")
       unit_id = units[e.key]&.id unless known.include?(unit_id)
       { "key" => e.key, "value" => e.value, "note" => e.note, "unit_id" => unit_id }
     end
-    create!(fr_hash: hash_text(fr_text), entries: entries, source: source)
+    create!(fr_hash: hash_text(fr_text), entries: entries, branch_notes: reader.branch_notes, source: source)
   end
 
   def by_key

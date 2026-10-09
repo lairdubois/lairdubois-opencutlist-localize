@@ -23,8 +23,7 @@
 /* OCL strings in CodeMirror (lib/i18n_text.js). Colours only in the editor : a bolder weight could
    change the monospace advance width. */
 @layer components {
-  .tok-var { color: var(--color-violet-800); background: var(--color-violet-100); border-radius: 0.2rem; }
-  .tok-ref { color: var(--color-sky-800); background: var(--color-sky-100); border-radius: 0.2rem; }
+  .tok-var, .tok-ref { color: var(--color-violet-800); background: var(--color-violet-100); border-radius: 0.2rem; }
   .tok-ref[title] { cursor: help; }
   .tok-tag, .tok-entity { color: var(--color-stone-500); background: var(--color-stone-100); border-radius: 0.2rem; }
   /* An invariant the fr source doesn't have : editable, flagged */
