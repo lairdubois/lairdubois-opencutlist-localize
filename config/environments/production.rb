@@ -55,7 +55,7 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: ENV.fetch("OCL_HOST", "ocl-i18n.lairdubois.fr"), protocol: "https" }
+  config.action_mailer.default_url_options = { host: ENV.fetch("OCL_HOST", "localize.opencutlist.org"), protocol: "https" }
 
   # Outgoing SMTP server (deliveries stay off unless OCL_MAIL_ENABLED=1)
   smtp_address = ENV.fetch("SMTP_ADDRESS", "localhost")
@@ -84,7 +84,7 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  config.hosts = [ ENV.fetch("OCL_HOST", "ocl-i18n.lairdubois.fr") ]
+  config.hosts = [ ENV.fetch("OCL_HOST", "localize.opencutlist.org") ]
 
   # Skip DNS rebinding protection for the default health check endpoint.
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }

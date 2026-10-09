@@ -58,14 +58,14 @@
 </div>
 
 <%# dirty-form : unsaved edits flagged (border) and guarded on leave %>
-<%= form_with url: rename_unit_path(@unit), method: :patch, class: "group mb-6 flex items-center gap-2", data: { controller: "dirty-form" } do %>
+<%= form_with url: rename_unit_path(@unit), method: :patch, class: "group mb-3 flex items-center gap-2", data: { controller: "dirty-form" } do %>
   <% if @index %><span class="text-stone-400 tabular-nums">#<%= @index %></span><% end %>
   <%= text_field_tag :key, @unit.key, class: "flex-1 rounded border border-stone-300 px-3 py-1.5 font-mono group-data-dirty:border-sky-500" %>
   <%= submit_tag t(".rename"), disabled: true, data: { dirty_form_target: "submit" },
                  class: "rounded border border-stone-300 bg-white px-3 py-1.5 disabled:cursor-not-allowed disabled:opacity-50" %>
 <% end %>
 
-<section class="mb-8 rounded border border-stone-200 bg-white p-4">
+<section class="mb-3 rounded border border-stone-200 bg-white p-4">
   <div class="mb-2 flex items-center justify-between">
     <h2 class="font-semibold"><%= t(".source") %></h2>
     <button type="button" data-controller="whitespace-toggle" data-action="whitespace-toggle#toggle" title="<%= t("translations.index.show_whitespace") %>"
@@ -88,9 +88,17 @@
                       data: { i18n_text_target: "field" }, class: "min-h-16 w-full rounded border border-stone-300 px-3 py-2 font-mono text-sm group-data-dirty:border-sky-500" %>
     <% TranslationChecks.text(@unit.source_text).each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
     <div class="mt-2 flex items-center gap-4 text-sm">
-      <%# The kind of change alone isn't an edit %>
-      <label><%= radio_button_tag :change, "minor", true, data: { dirty_ignore: true } %> <%= t(".minor") %></label>
-      <label><%= radio_button_tag :change, "major", false, data: { dirty_ignore: true } %> <%= t(".major") %></label>
+      <%# The kind of change alone isn't an edit. Segmented control : the radios stay (visually hidden) for the form
+          and the keyboard ; the dot tells what happens to the translations (major = outdated's amber) %>
+      <div role="radiogroup" class="flex rounded-md border border-stone-300 bg-stone-100 p-0.5">
+        <% [["minor", true, "bg-emerald-500"], ["major", false, "bg-amber-500"]].each do |value, checked, dot| %>
+          <label class="flex cursor-pointer items-center gap-1.5 rounded px-2.5 py-1 text-stone-500 hover:text-stone-800 has-checked:bg-white has-checked:text-stone-900 has-checked:shadow-sm has-focus-visible:ring-2 has-focus-visible:ring-sky-500">
+            <%= radio_button_tag :change, value, checked, class: "sr-only", data: { dirty_ignore: true } %>
+            <span class="h-2 w-2 shrink-0 rounded-full <%= dot %>"></span>
+            <%= t(".#{value}") %>
+          </label>
+        <% end %>
+      </div>
       <span class="ml-auto hidden text-xs text-sky-700 group-data-dirty:inline">● <%= t("unsaved.marker") %></span>
       <%= submit_tag t("save"), title: t("unsaved.save_shortcut"), disabled: true, data: { dirty_form_target: "submit" },
                      class: "rounded bg-stone-800 px-3 py-1.5 text-white group-data-dirty:ml-0 ml-auto disabled:cursor-not-allowed disabled:opacity-50" %>
@@ -98,42 +106,84 @@
   <% end %>
 </section>
 
-<section class="mb-8 rounded border border-stone-200 bg-white">
-  <h2 class="border-b border-stone-200 px-4 py-2 font-semibold"><%= t(".translations") %></h2>
-  <% @languages.each do |language| %>
-    <% t = @translations[language] %>
-    <div class="flex gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
-      <span class="w-24 shrink-0 text-sm text-stone-500"><%= language.name %></span>
-      <% if t %>
-        <div class="min-w-0 flex-1">
-          <div class="whitespace-pre-wrap font-mono text-sm" dir="<%= language.rtl ? "rtl" : "ltr" %>"
-               data-controller="i18n-text" data-i18n-text-text-value="<%= t.text %>" data-i18n-text-source-value="<%= @unit.source_text %>"
-               data-i18n-text-refs-value="<%= @refs.to_json %>"><%= t.text %></div>
-          <% TranslationChecks.call(@unit.source_text, t.text).each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
-        </div>
-        <% if t.outdated? %><span class="h-fit rounded bg-amber-100 px-1.5 text-xs text-amber-800"><%= t("status.outdated") %></span><% end %>
-      <% else %>
-        <span class="flex-1 text-sm italic text-stone-400"><%= t("status.untranslated") %></span>
+<%# Translations and history fold from their header, as the user left them (collapsible's cookie) %>
+<% unfolded = section_open?("unit_translations", default: true) %>
+<section class="mb-3 rounded border border-stone-200 bg-white" data-controller="collapsible" data-collapsible-name-value="unit_translations">
+  <h2>
+    <button type="button" data-collapsible-target="button" data-action="collapsible#toggle" aria-expanded="<%= unfolded %>"
+            class="group/section flex w-full items-center gap-2 px-4 py-2 text-left font-semibold hover:bg-stone-50">
+      <%= chevron_icon("text-stone-400 group-aria-expanded/section:rotate-90") %>
+      <%= t(".translations") %>
+      <%# Status counts, readable while folded %>
+      <% counts = @languages.map { |l| (tr = @translations[l]).nil? ? "untranslated" : tr.outdated? ? "outdated" : tr.reviewed? ? "reviewed" : "unreviewed" }.tally %>
+      <span class="ml-auto flex items-center gap-3 text-xs font-normal text-stone-500">
+        <% %w[reviewed unreviewed outdated untranslated].each do |status| %>
+          <% next unless counts[status] %>
+          <span class="flex items-center gap-1 tabular-nums" title="<%= t("shared.search_bar.statuses.#{status}") %>"><%= status_dot(status) %><%= counts[status] %></span>
+        <% end %>
+      </span>
+    </button>
+  </h2>
+  <div data-collapsible-target="panel" class="border-t border-stone-200" <%= "hidden" unless unfolded %>>
+    <% @languages.each do |language| %>
+      <% t = @translations[language] %>
+      <div class="flex gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
+        <span class="w-24 shrink-0 text-sm text-stone-500"><%= language.name %></span>
+        <% if t %>
+          <div class="min-w-0 flex-1">
+            <div class="whitespace-pre-wrap font-mono text-sm" dir="<%= language.rtl ? "rtl" : "ltr" %>"
+                 data-controller="i18n-text" data-i18n-text-text-value="<%= t.text %>" data-i18n-text-source-value="<%= @unit.source_text %>"
+                 data-i18n-text-refs-value="<%= @refs.to_json %>"><%= t.text %></div>
+            <% TranslationChecks.call(@unit.source_text, t.text).each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
+          </div>
+          <% if t.outdated? %><span class="h-fit rounded bg-amber-100 px-1.5 text-xs text-amber-800"><%= t("status.outdated") %></span><% end %>
+        <% else %>
+          <span class="flex-1 text-sm italic text-stone-400"><%= t("status.untranslated") %></span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</section>
+
+<%# Comments : rendered with the page when unfolded, else loaded once unfolded (lazy frame of the thread's id) %>
+<% unfolded = section_open?("unit_comments", default: true) %>
+<section class="mb-3 rounded border border-stone-200 bg-white" data-controller="collapsible" data-collapsible-name-value="unit_comments">
+  <h2>
+    <button type="button" data-collapsible-target="button" data-action="collapsible#toggle" aria-expanded="<%= unfolded %>"
+            class="group/section flex w-full items-center gap-2 px-4 py-2 text-left font-semibold hover:bg-stone-50">
+      <%= chevron_icon("text-stone-400 group-aria-expanded/section:rotate-90") %>
+      <%= t(".comments") %>
+      <% comments = @unit.comments.to_a %>
+      <%= render "comments_summary", unit: @unit, count: comments.size, questions: comments.count { |c| c.question && !c.resolved? } %>
+    </button>
+  </h2>
+  <div data-collapsible-target="panel" class="border-t border-stone-200 p-4" <%= "hidden" unless unfolded %>>
+    <% if unfolded %>
+      <%= render "comments/thread", unit: @unit, language: nil %>
+    <% else %>
+      <%= turbo_frame_tag "comments_#{@unit.id}", src: unit_comments_path(@unit), loading: :lazy do %>
+        <p class="text-sm text-stone-400"><%= t("loading") %></p>
       <% end %>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
 </section>
 
-<section class="mb-8 rounded border border-stone-200 bg-white p-4">
-  <h2 class="mb-2 font-semibold"><%= t(".comments") %></h2>
-  <%= render "comments/thread", unit: @unit, language: nil %>
-</section>
-
-<section class="mb-8 rounded border border-stone-200 bg-white">
-  <h2 class="border-b border-stone-200 px-4 py-2 font-semibold"><%= t(".history") %></h2>
-  <% @unit.revisions.includes(:language).reverse_each do |r| %>
-    <div class="flex gap-4 border-b border-stone-100 px-4 py-2 text-sm last:border-0">
-      <span class="w-36 shrink-0 text-stone-500"><%= l r.created_at, format: :short %></span>
-      <span class="w-28 shrink-0"><%= t("revision_kinds.#{r.kind}", default: r.kind) %><%= " (#{r.language.code.upcase})" if r.language %></span>
-      <span class="flex-1"><% if r.old_value %><del class="text-stone-400"><%= r.old_value %></del> → <% end %><%= r.new_value %></span>
-      <span class="text-stone-500"><%= r.author %></span>
-    </div>
-  <% end %>
+<%# History : loaded once unfolded (lazy frame), folded by default %>
+<% unfolded = section_open?("unit_history", default: false) %>
+<section class="mb-8 rounded border border-stone-200 bg-white" data-controller="collapsible" data-collapsible-name-value="unit_history">
+  <h2>
+    <button type="button" data-collapsible-target="button" data-action="collapsible#toggle" aria-expanded="<%= unfolded %>"
+            class="group/section flex w-full items-center gap-2 px-4 py-2 text-left font-semibold hover:bg-stone-50">
+      <%= chevron_icon("text-stone-400 group-aria-expanded/section:rotate-90") %>
+      <%= t(".history") %>
+      <span class="ml-auto text-xs font-normal text-stone-500 tabular-nums"><%= t(".history_count", count: @history_count) %></span>
+    </button>
+  </h2>
+  <div data-collapsible-target="panel" class="border-t border-stone-200" <%= "hidden" unless unfolded %>>
+    <%= turbo_frame_tag "unit_history", src: history_unit_path(@unit), loading: :lazy do %>
+      <p class="p-4 text-sm text-stone-400"><%= t("loading") %></p>
+    <% end %>
+  </div>
 </section>
 
 <%= button_to t(".archive"), archive_unit_path(@unit), method: :patch, class: "text-sm text-red-700 hover:underline",

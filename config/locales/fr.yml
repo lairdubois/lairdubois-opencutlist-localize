@@ -163,7 +163,6 @@ fr:
         other: "🤖 Proposer des traductions (%{language}) pour les %{count} premières chaînes à faire"
     row:
       source: "source"
-      reference: "référence"
       en_outdated: "EN obsolète, le FR fait foi"
       en_missing: "EN manquant"
       before: "avant :"
@@ -175,6 +174,14 @@ fr:
       save_and_review: "Valider"
       machine: "Proposition :"
       same_text: "Même texte ailleurs :"
+      history: "Historique"
+    history:
+      empty: "Aucun historique."
+    history_entry:
+      copy: "Recopier"
+      copy_title: "Remplit l'éditeur avec ce texte, à vérifier puis enregistrer"
+      deleted: "texte supprimé :"
+      other_source: "Écrit pour un autre texte FR (alors → maintenant) :"
     comments_button:
       comments:
         one: "%{count} commentaire"
@@ -247,6 +254,14 @@ fr:
       rename_confirm:
         one: "Déplacer la clé de %{path} ?"
         other: "Déplacer les %{count} clés de %{path} ?"
+    comments_summary:
+      comments:
+        zero: "aucun commentaire"
+        one: "%{count} commentaire"
+        other: "%{count} commentaires"
+      open_questions:
+        one: "%{count} question ouverte"
+        other: "%{count} questions ouvertes"
     show:
       previous: "Précédente : %{key}"
       next: "Suivante : %{key}"
@@ -264,6 +279,9 @@ fr:
       translations: "Traductions"
       comments: "Commentaires"
       history: "Historique"
+      history_count:
+        one: "%{count} entrée"
+        other: "%{count} entrées"
       archive: "Supprimer cette clé"
       archive_confirm: "Supprimer %{key} de toutes les langues ? (l'historique est conservé)"
     rename:
@@ -448,9 +466,9 @@ fr:
 
   login_mailer:
     link:
-      subject: "Connexion à OCL i18n"
+      subject: "Connexion à OCL Localize"
       hello: "Bonjour %{name},"
-      body: "Voici ton lien de connexion à OCL i18n (valable 30 minutes, une seule fois) :"
+      body: "Voici ton lien de connexion à OCL Localize (valable 30 minutes, une seule fois) :"
       ignore: "Si tu n'as rien demandé, ignore ce message."
   comment_mailer:
     posted:

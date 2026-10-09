@@ -3,21 +3,21 @@
 set -euo pipefail
 
 src="${1:?uploaded tree}"
-home=/var/www/ocl-i18n.lairdubois.fr
+home=/var/www/localize.opencutlist.org
 app=$home/app
-[ -f /etc/ocl-i18n.env ] || { echo "server not set up : deploy/deploy.sh setup" >&2; exit 1; }
+[ -f /etc/ocl-localize.env ] || { echo "server not set up : deploy/deploy.sh setup" >&2; exit 1; }
 [ -x "$home/.rbenv/versions/4.0.1/bin/bundle" ] || { echo "Ruby 4.0.1 missing : deploy/deploy.sh setup" >&2; exit 1; }
 
 # What only exists on the server (data, builds, gems) is excluded, hence kept by --delete
-rsync -a --delete --chown=ocl-i18n:ocl-i18n \
+rsync -a --delete --chown=ocl-localize:ocl-localize \
   --exclude /storage/ --exclude /log/ --exclude /tmp/ \
   --exclude /public/assets/ --exclude /app/assets/builds/ --exclude /vendor/bundle/ --exclude /.bundle/ \
   "$src/" "$app/"
 
 cd "$app"
-sudo -u ocl-i18n bash -c "
+sudo -u ocl-localize bash -c "
   set -euo pipefail
-  set -a; source /etc/ocl-i18n.env; set +a
+  set -a; source /etc/ocl-localize.env; set +a
   export PATH=$home/.rbenv/versions/4.0.1/bin:\$PATH
   mkdir -p storage log tmp
   chmod 750 storage
@@ -30,10 +30,10 @@ sudo -u ocl-i18n bash -c "
   bin/rails db:prepare
 "
 
-systemctl restart ocl-i18n
+systemctl restart ocl-localize
 for _ in $(seq 1 20); do
   curl -fsS -o /dev/null http://127.0.0.1:3007/up 2>/dev/null && { echo "up"; exit 0; }
   sleep 1
 done
-echo "not answering on /up : journalctl -u ocl-i18n -n 50" >&2
+echo "not answering on /up : journalctl -u ocl-localize -n 50" >&2
 exit 1

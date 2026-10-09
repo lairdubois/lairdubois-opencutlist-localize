@@ -25,7 +25,7 @@ Weblate was evaluated and rejected.
 - Without `OCL_REPO_URL` the app points to the real GitHub repo : don't click / call "Publier"
   while testing unless a local repo is configured.
 - Not deployed yet : target is the user's Debian 12 server next to L'Air du Bois, behind its NGINX,
-  at `ocl-i18n.lairdubois.fr`, systemd + rbenv, no Docker (`deploy/`).
+  at `localize.opencutlist.org`, systemd + rbenv, no Docker (`deploy/`).
 
 ## Hard rules
 
@@ -67,6 +67,15 @@ Weblate was evaluated and rejected.
 - `TranslationChecks` : non-blocking warnings, text rules (any text, fr included) and comparison with the fr
   source ; `SourceDuplicates` (`/units/duplicates`) : fr texts repeated over several keys, with their
   translations in a language, to factor them into `$t()`. Both ported from a Python lint by mobilarte.
+- Translation history (admins only) : translator's rows and, every language, the key page (shared `_history_entry`,
+  tinted by the status each revision produced). `TranslationHistory` = the language's revisions between the unit's fr
+  changes / renames, `WordDiff` (word-level LCS, whitespace marked inside changes) ; the fr of a text's time is the last
+  source revision before it, shown when a `source_major` came after. "Copy" refills the editor like a suggestion (no
+  write path of its own) ; a save replaces the lazy history frame through a turbo-stream in the editor partial.
+  `disclosure` panels are named (`data-disclosure-name` / `-panel-param`).
+- Key page sections Translations (status counts in the header), Comments (counts kept in step by the thread's
+  turbo-stream ; lazy frame when folded) and History (lazy frame, `units#history`) fold
+  (`collapsible`) ; the state is a `section_<name>` cookie read by `section_open?`, so the server renders it as left.
 - `Pretranslator` (anthropic gem, `claude-opus-5-5`, structured output) only creates `Suggestion`s,
   never translations.
 - Migration : `TransifexImport` (API v3, parallel fetch, keys mapped through the Baseline ;
@@ -81,8 +90,9 @@ Weblate was evaluated and rejected.
   url ; urls may hold one level of parentheses, e.g. `wiki/STL_(file_format)`).
 - Unsaved edits : `dirty-form` flags a form `data-dirty` (fields vs their DOM defaults, `data-dirty-ignore`
   skips one ; `i18n-text:change` covers the editor ; its `submit` targets are disabled while the form is clean,
-  and a clean form refuses a submission through them or without a submitter, i.e. the shortcuts ; other buttons
-  still submit : save and approve, and save on an outdated translation, which revalidates it, isn't a target),
+  and a clean form refuses a submission through them or without a submitter, i.e. the shortcuts ; targets are hidden too (`disabled:hidden`) ;
+  other buttons still submit : save on an outdated translation, which revalidates it, and save and approve unless the
+  translation is reviewed and up to date, aren't targets),
   `unsaved-guard` on `<body>` asks before a Turbo visit,
   a navigating submit (saves inside a turbo-frame don't navigate) or an unload, and counts them on the
   translations toolbar. Mod-Enter saves, Shift-Mod-Enter saves and approves (`review` target).

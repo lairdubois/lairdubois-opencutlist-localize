@@ -33,10 +33,13 @@
       </div>
     <% end %>
   </div>
-  <%# Keeps the translator's comments button in step (count, open question) %>
+  <%# Keeps the translator's comments button, or the key page's comments header, in step (count, open questions) %>
   <% if language %>
     <%= turbo_stream.replace "comments_button_#{unit.id}_#{language.code}",
                              partial: "translations/comments_button",
                              locals: { unit: unit, language: language, count: comments.size, question: comments.any? { |c| c.question && !c.resolved? } } %>
+  <% else %>
+    <%= turbo_stream.replace "unit_comments_summary_#{unit.id}", partial: "units/comments_summary",
+                             locals: { unit: unit, count: comments.size, questions: comments.count { |c| c.question && !c.resolved? } } %>
   <% end %>
 <% end %>

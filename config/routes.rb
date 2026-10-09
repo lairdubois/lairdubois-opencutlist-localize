@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   get "translate/:lang", to: "translations#index", as: :translate
   patch "translate/reference", to: "reference_languages#update", as: :reference_language
   patch "translate/:lang/:unit_id", to: "translations#update", as: :translate_unit
+  get "translate/:lang/:unit_id/history", to: "translations#history", as: :translate_unit_history
   post "translate/:lang/pretranslate", to: "translations#pretranslate", as: :pretranslate
 
   # Admins
@@ -18,6 +19,7 @@ Rails.application.routes.draw do
     get :duplicates, on: :collection
     resources :comments, only: [:index, :create]
     member do
+      get :history
       patch :rename
       patch :source
       patch :note

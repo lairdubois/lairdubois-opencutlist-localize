@@ -163,7 +163,6 @@ en:
         other: "🤖 Suggest translations (%{language}) for the first %{count} strings to do"
     row:
       source: "source"
-      reference: "reference"
       en_outdated: "EN outdated, FR prevails"
       en_missing: "EN missing"
       before: "before:"
@@ -175,6 +174,14 @@ en:
       save_and_review: "Approve"
       machine: "Suggestion:"
       same_text: "Same text elsewhere:"
+      history: "History"
+    history:
+      empty: "No history."
+    history_entry:
+      copy: "Copy"
+      copy_title: "Fills the editor with this text, to check then save"
+      deleted: "text deleted:"
+      other_source: "Written for another FR text (then → now):"
     comments_button:
       comments:
         one: "%{count} comment"
@@ -247,6 +254,14 @@ en:
       rename_confirm:
         one: "Move the key of %{path}?"
         other: "Move the %{count} keys of %{path}?"
+    comments_summary:
+      comments:
+        zero: "no comments"
+        one: "%{count} comment"
+        other: "%{count} comments"
+      open_questions:
+        one: "%{count} open question"
+        other: "%{count} open questions"
     show:
       previous: "Previous: %{key}"
       next: "Next: %{key}"
@@ -264,6 +279,9 @@ en:
       translations: "Translations"
       comments: "Comments"
       history: "History"
+      history_count:
+        one: "%{count} entry"
+        other: "%{count} entries"
       archive: "Delete this key"
       archive_confirm: "Delete %{key} from every language? (history is kept)"
     rename:
@@ -448,9 +466,9 @@ en:
 
   login_mailer:
     link:
-      subject: "Log in to OCL i18n"
+      subject: "Log in to OCL Localize"
       hello: "Hello %{name},"
-      body: "Here is your login link to OCL i18n (valid for 30 minutes, single use):"
+      body: "Here is your login link to OCL Localize (valid for 30 minutes, single use):"
       ignore: "If you didn't ask for anything, ignore this message."
   comment_mailer:
     posted:

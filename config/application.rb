@@ -18,7 +18,7 @@ require "action_cable/engine"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module LairduboisOpencutlistI18n
+module LairduboisOpencutlistLocalize
   class Application < Rails::Application
     # No e-mail ever leaves the app unless explicitly enabled (OCL_MAIL_ENABLED=1)
     config.action_mailer.perform_deliveries = ENV["OCL_MAIL_ENABLED"] == "1"

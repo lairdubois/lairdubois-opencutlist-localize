@@ -1,6 +1,6 @@
 <% outdated = @data[:translations][unit.id]&.outdated? %>
 <div id="<%= dom_id(unit) %>" data-controller="disclosure" class="rounded border bg-white <%= outdated ? 'border-amber-300' : 'border-stone-200' %>">
-  <div class="flex items-baseline gap-1 border-b border-stone-100 px-3 py-1.5 text-xs">
+  <div class="flex items-baseline gap-1 px-3 py-1.5 text-xs">
     <span class="text-stone-400 tabular-nums">#<%= @indexes[unit.id] %></span>
     <span class="min-w-0 flex-1 font-mono break-all text-stone-500"><%= unit.key %></span>
     <%# Sorted by date : the last revision's %>
@@ -11,46 +11,46 @@
         <span class="shrink-0 text-stone-400"><%= t(".never_revised") %></span>
       <% end %>
     <% end %>
+    <%= render "status", unit: unit, language: @language, translation: @data[:translations][unit.id] %>
   </div>
   <% if unit.note %>
-    <p class="border-b border-sky-100 bg-sky-50 px-3 py-1 font-mono text-xs whitespace-pre-wrap text-sky-800"># <%= unit.note %></p>
+    <p class="px-3 pb-3 font-mono text-xs whitespace-pre-wrap text-violet-800"># <%= unit.note %></p>
   <% end %>
-  <%# Each column is a 3-row subgrid (header, box, extras) : the source box and the textareas share one height %>
-  <div class="grid grid-cols-1 gap-x-3 gap-y-1 p-3 md:grid-cols-2">
+  <%# Each column is a 2-row subgrid (box, extras) : the source box and the textarea share one height.
+      The boxes are frameless, edge to edge on their background, between the 1px lines that part the key line above
+      from the extras and buttons below. No language header : the sticky toolbar names the reference and the language. %>
+  <div class="grid grid-cols-1 md:grid-cols-2">
     <%# Main reference : the fr source, or the en translation when the user chose it (fr stays the official source) %>
     <% en = @references[unit.id] %>
     <% en_main = @en_reference && en.present? %>
-    <div class="row-span-3 grid min-w-0 grid-rows-subgrid text-sm">
-      <div class="flex h-5 items-center gap-2 text-xs font-medium text-stone-700">
-        <% if en_main %>
-          <span>EN · <%= t(".reference") %></span>
-          <% if en.outdated? %><span class="rounded bg-amber-100 px-1.5 font-normal text-amber-800"><%= t(".en_outdated") %></span><% end %>
-        <% else %>
-          <span><%= Language::SOURCE_CODE.upcase %> · <%= t(".source") %></span>
-          <% if @en_reference %><span class="rounded bg-stone-100 px-1.5 font-normal text-stone-600"><%= t(".en_missing") %></span><% end %>
-        <% end %>
-      </div>
+    <div class="row-span-2 grid min-w-0 grid-rows-subgrid text-sm">
       <% reference = en_main ? en.text : unit.source_text %>
-      <div class="rounded border px-2 py-1.5 font-mono whitespace-pre-wrap <%= en_main && en.outdated? ? 'border-amber-200 bg-amber-50' : 'border-stone-200 bg-stone-50' %>"
+      <div class="border-y border-stone-200 px-3 py-2 font-mono whitespace-pre-wrap <%= en_main && en.outdated? ? 'bg-amber-50' : 'bg-stone-50' %>"
            data-controller="i18n-text" data-i18n-text-text-value="<%= reference %>" data-i18n-text-refs-value="<%= @ref_texts[unit.id].to_json %>"><%= reference %></div>
-      <div class="pb-3 md:pb-0">
-        <% if en_main %>
-          <p class="mt-2 whitespace-pre-wrap text-xs <%= en.outdated? ? 'text-stone-800' : 'text-stone-500' %>"><span class="font-medium"><%= Language::SOURCE_CODE.upcase %> · <%= t(".source") %></span> · <%= unit.source_text %></p>
+      <div class="flex flex-col items-start gap-1 px-3 py-1.5">
+        <%# Only the chosen reference : the fr source joins it when the en no longer matches it %>
+        <% if en_main && en.outdated? %>
+          <p><span class="rounded bg-amber-100 px-1.5 text-xs text-amber-800"><%= t(".en_outdated") %></span></p>
+          <p class="whitespace-pre-wrap text-xs text-stone-800"><span class="font-medium"><%= Language::SOURCE_CODE.upcase %> · <%= t(".source") %></span> · <%= unit.source_text %></p>
+        <% elsif !en_main && @en_reference %>
+          <p><span class="rounded bg-stone-100 px-1.5 text-xs text-stone-600"><%= t(".en_missing") %></span></p>
         <% end %>
         <% if (previous = @previous_sources[unit.id]) && outdated %>
-          <p class="mt-1 whitespace-pre-wrap text-xs text-stone-500"><%= "#{Language::SOURCE_CODE.upcase} " if en_main %><%= t(".before") %> <del><%= previous %></del></p>
-        <% end %>
-        <% if en && !en_main %>
-          <p class="mt-2 whitespace-pre-wrap text-xs text-stone-500"><span class="font-medium">EN</span> · <%= en.text %></p>
+          <p class="whitespace-pre-wrap text-xs text-stone-500"><%= "#{Language::SOURCE_CODE.upcase} " if en_main %><%= t(".before") %> <del><%= previous %></del></p>
         <% end %>
       </div>
     </div>
     <%= render "editor", unit: unit, language: @language, data: @data %>
     <%# Comments : opened from the editor's buttons row, on the next row under the language's column ; lazy frame loads once shown %>
-    <div data-disclosure-target="panel" hidden class="mt-2 min-w-0 border-t border-stone-100 pt-2 text-xs md:col-start-2">
+    <div data-disclosure-target="panel" hidden class="min-w-0 border-t border-stone-200 px-3 py-2 text-xs md:col-start-2">
       <%= turbo_frame_tag "comments_#{unit.id}_#{@language.code}", src: unit_comments_path(unit, lang: @language.code), loading: :lazy do %>
         <span class="text-stone-400"><%= t("loading") %></span>
       <% end %>
     </div>
+    <% if current_user.admin? %>
+      <div data-disclosure-target="panel" data-disclosure-name="history" hidden class="min-w-0 border-t border-stone-200 px-3 py-2 text-xs md:col-start-2">
+        <%= render "history_frame", unit: unit, language: @language %>
+      </div>
+    <% end %>
   </div>
 </div>

@@ -8,7 +8,8 @@ class TranslationsController < ApplicationController
 
   before_action :set_language
   before_action :set_reference, only: [:index]
-  before_action :set_unit, only: [:update]
+  before_action :set_unit, only: [:update, :history]
+  before_action :require_admin, only: [:history]
 
   # Asks Claude for suggestions on the untranslated or outdated strings of the current page
   def pretranslate
@@ -41,6 +42,11 @@ class TranslationsController < ApplicationController
     operations.save(@unit, @language, params[:text], reviewed: params[:reviewed] == "1")
     @ref_texts = Unit.ref_texts([@unit])
     render partial: "editor", locals: { unit: @unit, language: @language, data: preload_language(@language, [@unit]), saved: true }
+  end
+
+  # The unit's history in this language, in the row's lazy frame : older texts can refill the editor
+  def history
+    render partial: "history", locals: { unit: @unit, language: @language, entries: TranslationHistory.new(@unit, @language).entries }
   end
 
   private

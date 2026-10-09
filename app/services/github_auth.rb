@@ -3,10 +3,10 @@ require "base64"
 require "monitor"
 
 # Credentials for GitHub : the user access token of an admin who connected their account (GithubOauth),
-# else short-lived installation tokens of the OCL i18n GitHub App when it is configured (pushes, PRs
+# else short-lived installation tokens of the OCL Localize GitHub App when it is configured (pushes, PRs
 # and commits then show as <app>[bot]), else the static OCL_GITHUB_TOKEN
 class GithubAuth
-  DEFAULT_COMMITTER = ["OCL i18n", "opencutlist@lairdubois.fr"].freeze
+  DEFAULT_COMMITTER = ["OCL Localize", "opencutlist@lairdubois.fr"].freeze
 
   LOCK = Monitor.new
   CACHE = {} # rubocop:disable Style/MutableConstant -- per-process token cache

@@ -4,7 +4,7 @@ class UnitsController < ApplicationController
   PER_PAGE = 200
 
   before_action :require_admin
-  before_action :set_unit, only: [:show, :rename, :source, :note, :archive]
+  before_action :set_unit, only: [:show, :history, :rename, :source, :note, :archive]
 
   def index
     # Remembered for the "← Keys" link of a key's page (not the frames : branches, next pages,
@@ -50,6 +50,7 @@ class UnitsController < ApplicationController
     @translations = @unit.translations.includes(:language).index_by(&:language)
     @languages = Language.targets
     @refs = Unit.ref_texts([@unit])[@unit.id]
+    @history_count = @unit.revisions.count
     return if @unit.archived_at # out of the tree
 
     # Walked within the keys list the page was opened from (a single index aside : it lists one key)
@@ -60,6 +61,11 @@ class UnitsController < ApplicationController
     @index = @list.indexes[@unit.id]
     @position = @list.listed.index(@unit)&.succ
     @previous, @next = @list.neighbours(@unit)
+  end
+
+  # Every language's history, in the page's lazy frame (loaded once its section is unfolded)
+  def history
+    render partial: "history", locals: { unit: @unit, entries: TranslationHistory.new(@unit).entries }
   end
 
   def rename

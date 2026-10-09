@@ -1,5 +1,5 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: ENV.fetch("OCL_MAIL_FROM", "OpenCutList i18n <noreply@lairdubois.fr>")
+  default from: ENV.fetch("OCL_MAIL_FROM", "OpenCutList Localize <noreply@lairdubois.fr>")
   layout "mailer"
 
   private

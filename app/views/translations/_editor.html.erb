@@ -1,55 +1,67 @@
 <% t = data[:translations][unit.id] %>
 <% warnings = t ? TranslationChecks.call(unit.source_text, t.text) : [] %>
 <% fill = "const a = this.closest('turbo-frame').querySelector('textarea'); a.value = this.dataset.text; a.dispatchEvent(new Event('input'))" %>
-<%# Spans the row's 3 subgrid rows (header, box, extras) so its box shares the height of its neighbours %>
+<%# Spans the row's 2 subgrid rows (box, extras) so its box shares the height of its neighbours %>
 <%# group : the frame's parts follow the form's unsaved state (dirty-form) %>
-<%= turbo_frame_tag dom_id(unit, language.code), class: "group row-span-3 grid min-w-0 grid-rows-subgrid" do %>
-  <div class="flex h-5 items-center gap-2 text-xs">
-    <span class="font-medium text-stone-700"><%= language.name %></span>
-    <% badge = "flex items-center gap-1 rounded px-1.5" %>
-    <% if t.nil? %><span class="<%= badge %> bg-stone-100 text-stone-600"><%= status_dot("untranslated") %><%= t("status.untranslated") %></span>
-    <% elsif t.outdated? %><span class="<%= badge %> bg-amber-100 text-amber-800"><%= status_dot("outdated") %><%= t("status.outdated") %></span>
-    <% elsif t.reviewed? %><span class="<%= badge %> bg-emerald-100 text-emerald-800"><%= status_dot("reviewed") %><%= t("status.reviewed") %></span>
-    <% else %><span class="<%= badge %> bg-sky-50 text-sky-800"><%= status_dot("unreviewed") %><%= t("status.translated") %></span>
-    <% end %>
-    <% if local_assigns[:saved] %><span class="text-emerald-700 group-has-data-dirty:hidden">✓ <%= t(".saved") %></span><% end %>
-  </div>
+<%= turbo_frame_tag dom_id(unit, language.code), class: "group row-span-2 grid min-w-0 grid-rows-subgrid" do %>
+  <%# hidden : the streams stay out of the frame's grid until Turbo performs and drops them %>
+  <% if local_assigns[:saved] %>
+    <div hidden>
+      <%= turbo_stream.replace "status_#{unit.id}_#{language.code}", partial: "translations/status", locals: { unit: unit, language: language, translation: t } %>
+      <%# A save adds a revision : the history panel reloads (now if shown, else when it is) %>
+      <% if current_user.admin? %>
+        <%= turbo_stream.replace "history_#{unit.id}_#{language.code}", partial: "translations/history_frame", locals: { unit: unit, language: language } %>
+      <% end %>
+    </div>
+  <% end %>
   <%# i18n-text swaps the textarea for a CodeMirror editor (source invariants locked), keeping it in sync for the form %>
   <%= form_with url: translate_unit_path(language.code, unit), method: :patch, class: "contents",
                 data: { controller: "i18n-text dirty-form", i18n_text_source_value: unit.source_text, i18n_text_refs_value: @ref_texts[unit.id].to_json } do %>
     <%= text_area_tag :text, t&.text, rows: 1, dir: language.rtl ? "rtl" : "ltr", lang: language.code,
                       data: { i18n_text_target: "field" },
-                      class: "block w-full resize-none overflow-hidden rounded border bg-white px-2 py-1.5 font-mono text-sm #{t&.outdated? ? 'border-amber-300' : 'border-stone-300'} group-has-data-dirty:border-sky-500" %>
-    <div class="pb-3 md:pb-0">
-      <div class="mt-1 flex flex-wrap gap-1" data-i18n-text-target="chips" hidden></div>
+                      class: "block w-full resize-none overflow-hidden border-y border-stone-200 px-3 py-2 font-mono text-sm md:border-l #{t&.outdated? ? 'bg-amber-50' : 'bg-white'} group-has-data-dirty:bg-sky-50" %>
+    <div class="flex flex-col gap-1 px-3 py-1.5">
+      <div class="flex flex-wrap gap-1" data-i18n-text-target="chips" hidden></div>
       <% warnings.each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
-      <div class="mt-1 flex items-center justify-end gap-2">
-        <%= render "comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
-                                      question: data[:open_questions].include?(unit.id) %>
-        <span class="hidden text-xs text-sky-700 group-has-data-dirty:inline">● <%= t("unsaved.marker") %></span>
-        <%# Saving an outdated translation unchanged revalidates it against the current fr : always allowed %>
-        <% clean_save = !t&.outdated? %>
-        <%= submit_tag t(".save"), title: t("unsaved.save_shortcut"), disabled: clean_save, data: { dirty_form_target: ("submit" if clean_save) },
-                       class: "rounded border border-stone-800 bg-stone-800 px-2 py-0.5 text-xs text-white disabled:cursor-not-allowed disabled:opacity-50" %>
-        <% if current_user.can_review?(language) %>
-          <%= button_tag t(".save_and_review"), name: "reviewed", value: "1", title: t("unsaved.review_shortcut"),
-                         data: { i18n_text_target: "review" }, class: "rounded border border-emerald-600 px-2 py-0.5 text-xs text-emerald-700" %>
-        <% end %>
-      </div>
       <% if (machine = data[:machine][unit.id]) && (t.nil? || t.outdated?) %>
-        <p class="mt-2 text-xs text-stone-500">🤖 <%= t(".machine") %>
+        <p class="text-xs text-stone-500">🤖 <%= t(".machine") %>
           <button type="button" class="ml-1 whitespace-pre-wrap rounded bg-violet-50 px-1.5 text-left text-violet-900 hover:bg-violet-100"
                   onclick="<%= fill %>" data-text="<%= machine %>"><%= machine %></button>
         </p>
       <% end %>
       <% if (suggestions = data[:suggestions][unit.source_text]).present? && t.nil? %>
-        <p class="mt-2 text-xs text-stone-500"><%= t(".same_text") %>
+        <p class="text-xs text-stone-500"><%= t(".same_text") %>
           <% suggestions.each do |s| %>
             <button type="button" class="ml-1 rounded bg-sky-50 px-1.5 text-sky-800 hover:bg-sky-100"
                     onclick="<%= fill %>" data-text="<%= s %>"><%= s %></button>
           <% end %>
         </p>
       <% end %>
+      <div class="flex items-center justify-end gap-2">
+        <% if current_user.admin? %>
+          <button type="button" data-disclosure-target="button" data-action="disclosure#toggle" data-disclosure-panel-param="history"
+                  class="group/history flex items-center gap-1 rounded px-1 text-xs text-stone-400 hover:bg-stone-100 aria-expanded:bg-stone-100">
+            <%= chevron_icon("group-aria-expanded/history:rotate-90") %>
+            <%= t(".history") %>
+          </button>
+        <% end %>
+        <%= render "comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
+                                      question: data[:open_questions].include?(unit.id) %>
+        <span class="hidden text-xs text-sky-700 group-has-data-dirty:inline">● <%= t("unsaved.marker") %></span>
+        <% if local_assigns[:saved] %><span class="text-xs text-emerald-700 group-has-data-dirty:hidden">✓ <%= t(".saved") %></span><% end %>
+        <%# Saving an outdated translation unchanged revalidates it against the current fr : always allowed.
+            Otherwise disabled, and hidden, while the form is clean (dirty-form) %>
+        <% clean_save = !t&.outdated? %>
+        <%= submit_tag t(".save"), title: t("unsaved.save_shortcut"), disabled: clean_save, data: { dirty_form_target: ("submit" if clean_save) },
+                       class: "rounded border border-stone-800 bg-stone-800 px-2 py-0.5 text-xs text-white disabled:hidden" %>
+        <% if current_user.can_review?(language) %>
+          <%# Already reviewed and up to date : nothing to approve until edited (disabled and hidden like the save) %>
+          <% clean_review = t&.reviewed? && !t.outdated? %>
+          <%= button_tag t(".save_and_review"), name: "reviewed", value: "1", title: t("unsaved.review_shortcut"), disabled: clean_review,
+                         data: { i18n_text_target: "review", dirty_form_target: ("submit" if clean_review) },
+                         class: "rounded border border-emerald-600 px-2 py-0.5 text-xs text-emerald-700 disabled:hidden" %>
+        <% end %>
+      </div>
     </div>
   <% end %>
 <% end %>

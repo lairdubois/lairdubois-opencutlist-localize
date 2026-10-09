@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-const KEY = "ocl-i18n.show-whitespace"
+const KEY = "ocl-localize.show-whitespace"
 
 // Reveals spaces and line breaks in the i18n-text views (html.show-ws), remembered per browser
 export default class extends Controller {

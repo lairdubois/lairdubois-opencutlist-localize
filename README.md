@@ -1,4 +1,4 @@
-# OCL i18n
+# OCL Localize
 
 Translation platform for OpenCutList. A string (`Unit`) has a stable id ; its key is a mutable
 attribute, so renaming or moving keys keeps translations, statuses, history and comments.
@@ -27,7 +27,7 @@ Production (Debian 12, NGINX, systemd) : see `deploy/README.md`.
 | `OCL_GITHUB_API_URL` | Default `https://api.github.com` ; a fake server for tests |
 | `OCL_GITHUB_WEB_URL` | Default `https://github.com` (OAuth endpoints) ; a fake server for tests |
 | `OCL_GITHUB_WEBHOOK_SECRET` | Secret of the GitHub `push` webhook pointing to `/github/webhook` |
-| `OCL_HOST` | Production host name (default `ocl-i18n.lairdubois.fr`) : allowed host and mail links |
+| `OCL_HOST` | Production host name (default `localize.opencutlist.org`) : allowed host and mail links |
 | `OCL_MAIL_FROM`, `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | Production mail sender and SMTP server |
 | `SMTP_OPENSSL_VERIFY_MODE` | `none` / `peer` ; default : no certificate check for a localhost MTA, checked otherwise |
 | `OCL_MAIL_ENABLED` | `1` to actually send e-mails (login links, invitations, comment notifications) ; off by default |

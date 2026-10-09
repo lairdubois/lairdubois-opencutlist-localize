@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="<%= I18n.locale %>">
   <head>
-    <title><%= content_for(:title) || "OpenCutList i18n" %></title>
+    <title><%= content_for(:title) || "OpenCutList Localize" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -15,7 +15,7 @@
     <%# Sticky : 3.5rem nav + 1px border, pages with their own sticky toolbar stick it below (top-[calc(3.5rem+1px)]) %>
     <header class="sticky top-0 z-20 border-b border-stone-200 bg-white">
       <nav class="mx-auto max-w-6xl px-4 h-14 flex items-center gap-6 text-sm">
-        <%= link_to "OpenCutList i18n", root_path, class: "text-base font-semibold" %>
+        <%= link_to "OpenCutList Localize", root_path, class: "text-base font-semibold" %>
         <% if current_user %>
           <% if current_user.admin? %>
             <%= nav_link :keys, units_path %>
