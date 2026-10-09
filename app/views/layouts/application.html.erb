@@ -17,15 +17,17 @@
       <nav class="mx-auto max-w-6xl px-4 h-14 flex items-center gap-6 text-sm">
         <%= link_to "OpenCutList i18n", root_path, class: "text-base font-semibold" %>
         <% if current_user %>
-          <%= link_to t(".translate"), translate_root_path, class: "text-stone-600 hover:text-stone-900" %>
           <% if current_user.admin? %>
-            <%= link_to t(".keys"), units_path, class: "text-stone-600 hover:text-stone-900" %>
-            <%= link_to t(".sync"), new_sync_path, class: "text-stone-600 hover:text-stone-900" %>
-            <%= link_to t(".users"), users_path, class: "text-stone-600 hover:text-stone-900" %>
-            <%= link_to t(".migration"), migration_path, class: "text-stone-600 hover:text-stone-900" %>
-            <%= link_to t(".publish"), publications_path, class: "ml-auto rounded bg-stone-800 px-3 py-1.5 text-white hover:bg-stone-700" %>
+            <%= nav_link :keys, units_path %>
           <% end %>
-          <span class="<%= 'ml-auto' unless current_user.admin? %> flex gap-1 text-xs">
+          <%= nav_link :translate, translate_root_path %>
+          <% if current_user.admin? %>
+            <%= nav_link :sync, new_sync_path %>
+            <%= nav_link :users, users_path %>
+            <%= nav_link :migration, migration_path %>
+            <%= nav_link :publish, publications_path %>
+          <% end %>
+          <span class="ml-auto flex gap-1 text-xs">
             <% I18n.available_locales.each do |locale| %>
               <%= button_to locale.upcase, locale_path, method: :patch, params: { locale: locale },
                             class: "rounded px-1.5 py-0.5 #{locale == I18n.locale ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-200'}" %>
@@ -47,7 +49,7 @@
         <% end %>
       </nav>
     </header>
-    <main class="mx-auto <%= content_for?(:wide) ? 'max-w-[96rem]' : 'max-w-6xl' %> px-4 py-6">
+    <main class="mx-auto max-w-6xl px-4 py-6">
       <% if current_user&.admin? && Setting["repo_fr_changed_at"].present? %>
         <p class="mb-4 rounded bg-sky-50 px-3 py-2 text-sky-900"><%= t(".repo_changed") %> <%= link_to t(".sync_now"), new_sync_path, class: "underline" %></p>
       <% end %>

@@ -7,8 +7,8 @@ class CommentsController < ApplicationController
 
   def create
     comment = @unit.comments.create!(user: current_user, body: params.require(:body).strip,
-                                     language: params[:scope] == "all" ? nil : @language,
-                                     question: params[:question] == "1")
+                                     language: @language,
+                                     question: @language.present? || params[:question] == "1")
     CommentNotifier.new(comment).call
     render partial: "thread", locals: { unit: @unit, language: @language }
   end

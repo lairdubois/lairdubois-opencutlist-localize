@@ -21,7 +21,7 @@ class UnitOperations
 
   # Renames a whole branch : every active key under `prefix` moves under `new_prefix`
   def rename_branch(prefix, new_prefix)
-    units = Unit.active.where("key = ? OR key LIKE ?", prefix, "#{Unit.sanitize_sql_like(prefix)}.%").to_a
+    units = Unit.active.where("key = ? OR key LIKE ? ESCAPE '\\'", prefix, "#{Unit.sanitize_sql_like(prefix)}.%").to_a
     old_keys = units.to_h { |u| [u.id, u.key] }
     ApplicationRecord.transaction do
       # Two passes, so that a moved key never collides with another key of the same branch
@@ -52,7 +52,7 @@ class UnitOperations
     replacement = "$t(#{new_key}"
     like = "%$t(#{Unit.sanitize_sql_like(old_key)}%"
 
-    Unit.active.where("source_text LIKE ?", like).find_each do |unit|
+    Unit.active.where("source_text LIKE ? ESCAPE '\\'", like).find_each do |unit|
       text = unit.source_text.gsub(pattern, replacement)
       next if text == unit.source_text
 
@@ -60,7 +60,7 @@ class UnitOperations
       unit.update!(source_text: text)
       unit.translations.where(source_hash: old_hash).update_all(source_hash: unit.source_hash)
     end
-    Translation.where("text LIKE ?", like).find_each do |translation|
+    Translation.where("text LIKE ? ESCAPE '\\'", like).find_each do |translation|
       text = translation.text.gsub(pattern, replacement)
       translation.update!(text: text) unless text == translation.text
     end

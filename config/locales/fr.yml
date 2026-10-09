@@ -15,7 +15,7 @@ fr:
     untranslated: "non traduit"
     translated: "traduit"
     reviewed: "relu"
-    outdated: "fr modifié, à revoir"
+    outdated: "FR modifié, à revoir"
     outdated_count:
       one: "%{count} à revoir"
       other: "%{count} à revoir"
@@ -26,8 +26,8 @@ fr:
     import: "import"
     create: "création"
     rename: "renommage"
-    source_minor: "correction fr"
-    source_major: "changement fr"
+    source_minor: "correction FR"
+    source_major: "changement FR"
     note: "commentaire YAML"
     translate: "traduction"
     review: "relecture"
@@ -45,27 +45,30 @@ fr:
         ⌘/Ctrl + F : aller à la recherche (2e fois : celle du navigateur)
         Entrée : rechercher
         Échap : quitter le champ
-        Maj + Échap : tout effacer, texte et filtres
+        Maj + Échap : tout effacer, texte, filtres et tri
         Dans le texte, avant Entrée :
         #120, #120-180 : par numéro
         key:… : par clé
         branch:… : par branche
+        user:… : par utilisateur (nom ou début du nom)
       remove: "Retirer"
-      remove_all: "Retirer tous les filtres"
+      remove_all: "Retirer tous les filtres et le tri"
       count:
         one: "%{formatted} chaîne"
         other: "%{formatted} chaînes"
       filters: "Filtres"
       or: "ou"
       status: "Statut"
-      status_header: "Statut (l'un des cochés)"
+      status_header: "Statut"
       fields:
         key: "Clé"
         prefix: "Branche"
+        user: "Utilisateur"
         at: "#"
       placeholders:
         key: "contient…"
         prefix: "tab.cutlist"
+        user: "choisir…"
         at: "120, 120-180, 120-…"
       statuses:
         untranslated: "Non traduites"
@@ -75,6 +78,24 @@ fr:
       questions: "Questions ouvertes"
       with: "Avec"
       questions_chip: "question ouverte"
+      warnings: "Avertissements"
+      warnings_chip: "avertissement"
+      days_header: "Modifiées dans les…"
+      days_chip: "Modifiées dans les"
+      periods:
+        "1": "dernières 24 heures"
+        "7": "7 derniers jours"
+        "30": "30 derniers jours"
+        "90": "90 derniers jours"
+      no_users: "Aucun utilisateur"
+      sort: "Tri"
+      sort_header: "Trier par"
+      sorts:
+        index: "index"
+        updated: "date de modification"
+      sort_dirs:
+        asc: "Croissant (cliquer pour inverser)"
+        desc: "Décroissant (cliquer pour inverser)"
     empty_list:
       filtered: "Aucune chaîne avec ces filtres."
       show_unfiltered:
@@ -91,7 +112,7 @@ fr:
         locale: "Langue de l'interface"
       unit:
         key: "Clé"
-        source_text: "Texte fr"
+        source_text: "Texte FR"
     errors:
       models:
         unit:
@@ -103,7 +124,7 @@ fr:
     application:
       translate: "Traduire"
       keys: "Clés"
-      sync: "Synchroniser fr.yml"
+      sync: "Synchroniser FR"
       users: "Utilisateurs"
       migration: "Migration"
       publish: "Publier"
@@ -136,7 +157,6 @@ fr:
   translations:
     index:
       reference: "Référence :"
-      second_language: "+ 2e langue"
       show_whitespace: "Afficher les espaces et retours à la ligne"
       pretranslate:
         one: "🤖 Proposer des traductions (%{language}) pour la première chaîne à faire"
@@ -144,19 +164,22 @@ fr:
     row:
       source: "source"
       reference: "référence"
-      en_outdated: "en obsolète, le fr fait foi"
-      en_missing: "en manquant"
+      en_outdated: "EN obsolète, le FR fait foi"
+      en_missing: "EN manquant"
       before: "avant :"
+      revised_ago: "modifiée il y a %{time}"
+      never_revised: "jamais modifiée"
+    editor:
+      saved: "enregistré"
+      save: "Enregistrer"
+      save_and_review: "Valider"
+      machine: "Proposition :"
+      same_text: "Même texte ailleurs :"
+    comments_button:
       comments:
         one: "%{count} commentaire"
         other: "%{count} commentaires"
       open_question: "question ouverte"
-    editor:
-      saved: "enregistré"
-      save: "Enregistrer"
-      save_and_review: "Enregistrer et valider"
-      machine: "Proposition :"
-      same_text: "Même texte ailleurs :"
     pretranslate:
       started:
         one: "Pré-traduction de %{count} chaîne lancée : recharge la page dans un moment."
@@ -174,6 +197,22 @@ fr:
     bold: "nombre de **gras** différent"
     lines: "nombre de lignes différent"
     spaces: "espace en début ou fin"
+    literal: "texte entre apostrophes à garder tel quel : %{token}"
+    italic: "nombre d'*italique* différent"
+    final_dot:
+      missing: "point final manquant"
+      extra: "point final en trop"
+    typographic_quotes: "guillemets typographiques absents du source"
+    text:
+      double_space: "double espace"
+      line_end_space: "espace en fin de ligne"
+      space_before_comma: "espace avant une virgule"
+      link_space: "espace entre [texte] et (url) : le lien markdown est cassé"
+      insecure_url: "URL en http:// (préférer https://)"
+      url_space: "espace après http(s)://"
+      loose_bold: "espace à l'intérieur d'un **gras**"
+      triple_star: "trois * ou plus à la suite"
+      invisible: "caractère invisible (espace de largeur nulle, trait d'union conditionnel…)"
 
   comments:
     thread:
@@ -182,6 +221,7 @@ fr:
       open: "question ouverte"
       resolve: "marquer résolue"
       placeholder: "Écrire un commentaire…"
+      question_placeholder: "Poser une question sur cette traduction…"
       is_question: "C'est une question"
       send: "Envoyer"
 
@@ -189,6 +229,18 @@ fr:
     index:
       title: "Clés"
       status_hint: "Dans au moins une langue (Relues : dans toutes)"
+      duplicates: "Doublons FR"
+    duplicates:
+      title: "Doublons FR"
+      language: "Traductions en"
+      divergent_only: "Traduits de plusieurs façons seulement"
+      summary: "%{groups} textes FR répétés sur %{units} clés, dont %{divergent} traduits de plusieurs façons."
+      hint: "Candidats à une clé unique que les autres référencent avec $t() (les textes faits d'un seul $t() sont écartés)."
+      empty: "Aucun doublon."
+      keys:
+        one: "%{count} clé"
+        other: "%{count} clés"
+      divergent: "traductions différentes"
     node:
       continued: "(suite)"
       rename: "renommer / déplacer"
@@ -204,7 +256,7 @@ fr:
       position_all: "Position parmi toutes les clés"
       not_listed: "Cette clé n'est plus dans la liste filtrée"
       rename: "Renommer"
-      source: "Source (fr)"
+      source: "Source (FR)"
       note: "Commentaire YAML"
       note_hint: "Écrit au-dessus de la clé dans chaque fichier de langue, sans le « # ». Vide = aucun."
       minor: "Correction mineure : garder les traductions"
@@ -272,7 +324,7 @@ fr:
       empty: "Aucun changement : l'outil est à jour avec ce fr.yml."
       renames: "Renommages probables (%{count})"
       renames_hint: "décoché = suppression + nouvelle clé, traductions perdues"
-      changed: "Textes fr modifiés (%{count})"
+      changed: "Textes FR modifiés (%{count})"
       changed_hint: "coché = changement de sens, traductions à revoir"
       conflict: "aussi modifié ici, le repo l'emporte"
       notes: "Commentaires YAML modifiés (%{count})"
@@ -405,5 +457,5 @@ fr:
       subject_comment: "Commentaire sur %{key}"
       asked: "%{name} pose une question sur %{key}%{language} :"
       commented: "%{name} a commenté %{key}%{language} :"
-      source: "Texte fr :"
+      source: "Texte FR :"
       reply: "Répondre :"

@@ -76,14 +76,28 @@ hand over. Testers' accounts are created from the users page.
 
 ## Going to production
 
-1. Stop the service, delete the databases, `app/storage/ocl_repo` and `sandbox-repo.git`.
+1. Stop the service, delete the databases (all four, with their `-wal` / `-shm` files),
+   `app/storage/ocl_repo` and `sandbox-repo.git` (in a root shell, from `/var/www/ocl-i18n.lairdubois.fr`) :
+
+       systemctl stop ocl-i18n
+       rm -f app/storage/production*.sqlite3*
+       rm -rf app/storage/ocl_repo sandbox-repo.git
 2. In `/etc/ocl-i18n.env` : remove `OCL_REPO_URL`, fill in the `OCL_GITHUB_*` variables, put the
    App's private key in `/var/www/ocl-i18n.lairdubois.fr/github-app.pem` (`root:ocl-i18n`, mode 640).
 3. GitHub App callback URL : `https://ocl-i18n.lairdubois.fr/github/callback` ; OCL repo webhook
    (`push` events, JSON) : `https://ocl-i18n.lairdubois.fr/github/webhook`, secret =
    `OCL_GITHUB_WEBHOOK_SECRET`.
-4. `deploy/deploy.sh` (recreates the databases, restarts), first data load from a clone of the
-   real repo, Transifex import.
+   - Generate the secret with `openssl rand -hex 32`, put it in `/etc/ocl-i18n.env`, restart the service.
+   - On GitHub (repo admin) : Settings → Webhooks → Add webhook, content type **`application/json`**
+     (the form-encoded default is not parsed), "Just the push event", same secret.
+   - Check the `ping` in the webhook's "Recent Deliveries" : 200 = OK, 401 = secrets differ,
+     404 = secret not loaded on the server.
+   - What it does : after each push to the base branch, a job (`RepoFrCheckJob`, run by Solid Queue in
+     Puma, `SOLID_QUEUE_IN_PUMA=1`) reads the pushed fr.yml through the GitHub API and shows admins a
+     "sync" banner when it has changes to sync, or clears it when it has none (merging the tool's own
+     pull request, for instance). It only warns : nothing is synced automatically.
+4. `deploy/deploy.sh` (recreates the databases, restarts ; not `setup` : it would re-clone the
+   sandbox repo), first data load from a clone of the real repo, Transifex import.
 
 ## Logs and backups
 

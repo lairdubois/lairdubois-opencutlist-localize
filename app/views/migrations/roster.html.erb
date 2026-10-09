@@ -8,7 +8,7 @@
         <span class="w-40 font-medium"><%= username %></span>
         <span class="flex flex-1 flex-wrap gap-1">
           <% langs.each do |code, role| %>
-            <span class="rounded px-1.5 text-xs <%= role == 'reviewer' ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100' %>"><%= code %><%= " ✓" if role == "reviewer" %></span>
+            <span class="rounded px-1.5 text-xs <%= role == 'reviewer' ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100' %>"><%= code.upcase %><%= " ✓" if role == "reviewer" %></span>
           <% end %>
         </span>
         <% if user %>

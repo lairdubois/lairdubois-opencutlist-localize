@@ -16,6 +16,7 @@ class UnitsController < ApplicationController
     return render_branch(UnitTree.new(list.units, list.stats)) if params[:branch].present?
 
     @counts = list.counts
+    @users = Revision.users.to_a | [list_query.user].compact
     units = list.listed
     @tree = UnitTree.new(units, list.stats)
     # Filtered : the tree is shown unfolded, a page of keys at a time (infinite scroll).
@@ -28,6 +29,15 @@ class UnitsController < ApplicationController
     @more = @page * PER_PAGE < units.size
     @roots = UnitTree.new(page_units, list.stats).complete_from(@tree).roots
     render partial: "page_frame" if turbo_frame_request?
+  end
+
+  # Same fr text under several keys, with their translations in a language (?lang=, en by default) :
+  # ?divergent=1 keeps the groups translated in more than one way
+  def duplicates
+    @languages = Language.targets.to_a
+    @language = @languages.find { |l| l.code == params[:lang] } || @languages.find { |l| l.code == "en" } || @languages.first
+    @duplicates = SourceDuplicates.new(@language)
+    @groups = params[:divergent] == "1" ? @duplicates.divergent : @duplicates.groups
   end
 
   def show

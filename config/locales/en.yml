@@ -15,7 +15,7 @@ en:
     untranslated: "untranslated"
     translated: "translated"
     reviewed: "reviewed"
-    outdated: "fr changed, to review"
+    outdated: "FR changed, to review"
     outdated_count:
       one: "%{count} to review"
       other: "%{count} to review"
@@ -26,8 +26,8 @@ en:
     import: "import"
     create: "creation"
     rename: "rename"
-    source_minor: "fr fix"
-    source_major: "fr change"
+    source_minor: "FR fix"
+    source_major: "FR change"
     note: "YAML comment"
     translate: "translation"
     review: "review"
@@ -45,27 +45,30 @@ en:
         ⌘/Ctrl + F: go to the search (twice: the browser's find)
         Enter: search
         Esc: leave the field
-        Shift + Esc: clear everything, text and filters
+        Shift + Esc: clear everything, text, filters and sort
         In the text, before Enter:
         #120, #120-180: by number
         key:…: by key
         branch:…: by branch
+        user:…: by user (name or start of it)
       remove: "Remove"
-      remove_all: "Remove every filter"
+      remove_all: "Remove every filter and the sort"
       count:
         one: "%{formatted} string"
         other: "%{formatted} strings"
       filters: "Filters"
       or: "or"
       status: "Status"
-      status_header: "Status (any of the checked ones)"
+      status_header: "Status"
       fields:
         key: "Key"
         prefix: "Branch"
+        user: "User"
         at: "#"
       placeholders:
         key: "contains…"
         prefix: "tab.cutlist"
+        user: "choose…"
         at: "120, 120-180, 120-…"
       statuses:
         untranslated: "Untranslated"
@@ -75,6 +78,24 @@ en:
       questions: "Open questions"
       with: "With"
       questions_chip: "open question"
+      warnings: "Warnings"
+      warnings_chip: "warning"
+      days_header: "Changed in the…"
+      days_chip: "Changed in the"
+      periods:
+        "1": "last 24 hours"
+        "7": "last 7 days"
+        "30": "last 30 days"
+        "90": "last 90 days"
+      no_users: "No users"
+      sort: "Sort"
+      sort_header: "Sort by"
+      sorts:
+        index: "index"
+        updated: "last change"
+      sort_dirs:
+        asc: "Ascending (click to reverse)"
+        desc: "Descending (click to reverse)"
     empty_list:
       filtered: "No strings with these filters."
       show_unfiltered:
@@ -91,7 +112,7 @@ en:
         locale: "Interface language"
       unit:
         key: "Key"
-        source_text: "fr text"
+        source_text: "FR text"
     errors:
       models:
         unit:
@@ -103,7 +124,7 @@ en:
     application:
       translate: "Translate"
       keys: "Keys"
-      sync: "Sync fr.yml"
+      sync: "Sync FR"
       users: "Users"
       migration: "Migration"
       publish: "Publish"
@@ -136,7 +157,6 @@ en:
   translations:
     index:
       reference: "Reference:"
-      second_language: "+ 2nd language"
       show_whitespace: "Show spaces and line breaks"
       pretranslate:
         one: "🤖 Suggest translations (%{language}) for the first string to do"
@@ -144,19 +164,22 @@ en:
     row:
       source: "source"
       reference: "reference"
-      en_outdated: "en outdated, fr prevails"
-      en_missing: "en missing"
+      en_outdated: "EN outdated, FR prevails"
+      en_missing: "EN missing"
       before: "before:"
+      revised_ago: "changed %{time} ago"
+      never_revised: "never changed"
+    editor:
+      saved: "saved"
+      save: "Save"
+      save_and_review: "Approve"
+      machine: "Suggestion:"
+      same_text: "Same text elsewhere:"
+    comments_button:
       comments:
         one: "%{count} comment"
         other: "%{count} comments"
       open_question: "open question"
-    editor:
-      saved: "saved"
-      save: "Save"
-      save_and_review: "Save and approve"
-      machine: "Suggestion:"
-      same_text: "Same text elsewhere:"
     pretranslate:
       started:
         one: "Pre-translation of %{count} string started: reload the page in a moment."
@@ -174,6 +197,22 @@ en:
     bold: "different number of **bold** markers"
     lines: "different number of lines"
     spaces: "leading or trailing space"
+    literal: "quoted text to keep as is: %{token}"
+    italic: "different number of *italic* markers"
+    final_dot:
+      missing: "missing final dot"
+      extra: "extra final dot"
+    typographic_quotes: "typographic quotes absent from the source"
+    text:
+      double_space: "double space"
+      line_end_space: "space at the end of a line"
+      space_before_comma: "space before a comma"
+      link_space: "space between [text] and (url): the markdown link is broken"
+      insecure_url: "http:// URL (prefer https://)"
+      url_space: "space after http(s)://"
+      loose_bold: "space inside a **bold**"
+      triple_star: "three or more * in a row"
+      invisible: "invisible character (zero width space, soft hyphen…)"
 
   comments:
     thread:
@@ -182,6 +221,7 @@ en:
       open: "open question"
       resolve: "mark resolved"
       placeholder: "Write a comment…"
+      question_placeholder: "Ask a question about this translation…"
       is_question: "This is a question"
       send: "Send"
 
@@ -189,6 +229,18 @@ en:
     index:
       title: "Keys"
       status_hint: "In at least one language (Reviewed: in all of them)"
+      duplicates: "FR duplicates"
+    duplicates:
+      title: "FR duplicates"
+      language: "Translations in"
+      divergent_only: "Translated in several ways only"
+      summary: "%{groups} FR texts repeated over %{units} keys, %{divergent} of them translated in several ways."
+      hint: "Candidates for a single key the others reference with $t() (texts made of a single $t() are left out)."
+      empty: "No duplicates."
+      keys:
+        one: "%{count} key"
+        other: "%{count} keys"
+      divergent: "different translations"
     node:
       continued: "(continued)"
       rename: "rename / move"
@@ -204,7 +256,7 @@ en:
       position_all: "Position among every key"
       not_listed: "This key is no longer in the filtered list"
       rename: "Rename"
-      source: "Source (fr)"
+      source: "Source (FR)"
       note: "YAML comment"
       note_hint: "Written above the key in every language file, without the \"#\". Empty = none."
       minor: "Minor fix: keep the translations"
@@ -272,7 +324,7 @@ en:
       empty: "No changes: the tool is up to date with this fr.yml."
       renames: "Likely renames (%{count})"
       renames_hint: "unchecked = deletion + new key, translations lost"
-      changed: "Changed fr texts (%{count})"
+      changed: "Changed FR texts (%{count})"
       changed_hint: "checked = meaning changed, translations to review"
       conflict: "also changed here, the repo wins"
       notes: "YAML comments changed (%{count})"
@@ -405,5 +457,5 @@ en:
       subject_comment: "Comment on %{key}"
       asked: "%{name} asks a question about %{key}%{language}:"
       commented: "%{name} commented on %{key}%{language}:"
-      source: "fr text:"
+      source: "FR text:"
       reply: "Reply:"

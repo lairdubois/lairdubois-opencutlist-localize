@@ -6,7 +6,9 @@ module GithubApi
   def self.request(verb, path, token: nil, basic: nil, payload: nil)
     uri = URI(Rails.configuration.x.ocl.api_url + path)
     req = { get: Net::HTTP::Get, post: Net::HTTP::Post, patch: Net::HTTP::Patch, delete: Net::HTTP::Delete }.fetch(verb).new(uri)
-    basic ? req.basic_auth(*basic) : req["Authorization"] = "Bearer #{token}"
+    if basic then req.basic_auth(*basic)
+    elsif token then req["Authorization"] = "Bearer #{token}"
+    end
     req["Accept"] = "application/vnd.github+json"
     req["X-GitHub-Api-Version"] = "2022-11-28"
     req.body = payload.to_json if payload

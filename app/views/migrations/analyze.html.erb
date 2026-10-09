@@ -7,7 +7,7 @@
     </thead>
     <% @reports.each do |r| %>
       <tr class="border-b border-stone-100 <%= 'bg-red-50' if r.found.zero? %>">
-        <td class="px-3 py-1.5"><%= r.language.name %> <span class="text-stone-400"><%= r.language.code %></span></td>
+        <td class="px-3 py-1.5"><%= r.language.name %> <span class="text-stone-400"><%= r.language.code.upcase %></span></td>
         <td><%= r.found %></td><td><%= r.matched %></td><td><%= r.updates.size %></td><td><%= r.reviews.size %></td>
         <td class="<%= 'text-amber-700' if r.conflicts.any? %>"><%= r.conflicts.size %></td>
         <td class="<%= 'text-amber-700' if r.unmatched.any? %>"><%= r.unmatched.size %></td>
@@ -25,7 +25,7 @@
   <section class="mb-6 rounded border border-stone-200 bg-white p-4 text-sm">
     <h2 class="mb-2 font-semibold"><%= t(".examples") %></h2>
     <% details.first(20).each do |language, unit, text, who| %>
-      <p class="mb-1"><span class="font-mono text-xs text-stone-500"><%= language.code %> · <%= unit.key %></span><br>
+      <p class="mb-1"><span class="font-mono text-xs text-stone-500"><%= language.code.upcase %> · <%= unit.key %></span><br>
         <del class="text-stone-400"><%= unit.translations.find { |t| t.language_id == language.id }&.text %></del> → <%= text %> <span class="text-xs text-stone-500">(<%= who %>)</span></p>
     <% end %>
   </section>
@@ -35,7 +35,7 @@
   <section class="mb-6 rounded border border-amber-300 bg-amber-50 p-4 text-sm">
     <h2 class="mb-2 font-semibold"><%= t(".conflicts") %></h2>
     <% conflicts.each do |language, unit, text, who| %>
-      <p class="mb-1"><span class="font-mono text-xs"><%= language.code %> · <%= unit.key %></span> — <%= t(".transifex_version", who: who) %> <%= text %></p>
+      <p class="mb-1"><span class="font-mono text-xs"><%= language.code.upcase %> · <%= unit.key %></span> — <%= t(".transifex_version", who: who) %> <%= text %></p>
     <% end %>
   </section>
 <% end %>

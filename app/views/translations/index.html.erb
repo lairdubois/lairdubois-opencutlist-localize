@@ -1,14 +1,14 @@
-<% content_for :title, "#{@languages.map(&:name).join(' + ')} · OpenCutList i18n" %>
-<% content_for :wide, "1" if @second_language %>
+<% content_for :title, "#{@language.name} · OpenCutList i18n" %>
 <%# Toolbar (filters, search, column headers) stays on screen above the rows, under the sticky site header.
     z-10 : the rows' editors hold positioned spans (whitespace marks) that would otherwise paint over it. %>
 <div class="sticky top-[calc(3.5rem+1px)] z-10 -mx-4 -mt-3 mb-2 border-b border-stone-200 bg-stone-50 px-4 pt-3">
   <div class="mb-2 flex flex-wrap items-start gap-3">
     <h1 class="py-1 text-lg font-semibold"><%= t("layouts.application.translate") %></h1>
-    <%= render "shared/search_bar", url: translate_path(@language.code), hidden: { also: @second_language&.code }, counts: @counts, count: @count %>
+    <%= render "shared/search_bar", url: translate_path(@language.code), hidden: {}, counts: @counts, users: @users, count: @count,
+                                     sorts: ListFilters::SORTS.keys %>
   </div>
 
-  <% todo = @units.select { |u| (t = @data[@language.id][:translations][u.id]).nil? || t.outdated? } %>
+  <% todo = @units.select { |u| (t = @data[:translations][u.id]).nil? || t.outdated? } %>
   <div class="flex flex-wrap items-center gap-2 text-sm has-[>:not([hidden])]:mb-2">
     <button type="button" hidden data-unsaved-guard-target="count" data-action="unsaved-guard#reveal"
             class="rounded bg-sky-50 px-2 py-0.5 text-sky-800 hover:bg-sky-100"></button>
@@ -18,35 +18,23 @@
     <% end %>
   </div>
 
-  <%# Column headers, on the rows' grid : reference choice over the source, each language over its editor %>
-  <div class="mb-2 grid grid-cols-1 items-center gap-x-3 gap-y-2 border border-transparent px-3 <%= @languages.size > 1 ? 'md:grid-cols-3' : 'md:grid-cols-2' %>">
-    <div class="flex items-center gap-1 text-xs text-stone-500">
-      <button type="button" data-controller="whitespace-toggle" data-action="whitespace-toggle#toggle" title="<%= t(".show_whitespace") %>"
-              class="mr-2 rounded px-1.5 py-0.5 font-mono text-stone-500 hover:bg-stone-200 aria-pressed:bg-stone-800 aria-pressed:text-white">¶</button>
+  <%# Column headers, on the rows' grid : reference choice over the source, the language over its editor.
+      The grid keeps the rows' inset (1px border + px-3) ; the outer controls cancel it to sit on the toolbar's edges. %>
+  <div class="mb-2 grid grid-cols-1 items-center gap-x-3 gap-y-2 border border-transparent px-3 md:grid-cols-2">
+    <div class="-ml-[13px] flex items-center gap-1 text-xs text-stone-500">
       <% if @en %>
         <%= t(".reference") %>
         <% User::REFERENCE_LANGUAGES.each do |code| %>
-          <%= button_to code, reference_language_path, method: :patch, params: { reference_language: code },
+          <%= button_to code.upcase, reference_language_path, method: :patch, params: { reference_language: code },
                         class: "rounded px-1.5 py-0.5 #{code == current_user.reference_language ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-200'}" %>
         <% end %>
       <% end %>
     </div>
-    <% others = current_user.editable_languages.where.not(id: @language.id) %>
-    <% @languages.each do |language| %>
-      <div class="flex min-w-0 items-center justify-between gap-3">
-        <h2 class="text-lg font-semibold"><%= language.name %></h2>
-        <% if language == @languages.last && others.any? %>
-          <%= form_with url: translate_path(@language.code), method: :get, class: "text-sm" do %>
-            <% list_params.each do |name, value| %>
-              <% Array(value).each do |v| %><%= hidden_field_tag(value.is_a?(Array) ? "#{name}[]" : name, v, id: nil) %><% end %>
-            <% end %>
-            <%= select_tag :also, options_from_collection_for_select(others, :code, :name, @second_language&.code),
-                           include_blank: t(".second_language"), onchange: "this.form.requestSubmit()",
-                           class: "rounded border border-stone-300 bg-white py-1 pl-2 hover:border-stone-400" %>
-          <% end %>
-        <% end %>
-      </div>
-    <% end %>
+    <div class="-mr-[13px] flex min-w-0 items-center justify-between gap-3">
+      <h2 class="text-lg font-semibold"><%= @language.name %></h2>
+      <button type="button" data-controller="whitespace-toggle" data-action="whitespace-toggle#toggle" title="<%= t(".show_whitespace") %>"
+              class="rounded px-1.5 py-0.5 font-mono text-xs text-stone-500 hover:bg-stone-200 aria-pressed:bg-stone-800 aria-pressed:text-white">¶</button>
+    </div>
   </div>
 </div>
 
@@ -55,5 +43,5 @@
 </div>
 <% if @units.empty? %>
   <%= render "shared/empty_list", counts: @counts,
-             unfiltered_url: translate_path(@language.code, list_params.except(:status, :questions).merge(also: @second_language&.code)) %>
+             unfiltered_url: translate_path(@language.code, list_params.except(:status, :questions, :warnings)) %>
 <% end %>

@@ -6,7 +6,7 @@
         <div class="mb-0.5 flex items-center gap-2 text-xs text-stone-500">
           <span class="font-medium text-stone-700"><%= c.user.name %></span>
           <span><%= l c.created_at, format: :short %></span>
-          <span><%= c.language ? c.language.code : t(".all_languages") %></span>
+          <span><%= c.language ? c.language.code.upcase : t(".all_languages") %></span>
           <% if c.question %>
             <% if c.resolved? %><span class="text-emerald-700"><%= t(".resolved") %></span>
             <% else %>
@@ -21,17 +21,22 @@
       </div>
     <% end %>
     <%= form_with url: unit_comments_path(unit, lang: language&.code), class: "flex flex-col gap-1", data: { controller: "dirty-form" } do %>
-      <%= text_area_tag :body, nil, rows: 2, required: true, placeholder: t(".placeholder"),
+      <%= text_area_tag :body, nil, rows: 2, required: true, placeholder: t(language ? ".question_placeholder" : ".placeholder"),
                         data: { controller: "autosize", action: "input->autosize#resize" },
                         class: "block w-full resize-none overflow-hidden rounded border border-stone-300 px-2 py-1" %>
       <div class="flex items-center gap-3 text-xs">
-        <label><%= check_box_tag :question, "1", false, data: { dirty_ignore: true } %> <%= t(".is_question") %></label>
-        <% if language %>
-          <label><%= radio_button_tag :scope, "language", true, data: { dirty_ignore: true } %> <%= language.name %></label>
-          <label><%= radio_button_tag :scope, "all", false, data: { dirty_ignore: true } %> <%= t(".all_languages") %></label>
+        <%# The translator's comments are questions in their language ; the key page's ones address every language %>
+        <% unless language %>
+          <label><%= check_box_tag :question, "1", false, data: { dirty_ignore: true } %> <%= t(".is_question") %></label>
         <% end %>
         <%= submit_tag t(".send"), class: "ml-auto rounded bg-stone-800 px-2 py-1 text-white" %>
       </div>
     <% end %>
   </div>
+  <%# Keeps the translator's comments button in step (count, open question) %>
+  <% if language %>
+    <%= turbo_stream.replace "comments_button_#{unit.id}_#{language.code}",
+                             partial: "translations/comments_button",
+                             locals: { unit: unit, language: language, count: comments.size, question: comments.any? { |c| c.question && !c.resolved? } } %>
+  <% end %>
 <% end %>

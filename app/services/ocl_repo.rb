@@ -96,7 +96,7 @@ class OclRepo
   def old_branches(renames)
     renames.filter_map { |old, new| [old.rpartition(".").first, new.rpartition(".").first] }
            .reject { |old, new| old == new || old.empty? }.map(&:first).uniq
-           .reject { |prefix| Unit.active.where("key LIKE ?", "#{Unit.sanitize_sql_like(prefix)}.%").exists? }
+           .reject { |prefix| Unit.active.where("key LIKE ? ESCAPE '\\'", "#{Unit.sanitize_sql_like(prefix)}.%").exists? }
   end
 
   def rewrite_code(renames)

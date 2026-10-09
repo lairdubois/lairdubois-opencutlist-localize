@@ -1,0 +1,13 @@
+<%# Why the list is empty : the filters hide the search's matches (link without them), the search finds
+    nothing, or there is nothing at all. Locals : counts (ListFilters), unfiltered_url %>
+<p class="text-sm text-stone-500">
+  <% if (statuses.any? || questions? || warnings?) && counts[:searched].positive? %>
+    <%= t(".filtered") %>
+    <%= link_to t(".show_unfiltered", count: counts[:searched], formatted: number_with_delimiter(counts[:searched])), unfiltered_url,
+                class: "text-stone-900 underline" %>
+  <% elsif [:q, *ListFilters::FIELDS].any? { |name| params[name].present? } %>
+    <%= t(".searched") %>
+  <% else %>
+    <%= t(".empty") %>
+  <% end %>
+</p>

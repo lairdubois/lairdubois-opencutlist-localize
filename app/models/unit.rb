@@ -44,7 +44,7 @@ class Unit < ApplicationRecord
     parts = key.split(".")
     ancestors = (1...parts.size).map { |n| parts.first(n).join(".") }
     others = Unit.active.where.not(id: id)
-    if others.where(key: ancestors).exists? || others.where("key LIKE ?", "#{Unit.sanitize_sql_like(key)}.%").exists?
+    if others.where(key: ancestors).exists? || others.where("key LIKE ? ESCAPE '\\'", "#{Unit.sanitize_sql_like(key)}.%").exists?
       errors.add(:key, :overlapping_branch)
     end
   end

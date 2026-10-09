@@ -1,18 +1,19 @@
 <% total_units, translated, outdated = @tree.total %>
 <div class="mb-2 flex flex-wrap items-start gap-3">
   <h1 class="py-1 text-lg font-semibold"><%= t(".title") %></h1>
-  <%= render "shared/search_bar", url: units_path, hidden: {}, counts: @counts, count: total_units, status_hint: t(".status_hint") %>
+  <%= render "shared/search_bar", url: units_path, hidden: {}, counts: @counts, users: @users, count: total_units, status_hint: t(".status_hint") %>
 </div>
 
 <% if total_units > 0 %>
   <p class="mb-2 text-sm text-stone-500">
     <%= t("languages.index.translated", percent: number_to_percentage(100.0 * translated / [total_units * @languages.size, 1].max, precision: 0)) %>
     <% if outdated > 0 %>· <span class="text-amber-700"><%= t("status.outdated_count", count: outdated) %></span><% end %>
+    · <%= link_to t(".duplicates"), duplicates_units_path, class: "underline hover:text-stone-900" %>
   </p>
 <% end %>
 
 <% if total_units.zero? %>
-  <%= render "shared/empty_list", counts: @counts, unfiltered_url: units_path(list_params.except(:status, :questions)) %>
+  <%= render "shared/empty_list", counts: @counts, unfiltered_url: units_path(list_params.except(:status, :questions, :warnings)) %>
 <% else %>
   <div class="rounded border border-stone-200 bg-white text-sm"
        data-controller="branch-tree" data-action="toggle->branch-tree#sync:capture">

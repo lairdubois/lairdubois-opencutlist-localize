@@ -1,4 +1,5 @@
-# GitHub push webhook : flags that the base branch's fr.yml changed, so admins are told to sync
+# GitHub push webhook : after a push to the base branch, checks whether its fr.yml needs a sync (RepoFrCheckJob),
+# so admins are told to sync
 class GithubWebhooksController < ActionController::Base
   skip_forgery_protection
 
@@ -12,11 +13,10 @@ class GithubWebhooksController < ActionController::Base
     return head :ok unless request.headers["X-GitHub-Event"] == "push"
 
     payload = JSON.parse(body)
-    fr = "#{OclRepo::I18N_SRC}/fr.yml"
-    touched = Array(payload["commits"]).any? { |c| (Array(c["added"]) + Array(c["modified"]) + Array(c["removed"])).include?(fr) }
-    i18n_bot = Array(payload["commits"]).all? { |c| c.dig("author", "name") == "OCL i18n" }
-    if payload["ref"] == "refs/heads/#{OclRepo.base_branch}" && touched && !i18n_bot
-      Setting["repo_fr_changed_at"] = Time.current.iso8601
+    sha = payload["after"].to_s
+    # Every push, not only those listing a fr.yml change : the payload lists 20 commits at most
+    if payload["ref"] == "refs/heads/#{OclRepo.base_branch}" && sha.match?(/\A\h{40}\z/) && sha != "0" * 40
+      RepoFrCheckJob.perform_later(sha)
     end
     head :ok
   end

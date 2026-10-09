@@ -1,0 +1,45 @@
+<% content_for :title, t(".title") %>
+<div class="mb-2 flex flex-wrap items-center gap-x-6 gap-y-2">
+  <h1 class="text-lg font-semibold"><%= t(".title") %></h1>
+  <%= form_with url: duplicates_units_path, method: :get, class: "flex items-center gap-4 text-sm" do %>
+    <label class="flex items-center gap-2 text-stone-600">
+      <%= t(".language") %>
+      <%= select_tag :lang, options_from_collection_for_select(@languages, :code, :name, @language.code),
+                     onchange: "this.form.requestSubmit()", class: "rounded border border-stone-300 bg-white px-2 py-1" %>
+    </label>
+    <label class="flex items-center gap-2 text-stone-600">
+      <%= check_box_tag :divergent, "1", params[:divergent] == "1", onchange: "this.form.requestSubmit()" %>
+      <%= t(".divergent_only") %>
+    </label>
+  <% end %>
+</div>
+<p class="mb-4 text-sm text-stone-500">
+  <%= t(".summary", groups: @duplicates.groups.size, units: @duplicates.groups.sum { |g| g.units.size }, divergent: @duplicates.divergent.size) %>
+  <%= t(".hint") %>
+</p>
+
+<% if @groups.empty? %>
+  <p class="text-sm text-stone-500"><%= t(".empty") %></p>
+<% end %>
+<% @groups.each do |group| %>
+  <% usual = group.usual_translation %>
+  <section class="mb-3 rounded border border-stone-200 bg-white">
+    <div class="flex items-start gap-3 border-b border-stone-200 px-4 py-2">
+      <div class="min-w-0 flex-1 whitespace-pre-wrap font-mono text-sm"><%= group.text %></div>
+      <span class="shrink-0 text-xs text-stone-500"><%= t(".keys", count: group.units.size) %></span>
+      <% if group.divergent? %><span class="shrink-0 rounded bg-amber-100 px-1.5 text-xs text-amber-800"><%= t(".divergent") %></span><% end %>
+    </div>
+    <% group.units.each do |unit| %>
+      <% translation = group.translations[unit.id] %>
+      <div class="flex gap-4 border-b border-stone-100 px-4 py-1.5 text-sm last:border-0">
+        <%= link_to unit.key, unit_path(unit), title: unit.key, class: "w-2/5 min-w-0 shrink-0 truncate font-mono text-stone-700 hover:text-stone-900 hover:underline" %>
+        <% if translation %>
+          <span class="min-w-0 flex-1 whitespace-pre-wrap <%= 'text-amber-800' if group.divergent? && translation != usual %>"
+                dir="<%= @language.rtl ? "rtl" : "ltr" %>" lang="<%= @language.code %>"><%= translation %></span>
+        <% else %>
+          <span class="flex-1 italic text-stone-400"><%= t("status.untranslated") %></span>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+<% end %>

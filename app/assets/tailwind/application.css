@@ -1,4 +1,10 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+
+/* Explicit sources : automatic detection honors .gitignore only inside a git checkout, and the
+   deployed copy has no .git, so it would also scan vendor/bundle (gem READMEs : url(image.svg)…). */
+@source "../../views";
+@source "../../helpers";
+@source "../../javascript";
 
 @layer base {
   /* Single-line selects : native arrow replaced by a chevron set in from the right edge.

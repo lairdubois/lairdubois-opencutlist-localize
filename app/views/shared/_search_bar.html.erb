@@ -1,0 +1,204 @@
+<%# Search bar : a text search in the texts, and a "Filters" menu that adds chips under it. Field chips
+    (key, branch, index) hold their own input, the user one a list of names ; statuses combine with OR, open questions, warnings
+    and a period (changed in the last days, one at a time) with AND.
+    A single index is exclusive : applying it drops the other filters, and they drop it. A range mixes.
+    Every change reloads the list (GET form, search_bar_controller), empty fields left out of the URL.
+    Locals : url, hidden (other list params to keep), counts (ListFilters), count (listed units), users (offered by the user chip),
+    status_hint (optional, over the statuses in the menu), sorts (optional, ListFilters::SORTS offered by a "Sort" menu :
+    the picked one gets a chip, its arrow reversing it). %>
+<% status_hint = local_assigns[:status_hint] %>
+<% sorts = local_assigns[:sorts] || [] %>
+<% group = "flex items-center gap-1 rounded bg-stone-300 p-0.5 pl-2 text-xs text-stone-900" %>
+<% sub_chip = "flex items-center gap-1.5 rounded border border-transparent bg-white py-0.5 pr-0.5 pl-2 text-stone-900" %>
+<% sub_chip_remove = "flex h-4 w-4 items-center justify-center rounded leading-none text-stone-500 hover:bg-stone-200 hover:text-stone-900" %>
+<% item = "flex w-full items-center gap-2 rounded px-3 py-1.5 text-left outline-none hover:bg-stone-100 focus-visible:bg-stone-100" %>
+<%= form_with url: url, method: :get, class: "min-w-0 flex-1",
+              data: { controller: "search-bar popover", action: "formdata->search-bar#prune keydown@window->search-bar#shortcut" } do %>
+  <% hidden.compact_blank.each do |name, value| %>
+    <%= hidden_field_tag name, value, id: nil %>
+  <% end %>
+  <div class="rounded border border-stone-300 bg-white focus-within:border-stone-400">
+    <div class="flex items-center gap-2 pr-1 pl-2.5">
+      <%# Keyboard shortcuts in its tooltip, one per line %>
+      <span title="<%= t(".shortcuts").strip %>" class="shrink-0 cursor-help">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-stone-400" aria-hidden="true">
+          <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.45 4.39l3.08 3.08a.75.75 0 1 1-1.06 1.06l-3.08-3.08A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
+        </svg>
+      </span>
+      <%= search_field_tag :q, params[:q], id: nil, placeholder: t(".placeholder"), autocomplete: "off",
+                           data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur keydown.shift+esc->search-bar#reset" },
+                           class: "peer min-w-0 flex-1 bg-transparent py-1.5 text-sm text-stone-900 outline-none [&::-webkit-search-cancel-button]:appearance-none" %>
+      <button type="button" title="<%= t(".clear") %>" data-action="search-bar#clear"
+              class="flex h-5 w-5 items-center justify-center rounded leading-none text-stone-400 peer-placeholder-shown:hidden hover:bg-stone-100 hover:text-stone-700">×</button>
+      <span class="text-xs whitespace-nowrap text-stone-500 tabular-nums"><%= t(".count", count: count, formatted: number_with_delimiter(count)) %></span>
+      <%# Styled as a chip group %>
+      <button type="button" popovertarget="search-filters" data-popover-target="anchor"
+              data-action="keydown.down->search-bar#openMenu keydown.up->search-bar#openMenu" class="<%= group %> h-6.5 pr-1.5 hover:bg-stone-400">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5 text-stone-600" aria-hidden="true">
+          <path fill-rule="evenodd" d="M2.63 3.4A1 1 0 0 1 3.5 3h13a1 1 0 0 1 .78 1.63L12 11.24V16a1 1 0 0 1-.55.9l-2 1A1 1 0 0 1 8 17v-5.76L2.72 4.63a1 1 0 0 1-.09-1.23Z" clip-rule="evenodd" />
+        </svg>
+        <%= t(".filters") %> <span class="text-stone-600">▾</span>
+      </button>
+      <% if sorts.any? %>
+        <span data-controller="popover" class="contents">
+          <button type="button" popovertarget="search-sort" data-popover-target="anchor"
+                  data-action="keydown.down->search-bar#openMenu keydown.up->search-bar#openMenu" class="<%= group %> -ml-1 h-6.5 pr-1.5 hover:bg-stone-400">
+            <svg viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5 text-stone-600" aria-hidden="true">
+              <path fill-rule="evenodd" d="M2 3.75A.75.75 0 0 1 2.75 3h11.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75ZM2 7.5a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 2 7.5ZM14 7a.75.75 0 0 1 .75.75v6.69l1.72-1.72a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06l1.72 1.72V7.75A.75.75 0 0 1 14 7ZM2 11.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
+            </svg>
+            <%= t(".sort") %> <span class="text-stone-600">▾</span>
+          </button>
+          <div id="search-sort" popover data-popover-target="panel"
+               data-action="beforetoggle->popover#place toggle->search-bar#focusMenu keydown->search-bar#menuKeydown"
+               class="m-0 min-w-48 rounded border border-stone-200 bg-white p-1 text-sm text-stone-700 shadow-lg">
+            <p class="px-3 pt-1 pb-0.5 text-xs text-stone-500"><%= t(".sort_header") %></p>
+            <% sorts.each do |key| %>
+              <% on = key == (list_sort || "index") %>
+              <button type="button" role="menuitemradio" aria-checked="<%= on %>" data-action="search-bar#sort"
+                      data-search-bar-sort-param="<%= key %>" data-search-bar-dir-param="<%= ListFilters::SORTS[key] %>" class="<%= item %>">
+                <span class="w-3 shrink-0 text-xs text-stone-800"><%= "✓" if on %></span>
+                <span class="flex-1"><%= t(".sorts.#{key}").upcase_first %></span>
+              </button>
+            <% end %>
+          </div>
+        </span>
+      <% end %>
+    </div>
+
+    <%# Chips. Field chips are all rendered : an unused one stays hidden and disabled until picked in the menu %>
+    <% sorted = sorts.include?(list_sort) %>
+    <% any_chip = ListFilters::FIELDS.any? { |name| params[name].present? } || statuses.any? || questions? || warnings? || list_days || sorted %>
+    <div data-search-bar-target="chips" class="flex flex-wrap gap-1.5 border-t border-stone-200 p-1.5" <%= "hidden" unless any_chip %>>
+      <% ListFilters::FIELDS.each do |name| %>
+        <% applied = params[name].present? %>
+        <span data-chip data-search-bar-target="field" data-name="<%= name %>" class="<%= group %>" <%= "data-applied" if applied %> <%= "hidden" unless applied %>>
+          <%= t(".fields.#{name}") %>
+          <span class="<%= sub_chip %> focus-within:border-stone-500">
+            <% if name == "user" %>
+              <%# A list of names in a popover, styled like the filters menu ; the id goes in a hidden field %>
+              <% selected = users.find { |u| u.id.to_s == params[name] } %>
+              <span data-controller="popover" data-popover-align-value="left" class="contents">
+                <%= hidden_field_tag name, params[name], id: nil, disabled: !applied %>
+                <button type="button" popovertarget="search-user" data-popover-target="anchor" data-action="keydown.down->search-bar#openMenu keydown.up->search-bar#openMenu"
+                        class="flex items-center gap-1 outline-none">
+                  <span class="max-w-44 truncate <%= 'text-stone-400' unless selected %>"><%= selected&.name || t(".placeholders.user") %></span>
+                  <span class="text-stone-500">▾</span>
+                </button>
+                <div id="search-user" popover data-popover-target="panel" data-action="beforetoggle->popover#place toggle->search-bar#focusMenu toggle->search-bar#userToggled keydown->search-bar#menuKeydown"
+                     class="m-0 max-h-80 min-w-48 overflow-y-auto rounded border border-stone-200 bg-white p-1 text-sm text-stone-700 shadow-lg">
+                  <% users.each do |user| %>
+                    <% on = user == selected %>
+                    <button type="button" role="menuitemradio" aria-checked="<%= on %>" data-search-bar-user
+                            data-action="search-bar#pickUser" data-search-bar-id-param="<%= user.id %>" class="<%= item %>">
+                      <span class="w-3 shrink-0 text-xs text-stone-800"><%= "✓" if on %></span>
+                      <span class="flex-1"><%= user.name %></span>
+                    </button>
+                  <% end %>
+                  <% if users.empty? %><p class="px-3 py-1.5 text-stone-400"><%= t(".no_users") %></p><% end %>
+                </div>
+              </span>
+            <% else %>
+              <%= text_field_tag name, params[name], id: nil, disabled: !applied, autocomplete: "off", placeholder: t(".placeholders.#{name}"),
+                                 data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur keydown.shift+esc->search-bar#reset blur->search-bar#drop" },
+                                 class: "bg-transparent text-stone-900 outline-none placeholder:text-stone-400 #{name == 'at' ? 'w-28 tabular-nums' : 'w-44 font-mono'}" %>
+            <% end %>
+            <button type="button" title="<%= t(".remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
+          </span>
+        </span>
+      <% end %>
+      <%# Statuses are OR-ed : one group chip, "or" between its inner chips. Side by side chips are AND-ed. %>
+      <% if statuses.any? %>
+        <span class="<%= group %>">
+          <%= t(".status") %>
+          <% statuses.each_with_index do |key, i| %>
+            <% if i > 0 %><span class="text-stone-600"><%= t(".or") %></span><% end %>
+            <span data-chip class="<%= sub_chip %>">
+              <%= status_dot(key) %>
+              <%= t(".statuses.#{key}") %>
+              <%= hidden_field_tag "status[]", key, id: nil %>
+              <button type="button" title="<%= t(".remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
+            </span>
+          <% end %>
+        </span>
+      <% end %>
+      <% if questions? %>
+        <span class="<%= group %>">
+          <%= t(".with") %>
+          <span data-chip class="<%= sub_chip %>">
+            <%= t(".questions_chip") %>
+            <%= hidden_field_tag :questions, "1", id: nil %>
+            <button type="button" title="<%= t(".remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
+          </span>
+        </span>
+      <% end %>
+      <% if warnings? %>
+        <span class="<%= group %>">
+          <%= t(".with") %>
+          <span data-chip class="<%= sub_chip %>">
+            <%= t(".warnings_chip") %>
+            <%= hidden_field_tag :warnings, "1", id: nil %>
+            <button type="button" title="<%= t(".remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
+          </span>
+        </span>
+      <% end %>
+      <% if list_days %>
+        <span class="<%= group %>">
+          <%= t(".days_chip") %>
+          <span data-chip class="<%= sub_chip %>">
+            <%= t(".periods.#{list_days}") %>
+            <%= hidden_field_tag :days, list_days, id: nil %>
+            <button type="button" title="<%= t(".remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
+          </span>
+        </span>
+      <% end %>
+      <%# The sort : not a filter (its own colors), its arrow reverses it %>
+      <% if sorted %>
+        <span class="<%= group.sub('bg-stone-300', 'bg-sky-200').sub('text-stone-900', 'text-sky-950') %>">
+          <%= t(".sort") %>
+          <span data-chip data-sort class="<%= sub_chip %>">
+            <%= t(".sorts.#{list_sort}") %>
+            <%= hidden_field_tag :sort, list_sort, id: nil %>
+            <%= hidden_field_tag :dir, list_sort_dir, id: nil %>
+            <button type="button" title="<%= t(".sort_dirs.#{list_sort_dir}") %>" data-action="search-bar#reverse"
+                    class="flex h-4 w-4 items-center justify-center rounded leading-none text-stone-700 hover:bg-stone-200 hover:text-stone-900"><%= list_sort_dir == "desc" ? "↓" : "↑" %></button>
+            <button type="button" title="<%= t(".remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
+          </span>
+        </span>
+      <% end %>
+      <button type="button" title="<%= t(".remove_all") %>" data-action="search-bar#removeAll"
+              class="ml-auto flex h-6.5 w-6 items-center justify-center rounded leading-none text-stone-400 hover:bg-stone-100 hover:text-stone-700">×</button>
+    </div>
+  </div>
+
+  <%# Filters menu : native popover (light dismiss, Esc), placed under its button by popover_controller %>
+  <div id="search-filters" popover data-popover-target="panel" data-search-bar-target="menu"
+       data-action="beforetoggle->popover#place toggle->search-bar#focusMenu keydown->search-bar#menuKeydown"
+       class="m-0 min-w-64 rounded border border-stone-200 bg-white p-1 text-sm text-stone-700 shadow-lg">
+    <% ListFilters::FIELDS.each do |name| %>
+      <button type="button" data-action="search-bar#add" data-search-bar-name-param="<%= name %>" class="<%= item %>">
+        <span class="flex-1"><%= t(".fields.#{name}") %></span>
+        <span class="text-xs text-stone-400"><%= t(".placeholders.#{name}") %></span>
+      </button>
+    <% end %>
+    <hr class="my-1 border-stone-200">
+    <p class="px-3 pt-1 pb-0.5 text-xs text-stone-500">
+      <%= t(".status_header") %>
+      <% if status_hint %><br><%= status_hint %><% end %>
+    </p>
+    <% ListFilters::STATUSES.each do |key| %>
+      <%= render "shared/search_bar_toggle", item: item, name: "status[]", value: key, on: statuses.include?(key), count: counts[key],
+                                             label: t(".statuses.#{key}"), dot: ApplicationHelper::STATUS_DOTS[key] %>
+    <% end %>
+    <hr class="my-1 border-stone-200">
+    <%= render "shared/search_bar_toggle", item: item, name: "questions", value: "1", on: questions?, count: counts["questions"],
+                                           label: t(".questions"), dot: nil %>
+    <%= render "shared/search_bar_toggle", item: item, name: "warnings", value: "1", on: warnings?, count: counts["warnings"],
+                                           label: t(".warnings"), dot: nil %>
+    <hr class="my-1 border-stone-200">
+    <p class="px-3 pt-1 pb-0.5 text-xs text-stone-500"><%= t(".days_header") %></p>
+    <% ListFilters::PERIODS.each do |days| %>
+      <%= render "shared/search_bar_toggle", item: item, name: "days", value: days, on: list_days.to_s == days, count: counts["days_#{days}"],
+                                             label: t(".periods.#{days}").upcase_first, dot: nil, radio: true %>
+    <% end %>
+  </div>
+<% end %>

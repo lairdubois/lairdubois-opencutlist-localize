@@ -24,8 +24,13 @@
       <div class="mt-1 flex flex-wrap gap-1" data-i18n-text-target="chips" hidden></div>
       <% warnings.each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
       <div class="mt-1 flex items-center justify-end gap-2">
+        <%= render "comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
+                                      question: data[:open_questions].include?(unit.id) %>
         <span class="hidden text-xs text-sky-700 group-has-data-dirty:inline">● <%= t("unsaved.marker") %></span>
-        <%= submit_tag t(".save"), title: t("unsaved.save_shortcut"), class: "rounded border border-stone-800 bg-stone-800 px-2 py-0.5 text-xs text-white" %>
+        <%# Saving an outdated translation unchanged revalidates it against the current fr : always allowed %>
+        <% clean_save = !t&.outdated? %>
+        <%= submit_tag t(".save"), title: t("unsaved.save_shortcut"), disabled: clean_save, data: { dirty_form_target: ("submit" if clean_save) },
+                       class: "rounded border border-stone-800 bg-stone-800 px-2 py-0.5 text-xs text-white disabled:cursor-not-allowed disabled:opacity-50" %>
         <% if current_user.can_review?(language) %>
           <%= button_tag t(".save_and_review"), name: "reviewed", value: "1", title: t("unsaved.review_shortcut"),
                          data: { i18n_text_target: "review" }, class: "rounded border border-emerald-600 px-2 py-0.5 text-xs text-emerald-700" %>

@@ -15,6 +15,7 @@ Rails.application.routes.draw do
 
   # Admins
   resources :units, only: [:index, :show] do
+    get :duplicates, on: :collection
     resources :comments, only: [:index, :create]
     member do
       patch :rename

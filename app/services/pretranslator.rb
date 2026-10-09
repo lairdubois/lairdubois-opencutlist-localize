@@ -95,7 +95,7 @@ class Pretranslator
   def examples(units)
     branches = units.map { |u| u.key.split(".").first(2).join(".") }.uniq
     scope = Translation.joins(:unit).merge(Unit.active).where(language: @language).where.not(unit_id: units.map(&:id))
-    scope = scope.where(branches.map { "units.key LIKE ?" }.join(" OR "), *branches.map { |b| "#{Unit.sanitize_sql_like(b)}.%" })
+    scope = scope.where(branches.map { "units.key LIKE ? ESCAPE '\\'" }.join(" OR "), *branches.map { |b| "#{Unit.sanitize_sql_like(b)}.%" })
     scope.reorder("translations.status DESC", Arel.sql("LENGTH(units.source_text)")).limit(40)
          .pluck("units.source_text", "translations.text").map { |fr, t| { fr: fr, translation: t } }
   end

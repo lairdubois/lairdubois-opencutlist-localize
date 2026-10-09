@@ -1,0 +1,11 @@
+<%# A checkable entry of the filters menu, with its matches for the current search and other filters.
+    radio (optional) : one of a set, picking it replaces the others' value %>
+<% radio = local_assigns[:radio] %>
+<button type="button" role="<%= radio ? 'menuitemradio' : 'menuitemcheckbox' %>" aria-checked="<%= on %>" data-action="search-bar#<%= radio ? 'choose' : 'toggle' %>"
+        data-search-bar-name-param="<%= name %>" data-search-bar-value-param="<%= value %>"
+        class="<%= item %> <%= 'text-stone-400' if count.zero? && !on %>">
+  <span class="flex h-4 w-4 shrink-0 items-center justify-center <%= radio ? 'rounded-full' : 'rounded' %> border text-[10px] leading-none <%= on ? 'border-stone-800 bg-stone-800 text-white' : 'border-stone-300' %>"><%= "✓" if on %></span>
+  <% if dot %><span class="h-2 w-2 shrink-0 rounded-full <%= dot %>"></span><% end %>
+  <span class="flex-1"><%= label %></span>
+  <span class="text-xs text-stone-400 tabular-nums"><%= number_with_delimiter(count) %></span>
+</button>

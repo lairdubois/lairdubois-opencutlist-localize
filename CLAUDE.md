@@ -58,6 +58,14 @@ Weblate was evaluated and rejected.
   credentials.
 - Base branch (synced with, published from, PR base) = `Setting["base_branch"]`, else `OCL_BASE_BRANCH` :
   chosen on the sync page, saved only when that sync is applied (`OclRepo.base_branch`).
+- Push webhook (`GithubWebhooksController`, HMAC `OCL_GITHUB_WEBHOOK_SECRET`) : every push to the base branch
+  enqueues `RepoFrCheckJob`, which reads the pushed fr.yml through the contents API (never the shared checkout,
+  publish / sync may be using it) and sets or clears `Setting["repo_fr_changed_at"]` (admins' sync banner,
+  first date kept) on `SourceSync#plan.empty?`, Publisher's test : judged on content, not on commit authors,
+  so merging the tool's PR (any method) isn't a change. Applying a sync clears it.
+- `TranslationChecks` : non-blocking warnings, text rules (any text, fr included) and comparison with the fr
+  source ; `SourceDuplicates` (`/units/duplicates`) : fr texts repeated over several keys, with their
+  translations in a language, to factor them into `$t()`. Both ported from a Python lint by mobilarte.
 - `Pretranslator` (anthropic gem, `claude-opus-5-5`, structured output) only creates `Suggestion`s,
   never translations.
 - Migration : `TransifexImport` (API v3, parallel fetch, keys mapped through the Baseline ;
@@ -71,16 +79,27 @@ Weblate was evaluated and rejected.
   `html.show-ws` (whitespace marks, localStorage). Markdown is highlighted only (markers, link text,
   url ; urls may hold one level of parentheses, e.g. `wiki/STL_(file_format)`).
 - Unsaved edits : `dirty-form` flags a form `data-dirty` (fields vs their DOM defaults, `data-dirty-ignore`
-  skips one ; `i18n-text:change` covers the editor), `unsaved-guard` on `<body>` asks before a Turbo visit,
+  skips one ; `i18n-text:change` covers the editor ; its `submit` targets are disabled while the form is clean,
+  and a clean form refuses a submission through them or without a submitter, i.e. the shortcuts ; other buttons
+  still submit : save and approve, and save on an outdated translation, which revalidates it, isn't a target),
+  `unsaved-guard` on `<body>` asks before a Turbo visit,
   a navigating submit (saves inside a turbo-frame don't navigate) or an unload, and counts them on the
   translations toolbar. Mod-Enter saves, Shift-Mod-Enter saves and approves (`review` target).
 - List search (translator's list and keys list) : `shared/_search_bar` + `search_bar_controller` + `ListFilters`.
   `q` searches the texts only ; `status[]` (untranslated / outdated / unreviewed / reviewed, a partition) is
-  OR-ed, `questions=1` AND-ed ; `key`, `prefix`, `at` are chips with their own input ; a single `at` index (no `-`) is exclusive (applying
+  OR-ed, `questions=1`, `warnings=1` and `days` AND-ed (`TranslationChecks.unit_ids`, cached on texts' count +
+  max `updated_at` and the rules file's digest ; `days` = `ListFilters::PERIODS`, one at a time, a revision since then : same
+  kinds as the sort on the translator's list, any on the keys list) ; `key`, `prefix`, `at` are chips with their own input, `user` (id) a chip
+  with a list of names in a popover (hidden field) : the users having revisions (in the edited language on the translator's list ; `Revision.by_user`
+  includes Transifex imports through `transifex_username`) ; a single `at` index (no `-`) is exclusive (applying
   it drops the others, any other change drops it ; enforced by `ListFilters` too, and the menu's counts leave it out). Every change submits
   the GET form ; Mod-F focuses `q` (pressed again in it : the browser's find), Esc blurs it and the chips' inputs, Shift-Esc in them resets the search ; Enter
   and Shift-Esc keep the focus in the field across the Turbo visit (sessionStorage flag) ; on Enter, `#120` / `#120-180`,
-  `key:…`, `branch:…` words of `q` move to their chip ; the menu shows each entry's count under the other filters.
+  `key:…`, `branch:…`, `user:…` (a name or the
+  start of one, `_` for a space, left in `q` if none or several match) words of `q` move to their chip ; the menu shows each entry's count under the other filters.
+  Sort (translator's list only, `sorts:` local) : `sort` = `index` (default) / `updated` (last revision in the
+  language or fr source one, `TranslationsController::SOURCE_KINDS`, never revised last), `dir` ; not a filter :
+  its own menu, a sky chip whose arrow reverses it (removed by "remove all" / Shift-Esc), kept by a single `at`.
 - The site header is sticky (`h-14` + 1px border) ; the translations toolbar sticks below it with
   `top-[calc(3.5rem+1px)]` : keep both in sync if the header height changes.
 
@@ -95,10 +114,16 @@ Weblate was evaluated and rejected.
 
 ## Gotchas
 
+- Tailwind sources are explicit (`source(none)` + `@source` views / helpers / javascript) : the deployed
+  copy has no `.git`, so auto-detection ignored `.gitignore` and scanned `vendor/bundle`. Classes used
+  elsewhere need a new `@source`.
+
 - Turbo ignores a 200 HTML answer to a form POST : forms that render a page need
   `data: { turbo: false }`.
 - Turbo hover prefetch fires GETs : single-use tokens are consumed by POST (login confirm page).
 - `Unit` default_scope `order(:position)` leaks through `merge` : use `reorder`.
+- SQLite `LIKE` ignores `sanitize_sql_like`'s backslash escapes without `ESCAPE '\'` : always write
+  `"… LIKE ? ESCAPE '\\'"`, or any key with a `_` matches nothing.
 - curl tests need both `-c` and `-b` (the session cookie carries the CSRF token).
 - Restoring the SQLite db by file copy breaks with WAL files : `db:reset` + bootstrap instead.
 - CodeMirror rewrites its root element's `class` attribute (e.g. on focus) : pass classes through
