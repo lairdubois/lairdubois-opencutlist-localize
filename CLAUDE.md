@@ -92,7 +92,8 @@ Weblate was evaluated and rejected.
   `$t()`, HTML tags, entities) present in the fr source are locked (atomic ranges + transaction
   filter), unknown ones stay editable in red, missing ones are offered as chips. The hidden textarea
   stays the form field, kept in sync ; suggestion buttons fill it and fire `input`. `¶` toggles
-  `html.show-ws` (whitespace marks, localStorage). Markdown is highlighted only (markers, link text,
+  `html.show-ws` (whitespace marks, localStorage), the key button `html.hide-keys` (translator's rows : key on hover
+  only) ; both through `html_toggle_controller`. Markdown is highlighted only (markers, link text,
   url ; urls may hold one level of parentheses, e.g. `wiki/STL_(file_format)`).
 - Unsaved edits : `dirty-form` flags a form `data-dirty` (fields vs their DOM defaults, `data-dirty-ignore`
   skips one ; `i18n-text:change` covers the editor ; its `submit` targets are disabled while the form is clean,
@@ -117,6 +118,9 @@ Weblate was evaluated and rejected.
   Sort (translator's list only, `sorts:` local) : `sort` = `index` (default) / `updated` (last revision in the
   language or fr source one, `TranslationsController::SOURCE_KINDS`, never revised last), `dir` ; not a filter :
   its own menu, a sky chip whose arrow reverses it (removed by "remove all" / Shift-Esc), kept by a single `at`.
+- Reference choice (translator's list, fr source / en translation) : rows render both (`translations/_reference`)
+  when en exists, the `ref-en` class on the `reference` controller's wrapper shows one ; switched in place (scroll,
+  loaded pages, unsaved edits kept), saved by a json PATCH. The `q` search on en follows the choice at the next search.
 - The site header is sticky (`h-14` + 1px border) ; the translations toolbar sticks below it with
   `top-[calc(3.5rem+1px)]` : keep both in sync if the header height changes.
 
@@ -141,6 +145,8 @@ Weblate was evaluated and rejected.
 - `Unit` default_scope `order(:position)` leaks through `merge` : use `reorder`.
 - SQLite `LIKE` ignores `sanitize_sql_like`'s backslash escapes without `ESCAPE '\'` : always write
   `"… LIKE ? ESCAPE '\\'"`, or any key with a `_` matches nothing.
+- SQLite `LIKE` folds ASCII case only (`'Ø' LIKE 'ø'` is false) : text searches use `fold(column) LIKE` with a folded
+  pattern (`fold` = `SqliteFold.fold`, case and accents aside, registered by `config/initializers/sqlite_fold.rb`).
 - curl tests need both `-c` and `-b` (the session cookie carries the CSRF token).
 - Restoring the SQLite db by file copy breaks with WAL files : `db:reset` + bootstrap instead.
 - CodeMirror rewrites its root element's `class` attribute (e.g. on focus) : pass classes through

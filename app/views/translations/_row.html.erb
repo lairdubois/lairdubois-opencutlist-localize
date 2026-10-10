@@ -2,8 +2,8 @@
 <div id="<%= dom_id(unit) %>" data-controller="disclosure" class="group/row rounded border border-stone-200 bg-white">
   <div class="flex items-baseline gap-1 px-3 py-1.5 text-xs">
     <span class="text-stone-400 tabular-nums">#<%= @indexes[unit.id] %></span>
-    <%# The key shows on the row's hover, while its editor has the focus, or always under a key filter %>
-    <span class="min-w-0 flex-1 font-mono break-all text-stone-500 <%= 'invisible group-hover/row:visible group-has-[.i18n-editor.cm-focused]/row:visible' unless list_params[:key] %>"><%= unit.key %></span>
+    <%# html.hide-keys (toolbar toggle) : the key shows on the row's hover, while its editor has the focus, or always under a key filter %>
+    <span class="min-w-0 flex-1 font-mono break-all text-stone-500 <%= 'in-[.hide-keys]:invisible in-[.hide-keys]:group-hover/row:visible in-[.hide-keys]:group-has-[.i18n-editor.cm-focused]/row:visible' unless list_params[:key] %>"><%= unit.key %></span>
     <%# Sorted by date : the last revision's %>
     <% if @revised_at %>
       <% if (at = @revised_at[unit.id]) %>
@@ -21,37 +21,14 @@
       The boxes are frameless, edge to edge on their background, between the 1px lines that part the key line above
       from the extras and buttons below. No language header : the sticky toolbar names the reference and the language. %>
   <div class="grid grid-cols-1 md:grid-cols-2">
-    <%# Main reference : the fr source, or the en translation when the user chose it (fr stays the official source) %>
+    <%# References : with an en translation, both are rendered and the toolbar's choice shows one (no reload) %>
     <% en = @references[unit.id] %>
-    <% en_main = @en_reference && en.present? %>
-    <div class="row-span-2 grid min-w-0 grid-rows-subgrid text-sm">
-      <% reference = en_main ? en.text : unit.source_text %>
-      <%# The box : the view, then its notices under a dashed line, as the editor's box beside %>
-      <div class="flex min-w-0 flex-col border-y border-stone-200 <%= en_main && en.outdated? ? 'bg-orange-50' : 'bg-stone-50' %>">
-        <%# The copy button sits beside the view : i18n-text replaces its element's content %>
-        <div class="group/copy relative flex-1">
-          <div class="px-3 py-2 font-mono whitespace-pre-wrap"
-               data-controller="i18n-text" data-i18n-text-text-value="<%= reference %>" data-i18n-text-refs-value="<%= @ref_texts[unit.id].to_json %>"><%= reference %></div>
-          <%= render "shared/copy_button", text: reference, class: "absolute top-1 right-1" %>
-        </div>
-        <%# One section per notice, each under a dashed line. Only the chosen reference : the fr source joins it when
-            the en no longer matches it %>
-        <div class="flex flex-col *:border-t *:border-dashed *:border-stone-200 *:px-3 *:py-1.5">
-          <% if en_main && en.outdated? %>
-            <div class="flex flex-col items-start gap-1">
-              <span class="rounded bg-red-100 px-1.5 text-xs text-red-800">⚠ <%= t(".en_outdated") %></span>
-              <p class="whitespace-pre-wrap text-xs text-stone-800"><span class="font-medium"><%= Language::SOURCE_CODE.upcase %> · <%= t(".source") %></span> · <%= unit.source_text %></p>
-            </div>
-          <% elsif !en_main && @en_reference %>
-            <p><span class="rounded bg-red-100 px-1.5 text-xs text-red-800">⚠ <%= t(".en_missing") %></span></p>
-          <% end %>
-          <% if (previous = @previous_sources[unit.id]) && outdated %>
-            <p class="whitespace-pre-wrap text-xs text-stone-500"><%= "#{Language::SOURCE_CODE.upcase} " if en_main %><%= t(".before") %> <del><%= previous %></del></p>
-          <% end %>
-        </div>
-      </div>
-      <%# The subgrid's second row (extras) stays empty on this side %>
-    </div>
+    <% if en.present? %>
+      <%= render "reference", unit: unit, outdated: outdated, visibility: "in-[.ref-en]:hidden" %>
+      <%= render "reference", unit: unit, outdated: outdated, en: en, en_main: true, visibility: "hidden in-[.ref-en]:grid" %>
+    <% else %>
+      <%= render "reference", unit: unit, outdated: outdated, en_missing: @en.present? %>
+    <% end %>
     <%= render "editor", unit: unit, language: @language, data: @data %>
     <%# Comments : opened from the editor's buttons row, on the next row under the language's column ; lazy frame loads once shown %>
     <div data-disclosure-target="panel" hidden class="min-w-0 border-t border-stone-200 px-3 py-2 text-xs md:col-start-2">

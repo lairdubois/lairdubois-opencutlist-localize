@@ -1,4 +1,7 @@
 <% content_for :title, "#{@language.name} · OpenCutList Localize" %>
+<%# reference : the ref-en class shows the en reference instead of the fr source in the rows, switched without a reload %>
+<div data-controller="reference" data-reference-url-value="<%= reference_language_path %>"
+     class="<%= 'ref-en' if @en_reference %>">
 <%# Toolbar (filters, search, column headers) stays on screen above the rows, under the sticky site header.
     z-10 : the rows' editors hold positioned spans (whitespace marks) that would otherwise paint over it. %>
 <div class="sticky top-[calc(3.5rem+1px)] z-10 -mx-4 -mt-3 mb-2 border-b border-stone-200 bg-stone-50 px-4 pt-3">
@@ -24,8 +27,9 @@
       <% if @en %>
         <%= t(".reference") %>
         <% User::REFERENCE_LANGUAGES.each do |code| %>
-          <%= button_to code.upcase, reference_language_path, method: :patch, params: { reference_language: code },
-                        class: "rounded px-1.5 py-0.5 #{code == current_user.reference_language ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-200'}" %>
+          <button type="button" data-reference-target="button" data-action="reference#choose" data-reference-code-param="<%= code %>"
+                  aria-pressed="<%= code == current_user.reference_language %>"
+                  class="rounded px-1.5 py-0.5 text-stone-500 hover:bg-stone-200 aria-pressed:bg-stone-800 aria-pressed:text-white"><%= code.upcase %></button>
         <% end %>
       <% end %>
     </div>
@@ -36,14 +40,26 @@
         <button type="button" hidden data-unsaved-guard-target="count" data-action="unsaved-guard#reveal"
                 class="rounded bg-sky-50 px-2 py-0.5 text-sm text-sky-800 hover:bg-sky-100"></button>
       </div>
-      <button type="button" data-controller="whitespace-toggle" data-action="whitespace-toggle#toggle" title="<%= t(".show_whitespace") %>"
-              class="rounded px-1.5 py-0.5 font-mono text-xs text-stone-500 hover:bg-stone-200 aria-pressed:bg-stone-800 aria-pressed:text-white">¶</button>
+      <div class="flex items-center gap-1">
+        <button type="button" data-controller="html-toggle" data-action="html-toggle#toggle"
+                data-html-toggle-class-value="hide-keys" data-html-toggle-key-value="ocl-localize.show-keys" data-html-toggle-inverse-value="true"
+                title="<%= t(".show_keys") %>" aria-label="<%= t(".show_keys") %>"
+                class="flex h-5 w-5 items-center justify-center rounded text-stone-500 hover:bg-stone-200 aria-pressed:bg-stone-800 aria-pressed:text-white">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-3.5 w-3.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+          </svg>
+        </button>
+        <button type="button" data-controller="html-toggle" data-action="html-toggle#toggle"
+                data-html-toggle-class-value="show-ws" data-html-toggle-key-value="ocl-localize.show-whitespace" title="<%= t(".show_whitespace") %>"
+                class="flex h-5 w-5 items-center justify-center rounded font-mono text-xs text-stone-500 hover:bg-stone-200 aria-pressed:bg-stone-800 aria-pressed:text-white">¶</button>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="flex flex-col gap-3">
   <%= render "page" %>
+</div>
 </div>
 <% if @units.empty? %>
   <%= render "shared/empty_list", counts: @counts,

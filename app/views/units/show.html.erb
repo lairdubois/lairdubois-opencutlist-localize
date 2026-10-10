@@ -68,8 +68,9 @@
 <section class="mb-3 rounded border border-stone-200 bg-white p-4">
   <div class="mb-2 flex items-center justify-between">
     <h2 class="font-semibold"><%= t(".source") %></h2>
-    <button type="button" data-controller="whitespace-toggle" data-action="whitespace-toggle#toggle" title="<%= t("translations.index.show_whitespace") %>"
-            class="rounded px-1.5 py-0.5 font-mono text-xs text-stone-500 hover:bg-stone-200 aria-pressed:bg-stone-800 aria-pressed:text-white">¶</button>
+    <button type="button" data-controller="html-toggle" data-action="html-toggle#toggle"
+            data-html-toggle-class-value="show-ws" data-html-toggle-key-value="ocl-localize.show-whitespace" title="<%= t("translations.index.show_whitespace") %>"
+            class="flex h-5 w-5 items-center justify-center rounded font-mono text-xs text-stone-500 hover:bg-stone-200 aria-pressed:bg-stone-800 aria-pressed:text-white">¶</button>
   </div>
   <%= form_with url: note_unit_path(@unit), method: :patch, class: "group mb-4", data: { controller: "dirty-form" } do %>
     <label for="note" class="mb-1 block text-sm text-stone-600"># <%= t(".note") %></label>

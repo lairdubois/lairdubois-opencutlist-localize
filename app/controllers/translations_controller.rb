@@ -158,12 +158,12 @@ class TranslationsController < ApplicationController
       scope = user ? scope.where(units: { id: Revision.unscope(:order).where(language: @language).by_user(user).select(:unit_id) }) : scope.none
     end
     if params[:q].present?
-      like = "%#{Unit.sanitize_sql_like(params[:q])}%"
+      like = "%#{Unit.sanitize_sql_like(SqliteFold.fold(params[:q]))}%"
       if @en_reference
         scope = scope.joins(Unit.sanitize_sql_array(["LEFT JOIN translations refs ON refs.unit_id = units.id AND refs.language_id = ?", @en.id]))
-                     .where("units.source_text LIKE :q ESCAPE '\\' OR translations.text LIKE :q ESCAPE '\\' OR refs.text LIKE :q ESCAPE '\\'", q: like)
+                     .where("fold(units.source_text) LIKE :q ESCAPE '\\' OR fold(translations.text) LIKE :q ESCAPE '\\' OR fold(refs.text) LIKE :q ESCAPE '\\'", q: like)
       else
-        scope = scope.where("units.source_text LIKE :q ESCAPE '\\' OR translations.text LIKE :q ESCAPE '\\'", q: like)
+        scope = scope.where("fold(units.source_text) LIKE :q ESCAPE '\\' OR fold(translations.text) LIKE :q ESCAPE '\\'", q: like)
       end
     end
     single_index? ? scope : filter_by_index(scope)

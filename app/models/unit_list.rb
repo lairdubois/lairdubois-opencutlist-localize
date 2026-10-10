@@ -52,8 +52,9 @@ class UnitList
         ids = query.user ? Revision.unscope(:order).by_user(query.user).distinct.pluck(:unit_id).to_set : Set.new
         units = units.select { |u| ids.include?(u.id) }
       end
-      if (q = query[:q]&.downcase)
-        units = units.select { |u| u.source_text.downcase.include?(q) }
+      if (q = query[:q])
+        q = SqliteFold.fold(q)
+        units = units.select { |u| SqliteFold.fold(u.source_text).include?(q) }
       end
       query.single_index? ? units : filter_by_index(units)
     end

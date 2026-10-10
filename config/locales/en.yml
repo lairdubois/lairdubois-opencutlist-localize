@@ -163,16 +163,18 @@ en:
     index:
       reference: "Reference:"
       show_whitespace: "Show spaces and line breaks"
+      show_keys: "Always show the key names"
       pretranslate:
         one: "🤖 Suggest translations (%{language}) for the first string to do"
         other: "🤖 Suggest translations (%{language}) for the first %{count} strings to do"
     row:
+      revised_ago: "changed %{time} ago"
+      never_revised: "never changed"
+    reference:
       source: "source"
       en_outdated: "EN outdated, FR prevails"
       en_missing: "EN missing"
       before: "before:"
-      revised_ago: "changed %{time} ago"
-      never_revised: "never changed"
     editor:
       saved: "saved"
       save: "Save"

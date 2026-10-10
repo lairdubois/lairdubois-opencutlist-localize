@@ -163,16 +163,18 @@ fr:
     index:
       reference: "Référence :"
       show_whitespace: "Afficher les espaces et retours à la ligne"
+      show_keys: "Toujours afficher les noms des clés"
       pretranslate:
         one: "🤖 Proposer des traductions (%{language}) pour la première chaîne à faire"
         other: "🤖 Proposer des traductions (%{language}) pour les %{count} premières chaînes à faire"
     row:
+      revised_ago: "modifiée il y a %{time}"
+      never_revised: "jamais modifiée"
+    reference:
       source: "source"
       en_outdated: "EN obsolète, le FR fait foi"
       en_missing: "EN manquant"
       before: "avant :"
-      revised_ago: "modifiée il y a %{time}"
-      never_revised: "jamais modifiée"
     editor:
       saved: "enregistré"
       save: "Enregistrer"
