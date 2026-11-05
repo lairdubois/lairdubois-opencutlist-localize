@@ -163,7 +163,7 @@ Weblate was evaluated and rejected.
   (same `search_bar_controller`) : `q` (fold, over the term, forms, definition and the shown columns' entries), `missing` /
   `no_translate` / `archived` (admins) toggles as chips, counts under the other filters
   (`GlossaryController#load_list`). `Glossary` (service) matches the declared forms only : whole words (not at an edge
-  in a script without spaces ; an expected term may start a longer word in `Glossary::COMPOUNDING` languages, de : « Plattenrest »), `fold`, invariants left out, the longest term wins ; same rules in `lib/i18n_text.js`
+  in a script without spaces ; an expected term may be inside a longer word in `Glossary::COMPOUNDING` languages, de : « Plattenrest », « Gruppenteile »), `fold`, invariants left out, the longest term wins ; same rules in `lib/i18n_text.js`
   (`glossaryHits`, the `glossary` value from `GlossaryHelper#glossary_json` : the fr reference and the key page's source
   underlined, `tok-glossary`, tooltip). The translator's en reference is matched through the en entries' forms
   (`terms_in(text, via: en)`, `forms_for` : kept as is ones by their fr forms, no en entry = not found ; terms on the
