@@ -6,7 +6,7 @@ src="${1:?uploaded tree}"
 home=/var/www/localize.opencutlist.org
 app=$home/app
 [ -f /etc/ocl-localize.env ] || { echo "server not set up : deploy/deploy.sh setup" >&2; exit 1; }
-[ -x "$home/.rbenv/versions/4.0.1/bin/bundle" ] || { echo "Ruby 4.0.1 missing : deploy/deploy.sh setup" >&2; exit 1; }
+[ -x "$home/.rbenv/versions/4.0.9/bin/bundle" ] || { echo "Ruby 4.0.9 missing : deploy/deploy.sh setup" >&2; exit 1; }
 
 # What only exists on the server (data, builds, gems) is excluded, hence kept by --delete
 rsync -a --delete --chown=ocl-localize:ocl-localize \
@@ -18,7 +18,7 @@ cd "$app"
 sudo -u ocl-localize bash -c "
   set -euo pipefail
   set -a; source /etc/ocl-localize.env; set +a
-  export PATH=$home/.rbenv/versions/4.0.1/bin:\$PATH
+  export PATH=$home/.rbenv/versions/4.0.9/bin:\$PATH
   mkdir -p storage log tmp
   chmod 750 storage
   # Propshaft only adds the app/assets/* directories that exist at boot : the Tailwind build goes here

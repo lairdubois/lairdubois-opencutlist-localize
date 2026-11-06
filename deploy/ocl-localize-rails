@@ -7,6 +7,6 @@ home=/var/www/localize.opencutlist.org
 cd "$home/app"
 exec sudo -u ocl-localize bash -c '
   set -a; source /etc/ocl-localize.env; set +a
-  export PATH='"$home"'/.rbenv/versions/4.0.1/bin:$PATH
+  export PATH='"$home"'/.rbenv/versions/4.0.9/bin:$PATH
   exec bin/rails "$@"
 ' ocl-localize-rails "$@"

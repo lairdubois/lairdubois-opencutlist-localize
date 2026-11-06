@@ -6,7 +6,7 @@ publishing pushes the i18n branch to GitHub and opens a pull request there. No e
 (`OCL_MAIL_ENABLED=0`).
 
     /var/www/localize.opencutlist.org/   home of the ocl-localize system user
-      .rbenv/                            Ruby 4.0.1
+      .rbenv/                            Ruby 4.0.9
       app/                               the code (deploy/deploy.sh), NGINX serves app/public
       app/storage/                       SQLite databases + the OCL repo checkout : the only state
       acme/                              Let's Encrypt challenges (certbot webroot)
@@ -40,7 +40,7 @@ publishing pushes the i18n branch to GitHub and opens a pull request there. No e
    - apt packages : runtime ones (git, sqlite3, jemalloc, rsync, openssl) and build ones for Ruby
      and native gems (build-essential, pkg-config, libssl / libyaml / zlib / libffi `-dev`)
    - the `ocl-localize` system user, home `/var/www/localize.opencutlist.org`
-   - Ruby 4.0.1 through rbenv (compiles for a few minutes the first time)
+   - Ruby 4.0.9 through rbenv (compiles for a few minutes the first time)
    - `/etc/ocl-localize.env` from `ocl-localize.env.example`, with a generated `SECRET_KEY_BASE` and
      `OCL_BASE_BRANCH` (an existing file is kept : the setup only warns if its branch differs)
    - the systemd service, the `ocl-localize-rails` wrapper in `/usr/local/bin`

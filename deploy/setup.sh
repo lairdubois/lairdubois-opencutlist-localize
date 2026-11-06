@@ -6,7 +6,7 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 domain=localize.opencutlist.org
 home=/var/www/$domain
-ruby=4.0.1
+ruby=4.0.9
 # OCL branch the app syncs with and publishes from : first argument (deploy.sh's OCL_BASE_BRANCH)
 branch="${1:-master}"
 [[ "$branch" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "Invalid branch: $branch" >&2; exit 1; }
