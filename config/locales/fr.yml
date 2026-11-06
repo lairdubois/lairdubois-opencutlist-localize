@@ -529,10 +529,12 @@ fr:
 
   translation_checks:
     missing:
+      code: "code manquant : %{token}"
       variable: "variable manquante : %{token}"
       reference: "référence manquante : %{token}"
       tag: "balise manquante : %{token}"
     extra:
+      code: "code en trop : %{token}"
       variable: "variable en trop : %{token}"
       reference: "référence en trop : %{token}"
       tag: "balise en trop : %{token}"

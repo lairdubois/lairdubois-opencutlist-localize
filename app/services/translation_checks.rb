@@ -2,7 +2,9 @@
 # source included) ; a translation also gets compared with its fr source (invariants, markdown markers,
 # lines, final dot, quotes) and, given its language's Glossary, with the terms expected.
 class TranslationChecks
+  # Earlier kinds win on overlap : a `code` span is a single token, whatever it holds (as in i18n_text.js)
   TOKENS = {
+    code: /`[^`\n]+`/,                          # `MACHININGS`
     variable: /\{\{\s*[\w.]+\s*\}\}/,         # {{ count }}
     reference: /\$t\([^)]*\)/,                 # $t(tab.cutlist.label)
     tag: %r{</?[a-z][^>]*>}i                   # <br>, <strong>
@@ -74,9 +76,10 @@ class TranslationChecks
 
   def self.comparison_warnings(source, text)
     out = []
+    rest = [source, text]
     TOKENS.each do |kind, pattern|
-      expected = source.scan(pattern).map { |t| t.gsub(/\s+/, "") }.tally
-      found = text.scan(pattern).map { |t| t.gsub(/\s+/, "") }.tally
+      expected, found = rest.map { |t| t.scan(pattern).map { |token| token.gsub(/\s+/, "") }.tally }
+      rest = rest.map { |t| t.gsub(pattern, " ") }
       (expected.keys | found.keys).each do |token|
         if expected[token].to_i > found[token].to_i then out << I18n.t("translation_checks.missing.#{kind}", token: token)
         elsif found[token].to_i > expected[token].to_i then out << I18n.t("translation_checks.extra.#{kind}", token: token)

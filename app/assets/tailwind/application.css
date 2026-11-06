@@ -26,7 +26,7 @@
   .tok-ref[title] { cursor: help; }
   /* Mod-click opens the key (i18n_text.js) : shown as a link while Cmd / Ctrl is down over the editor */
   .cm-editor[data-mod-key] .tok-ref[data-ref-url] { cursor: pointer; text-decoration: underline; }
-  .tok-tag, .tok-entity { color: var(--color-stone-500); background: var(--color-stone-100); border-radius: 0.2rem; }
+  .tok-tag, .tok-entity, .tok-code { color: var(--color-stone-500); background: var(--color-stone-100); border-radius: 0.2rem; }
   /* An invariant the fr source doesn't have : editable, flagged */
   .tok-unknown { color: var(--color-red-700); background: var(--color-red-50); text-decoration: wavy underline var(--color-red-400); }
   /* A symbol hard to type (→, −, °…) : free to edit, offered as a chip when missing */

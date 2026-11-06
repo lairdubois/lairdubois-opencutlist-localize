@@ -3,8 +3,10 @@ import { EditorView, Decoration, WidgetType, keymap, highlightSpecialChars } fro
 import { defaultKeymap, history, historyKeymap, insertNewline } from "@codemirror/commands"
 
 // Invariants of an OCL string : a translation keeps them verbatim. Earlier kinds win on overlap,
-// so a $t() wrapping a {{ variable }} or a tag carrying one in its href stays a single token.
+// so a `code` span stays a single token whatever it holds, and a $t() wrapping a {{ variable }} or a tag
+// carrying one in its href too.
 const INVARIANTS = [
+  ["code", /`[^`\n]+`/g],
   ["ref", /\$t\([^)\n]*\)/g],
   ["tag", /<\/?[a-zA-Z][^<>\n]*>/g],
   ["var", /\{\{-?\s*[^{}\n]+?\s*\}\}/g],

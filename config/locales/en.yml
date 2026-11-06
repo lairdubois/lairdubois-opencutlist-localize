@@ -529,10 +529,12 @@ en:
 
   translation_checks:
     missing:
+      code: "missing code: %{token}"
       variable: "missing variable: %{token}"
       reference: "missing reference: %{token}"
       tag: "missing tag: %{token}"
     extra:
+      code: "extra code: %{token}"
       variable: "extra variable: %{token}"
       reference: "extra reference: %{token}"
       tag: "extra tag: %{token}"

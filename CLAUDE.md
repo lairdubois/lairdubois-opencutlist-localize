@@ -244,7 +244,7 @@ Weblate was evaluated and rejected.
 - CodeMirror 6 (`lib/i18n_text.js` + `i18n_text_controller`) for the editor and reference, and on the key page (fr
   source editor : nothing locked ; translations read-only, checked against the source). `Unit.refs` feeds the
   `$t()` tooltips ; Mod-click on one opens its key in a new tab, through the page's `ref_url` helper (`refs_json`) :
-  `at` filter of the translator's list (none for a translator when out of their work) or, on the key page, of the keys list. Invariants (`{{ var }}`, `$t()`, HTML tags, entities) of the fr source are locked (atomic ranges +
+  `at` filter of the translator's list (none for a translator when out of their work) or, on the key page, of the keys list. Invariants (`{{ var }}`, `$t()`, HTML tags, entities, `` `code` `` spans : one token whatever they hold) of the fr source are locked (atomic ranges +
   transaction filter), unknown ones editable in red, missing ones offered as chips. Symbols hard to type (non-ASCII `\p{S}` + `†‡`, e.g.
   `→ − °`) aren't invariants : highlighted (`tok-symbol`), offered as sky chips when fewer than in the source. The hidden textarea stays the form
   field, kept in sync ; suggestion buttons fill it and fire `input`. `¶` toggles `html.show-ws`, the key button
