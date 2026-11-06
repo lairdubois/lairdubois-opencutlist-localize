@@ -5,14 +5,14 @@
 # Matching : whole words (not at the edges written in a script without spaces), case and accents aside
 # (SqliteFold.fold), any whitespace inside a form, the invariants ({{ var }}, $t(), tags, entities) left out. On
 # overlap, the longest term wins (« plan de coupe » over « plan »). Same rules in lib/i18n_text.js. In a language
-# writing compounds (COMPOUNDING), the expected term may also start a longer word (« Platte » in « Plattenrest »).
+# writing compounds (COMPOUNDING), the expected term may also be inside a longer word (« Platte » in « Plattenrest », « Teile » in « Gruppenteile »).
 class Glossary
   INVARIANTS = Regexp.union(*TranslationChecks::TOKENS.values, /&(?:[a-zA-Z]+|#\d+);/)
   # A form edged by one of these characters needs no word boundary on that side
   UNSPACED = /[\p{Han}\p{Hiragana}\p{Katakana}\p{Thai}\p{Lao}\p{Khmer}\p{Myanmar}]/
   BEFORE = "(?<![\\p{L}\\p{N}_])".freeze
   AFTER = "(?![\\p{L}\\p{N}_])".freeze
-  # Languages whose compounds start with the expected term : no word boundary needed after it
+  # Languages whose compounds may start or end with the expected term : no word boundary needed
   COMPOUNDING = %w[de].freeze
 
   attr_reader :terms
@@ -27,14 +27,14 @@ class Glossary
     SqliteFold.fold(text.to_s.gsub(INVARIANTS, " "))
   end
 
-  # A regexp of some forms, on prepared texts. prefix : a form may start a longer word
+  # A regexp of some forms, on prepared texts. prefix : a form may be part of a longer word
   def self.pattern(forms, prefix: false)
     Regexp.union(forms.filter_map do |form|
       words = SqliteFold.fold(form).split
       next if words.empty?
 
       body = words.map { |w| Regexp.escape(w) }.join("[[:space:]]+")
-      Regexp.new("#{BEFORE unless words.first.match?(/\A#{UNSPACED}/)}#{body}#{AFTER unless prefix || words.last.match?(/#{UNSPACED}\z/)}")
+      Regexp.new("#{BEFORE unless prefix || words.first.match?(/\A#{UNSPACED}/)}#{body}#{AFTER unless prefix || words.last.match?(/#{UNSPACED}\z/)}")
     end)
   end
 
