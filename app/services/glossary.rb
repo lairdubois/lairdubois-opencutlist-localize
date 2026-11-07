@@ -13,7 +13,7 @@ class Glossary
   BEFORE = "(?<![\\p{L}\\p{N}_])".freeze
   AFTER = "(?![\\p{L}\\p{N}_])".freeze
   # Languages whose compounds may start or end with the expected term : no word boundary needed
-  COMPOUNDING = %w[de].freeze
+  COMPOUNDING = %w[de nl].freeze
 
   attr_reader :terms
 
