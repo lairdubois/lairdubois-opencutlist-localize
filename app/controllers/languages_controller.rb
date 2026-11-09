@@ -1,9 +1,9 @@
 # Home : every target language with its progress (the @no-translate keys left out), in three columns : work left
 # (to translate or outdated), to approve, ready. The ones the user can't edit are greyed out, not linked, or left out
 # with mine=1 (offered when the user can edit some but not all). Admins manage them (manage) : add one of the ISO
-# list (create), delete one with all its work (destroy)
+# list (create), delete one with all its work (destroy), say whether it writes compounds (compounding)
 class LanguagesController < ApplicationController
-  before_action :require_admin, only: [:manage, :create, :destroy]
+  before_action :require_admin, only: [:manage, :create, :destroy, :compounding]
 
   COLUMNS = { todo: [:outdated, :translating], to_approve: [:translated], ready: [:approved] }.freeze
 
@@ -27,6 +27,7 @@ class LanguagesController < ApplicationController
     @languages = Language.targets.to_a
     @translations = Translation.group(:language_id).count
     @members = Membership.group(:language_id).count
+    @enabled_languages = enabled_languages
     sort_languages
   end
 
@@ -49,7 +50,28 @@ class LanguagesController < ApplicationController
     redirect_to back, notice: t(".destroyed", language: language.name)
   end
 
+  # Writes compounds or not : the glossary's expected term may then be inside a longer word (Glossary#warnings).
+  # Answers with its button alone (scroll kept)
+  def compounding
+    language = Language.targets.find(params[:id])
+    language.update!(compounding: params[:enabled] == "1")
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(helpers.dom_id(language, :compounding), partial: "compounding_button",
+                                                  locals: { language: language, sort: params[:sort], dir: params[:dir] })
+      end
+      format.html { redirect_to manage_languages_path(sort: params[:sort], dir: params[:dir]) }
+    end
+  end
+
   private
+
+  # OCL's ENABLED_LANGUAGES as a %w[] literal : the fr source and the targets translated at 100 % (outdated included, as
+  # the progress bars), sorted by code
+  def enabled_languages
+    complete = Language.stats(@languages).select { |_, s| s[:total].positive? && s[:translated] >= s[:total] }.keys.map(&:code)
+    "%w[#{(complete + [Language::SOURCE_CODE]).sort.join(" ")}]"
+  end
 
   # manage's columns, sortable through `sort` : counts start descending, the language (its code) ascending
   MANAGE_SORTS = %w[language translations members].freeze

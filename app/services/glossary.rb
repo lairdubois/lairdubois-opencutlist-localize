@@ -5,21 +5,20 @@
 # Matching : whole words (not at the edges written in a script without spaces), case and accents aside
 # (SqliteFold.fold), any whitespace inside a form, the invariants ({{ var }}, $t(), tags, entities) left out. On
 # overlap, the longest term wins (« plan de coupe » over « plan »). Same rules in lib/i18n_text.js. In a language
-# writing compounds (COMPOUNDING), the expected term may also be inside a longer word (« Platte » in « Plattenrest », « Teile » in « Gruppenteile »).
+# writing compounds (Language#compounding), the expected term may also be inside a longer word (« Platte » in « Plattenrest », « Teile » in « Gruppenteile »).
 class Glossary
   INVARIANTS = Regexp.union(*TranslationChecks::TOKENS.values, /&(?:[a-zA-Z]+|#\d+);/)
   # A form edged by one of these characters needs no word boundary on that side
   UNSPACED = /[\p{Han}\p{Hiragana}\p{Katakana}\p{Thai}\p{Lao}\p{Khmer}\p{Myanmar}]/
   BEFORE = "(?<![\\p{L}\\p{N}_])".freeze
   AFTER = "(?![\\p{L}\\p{N}_])".freeze
-  # Languages whose compounds may start or end with the expected term : no word boundary needed
-  COMPOUNDING = %w[de nl].freeze
 
   attr_reader :terms
 
-  # Changes whenever a term or an entry does (TranslationChecks.unit_ids' cache)
+  # Changes whenever a term, an entry or the languages writing compounds do (TranslationChecks.unit_ids' cache)
   def self.fingerprint
-    [GlossaryTerm, GlossaryEntry].map { |model| model.pick(Arel.sql("COUNT(*)"), Arel.sql("MAX(updated_at)")) }
+    [GlossaryTerm, GlossaryEntry].map { |model| model.pick(Arel.sql("COUNT(*)"), Arel.sql("MAX(updated_at)")) } +
+      [Language.unscoped.where(compounding: true).order(:id).ids]
   end
 
   # A text as matched : invariants blanked, folded
@@ -72,7 +71,7 @@ class Glossary
         prepared.match?(@patterns[term]) ? [] : [I18n.t("translation_checks.glossary.keep", term: term.term)]
       elsif (entry = entry(term, language))
         out = []
-        if entry.term && !prepared.match?(self.class.pattern(entry.forms, prefix: COMPOUNDING.include?(language.code)))
+        if entry.term && !prepared.match?(self.class.pattern(entry.forms, prefix: language.compounding?))
           out << I18n.t("translation_checks.glossary.expected", term: term.term, expected: entry.term)
         end
         entry.avoided.each do |avoided|
