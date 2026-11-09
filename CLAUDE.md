@@ -118,7 +118,7 @@ Weblate was evaluated and rejected.
   the same thanks. Admins (`/volunteers`, badge on the Users link) accept (`accept!` : language created if new, user
   found or created, translator membership) then invite from the user's page, or reject. A stored one is mailed to the
   enabled admins (`VolunteerMailer`, `reply_to` the unverified address) when e-mails are on ; nothing to the applicant.
-- Languages (admins, `/languages/manage`, Administration menu and a button on the home page) : a new one picked among `Language.new_codes` (the ISO
+- Languages (admins, `/languages/manage`, Administration menu and a button on the home page ; the "Nouvelle langue" form in a right-hand column, first on mobile : `order-first md:order-none`) : a new one picked among `Language.new_codes` (the ISO
   list `Language::ISO` = `config/iso_languages.yml`, minus existing codes), created by `Language.create_from_iso!` (name,
   `rtl`, last position ; also `VolunteerRequest#accept!`), then on to the users. Both forms share `shared/_language_picker`.
   Published with the others (`YamlExport`) ; OCL offers it once its code is in `ENABLED_LANGUAGES` (`ruby/constants.rb`).
