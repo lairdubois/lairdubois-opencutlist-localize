@@ -11,6 +11,8 @@ class LanguagesController < ApplicationController
     @languages = Language.targets.to_a
     # Linked : the languages the user translates or reads
     @editable = current_user.readable_languages.pluck(:id).to_set
+    # Among them, the ones read only (reader role)
+    @read_only = @editable - current_user.editable_languages.pluck(:id)
     @mine_filter = @editable.any? && @editable.size < @languages.size
     @mine = @mine_filter && params[:mine] == "1"
     @stats = Language.stats(@languages)

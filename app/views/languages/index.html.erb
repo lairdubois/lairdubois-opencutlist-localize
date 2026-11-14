@@ -25,7 +25,7 @@
       <div class="space-y-3">
         <% languages.each do |language| %>
           <%= render "card", language: language, stats: @stats[language], state: @states[language],
-                              editable: @editable.include?(language.id) %>
+                              editable: @editable.include?(language.id), read_only: @read_only.include?(language.id) %>
         <% end %>
         <% if languages.empty? %>
           <p class="rounded border border-dashed border-stone-300 p-4 text-center text-sm text-stone-400"><%= t(".empty") %></p>

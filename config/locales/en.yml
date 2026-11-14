@@ -447,6 +447,7 @@ en:
         ready: "Ready!"
       empty: "No language"
       not_editable: "Language not assigned to you"
+      read_only: "read only"
       all: "All"
       mine: "My languages"
       manage: "Manage languages"
@@ -484,6 +485,7 @@ en:
   translations:
     index:
       glossary: "Glossary"
+      read_only_hint: "Read only: you can view this language, not edit its translations."
       issues:
         one: "%{count} open issue"
         other: "%{count} open issues"

@@ -1,5 +1,5 @@
 <%# A language's card on the home page. Locals : language, stats, state (LanguagesController#state), editable
-    (else greyed out, not linked). The link filters the list on the work its state calls for %>
+    (else greyed out, not linked), read_only (a reader's : tagged beside the code). The link filters the list on the work its state calls for %>
 <% statuses = case state
               when :outdated, :translating
                 [("not_translated" if stats[:translated] < stats[:total]), ("outdated" if stats[:outdated] > 0)].compact
@@ -17,7 +17,12 @@
         </svg>
       <% end %>
     </span>
-    <span class="text-sm text-stone-500"><%= language.code.upcase %></span>
+    <span class="flex items-baseline gap-1.5 text-sm text-stone-500">
+      <% if local_assigns[:read_only] %>
+        <span class="rounded bg-stone-200 px-1.5 text-xs text-stone-600"><%= t("languages.index.read_only") %></span>
+      <% end %>
+      <%= language.code.upcase %>
+    </span>
   </div>
   <%= render "shared/progress_bar", stats: stats, css: "mb-2 h-2" %>
   <p class="text-sm text-stone-600">

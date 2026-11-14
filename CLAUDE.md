@@ -300,8 +300,8 @@ each entry's count under the other filters.
   the login tokens' `updated_at` stays put), sorts name / email / languages (codes) / activity / seen (default, `UserList::DEFAULT_SORT`) / contributions /
   invited (last `Invitation`), from the sort menu or the table's column headers (`UsersHelper`, shared `sort_header_link` with `/pretranslations`).
 - Roles per language (`Membership.role`) : reader / translator / reviewer. A reader (`User#can_read?`, `readable_languages` :
-  home cards, language switch, export, glossary columns) sees the translator's list read-only (`translations/_editor` :
-  the stored text, its warnings, issues and comments buttons ; `update` 403), the issues (no "Résolu" / reopen) and
+  home cards (tagged "lecture seule" beside the code), language switch, export, glossary columns) sees the translator's list read-only (`translations/_editor` :
+  the stored text, its warnings, issues and comments buttons ; a click in the box shows a "read only" hint, `read_only_controller` ; `update` 403), the issues (no "Résolu" / reopen) and
   duplicates, and comments ; `can_translate?` / `editable_languages` = translators and reviewers (`Membership.editing`).
   Roles memoized per request (`User#role_in`, dropped by `reload`).
 - Disabling a user (`disabled_at`, `User.enabled`) : no login link, session dropped at the next request

@@ -447,6 +447,7 @@ fr:
         ready: "Prêtes !"
       empty: "Aucune langue"
       not_editable: "Langue qui ne t'est pas attribuée"
+      read_only: "lecture seule"
       all: "Toutes"
       mine: "Mes langues"
       manage: "Gérer les langues"
@@ -484,6 +485,7 @@ fr:
   translations:
     index:
       glossary: "Glossaire"
+      read_only_hint: "Lecture seule : tu peux consulter cette langue, pas modifier ses traductions."
       issues:
         one: "%{count} ticket ouvert"
         other: "%{count} tickets ouverts"
