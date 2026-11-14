@@ -13,6 +13,6 @@ class DuplicatesController < ApplicationController
 
   def set_language
     @language = Language.targets.find_by!(code: params[:lang])
-    redirect_to translate_root_path, alert: t("flash.no_language_access") unless current_user.can_translate?(@language)
+    redirect_to translate_root_path, alert: t("flash.no_language_access") unless current_user.can_read?(@language)
   end
 end

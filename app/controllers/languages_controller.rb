@@ -9,7 +9,8 @@ class LanguagesController < ApplicationController
 
   def index
     @languages = Language.targets.to_a
-    @editable = current_user.editable_languages.pluck(:id).to_set
+    # Linked : the languages the user translates or reads
+    @editable = current_user.readable_languages.pluck(:id).to_set
     @mine_filter = @editable.any? && @editable.size < @languages.size
     @mine = @mine_filter && params[:mine] == "1"
     @stats = Language.stats(@languages)

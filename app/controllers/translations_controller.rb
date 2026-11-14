@@ -42,11 +42,13 @@ class TranslationsController < ApplicationController
     @open_issues = Issue.still_open.visible_to(current_user).where(language: @language).count
     @divergent_duplicates = SourceDuplicates.new(@language, translatable: true).divergent.size
     # The language switch, with each one's progress
-    languages = current_user.editable_languages.to_a
+    languages = current_user.readable_languages.to_a
     @language_stats = Language.stats(languages) if languages.size > 1
   end
 
   def update
+    # A reader's list is read-only
+    return head :forbidden unless current_user.can_translate?(@language)
     # Copied as is into every language : nothing to save (the editor is read-only)
     return head :unprocessable_content if @unit.copied
 
@@ -64,7 +66,7 @@ class TranslationsController < ApplicationController
 
   def set_language
     @language = Language.targets.find_by!(code: params[:lang])
-    redirect_to translate_root_path, alert: t("flash.no_language_access") unless current_user.can_translate?(@language)
+    redirect_to translate_root_path, alert: t("flash.no_language_access") unless current_user.can_read?(@language)
   end
 
   # en is shown as a reference unless it is edited on this page ; it becomes the main one on the user's choice

@@ -131,7 +131,8 @@ Weblate was evaluated and rejected.
   blank = removed) by the language's reviewers, translators read only ; every change through `GlossaryOperations` into
   `GlossaryRevision` (`changes_made` `{ field => [old, new] }`, language nil = the fr term). A table, the only view :
   the fr terms down (forms ; the definition in the tooltip and the panel), the user's languages across (every target for an admin ;
-  `cell` / `history?code=` refuse the others), `cols[]` the ones checked in the search bar's "Colonnes" menu, one inner chip each, in their order (chips and headers
+  en offered to everyone, read only unless a reviewer : `GlossaryController#set_languages`, shown by default only when one of
+  the user's own (`@own_languages`) ; `cell` / `history?code=` refuse the others), `cols[]` the ones checked in the search bar's "Colonnes" menu, one inner chip each, in their order (chips and headers
   dragged to reorder them, `column_order_controller` rewrites `cols[]` and submits ; a header dragged with none checked checks them all), remembered in
   `User#glossary_columns` (saved when the search bar sends `cols_set=1`, read when the URL has no `cols` : a link's
   `cols` is shown, not saved) ; `GlossaryController#set_columns`, carried by the cells, the panel and the archive /
@@ -298,6 +299,11 @@ each entry's count under the other filters.
   written by `ApplicationController#record_last_seen` at most every `User::SEEN_PRECISION` through `update_column`, so
   the login tokens' `updated_at` stays put), sorts name / email / languages (codes) / activity / seen (default, `UserList::DEFAULT_SORT`) / contributions /
   invited (last `Invitation`), from the sort menu or the table's column headers (`UsersHelper`, shared `sort_header_link` with `/pretranslations`).
+- Roles per language (`Membership.role`) : reader / translator / reviewer. A reader (`User#can_read?`, `readable_languages` :
+  home cards, language switch, export, glossary columns) sees the translator's list read-only (`translations/_editor` :
+  the stored text, its warnings, issues and comments buttons ; `update` 403), the issues (no "Résolu" / reopen) and
+  duplicates, and comments ; `can_translate?` / `editable_languages` = translators and reviewers (`Membership.editing`).
+  Roles memoized per request (`User#role_in`, dropped by `reload`).
 - Disabling a user (`disabled_at`, `User.enabled`) : no login link, session dropped at the next request
   (`current_user`), no comment e-mail nor invitation ; memberships and history kept. Not oneself.
 - Invitations sent : `Invitation(user, inviter, email)`, written by `InvitationMailer`'s `after_deliver` only when

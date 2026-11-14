@@ -116,7 +116,7 @@ class UsersController < ApplicationController
     params.require(:user).permit(:name, :email, :admin, :locale)
   end
 
-  # roles[<language_id>] = "" | "translator" | "reviewer". An admin has every language : none kept (the form hides them)
+  # roles[<language_id>] = "" | "reader" | "translator" | "reviewer". An admin has every language : none kept (the form hides them)
   def save_memberships
     return @user.memberships.destroy_all if @user.admin?
 

@@ -1,4 +1,4 @@
-# Downloads a language's yml, as a publication would write it : the languages the user can translate, fr too for admins
+# Downloads a language's yml, as a publication would write it : the languages the user can translate or read, fr too for admins
 class ExportsController < ApplicationController
   def index
     @languages = exportable.to_a
@@ -15,6 +15,6 @@ class ExportsController < ApplicationController
   private
 
   def exportable
-    current_user.admin? ? Language.all : current_user.editable_languages
+    current_user.admin? ? Language.all : current_user.readable_languages
   end
 end

@@ -7,12 +7,20 @@ then click Save to save it without leaving the page.
 
 <h2>Statuses</h2>
 <dl>
-  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>To review</strong></dt><dd>The French text has changed since you translated it. Check your translation, correct it if necessary, and then save it—even if you don't make any changes—to validate it again. Or, if there's an open ticket disputing it—regardless of the ticket type—correct it if necessary, and then mark the ticket as resolved. It cannot be approved until then.</dd>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>To review</strong></dt><dd>The French text has changed since you translated it. Check your translation, correct it if necessary, and then save it—even if you don't make any changes—to validate it again. Or, if there's an open issue disputing it—regardless of the issue type—correct it if necessary, and then mark the issue resolved. It cannot be approved until then.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_translated" %> <strong>Not translated</strong></dt><dd>Nothing written in your language yet.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_approved" %> <strong>Not approved</strong></dt><dd>Translated, but not approved yet.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "approved" %> <strong>Approved</strong></dt><dd>Approved by a reviewer of the language.</dd>
 </dl>
 <p>Reviewers have an <strong>Approve</strong> button next to <strong>Save</strong>. An approved text should only be modified with care!</p>
+
+<h2>Roles</h2>
+<p>For each of your languages, an administrator gives you one of these roles:</p>
+<dl>
+  <dt><strong>Reader</strong></dt><dd>Browses the list and the translations without changing them. Can comment and ask questions, see the issues (without marking them resolved) and export the language's file.</dd>
+  <dt><strong>Translator</strong></dt><dd>Writes and saves translations, and marks issues resolved.</dd>
+  <dt><strong>Reviewer</strong></dt><dd>Same as a translator, and approves translations.</dd>
+</dl>
 
 <h2>The Editor</h2>
 <ul>
@@ -28,7 +36,7 @@ then click Save to save it without leaving the page.
     text, keep its url (or adapt it if there is a language version that matches your language).
   </li>
   <li>
-    <strong>Proposals</strong> under the editor (<%= robot_icon("text-violet-500") %> machine translation, "Same text elsewhere") can be filled with one click.
+    The <strong>proposals</strong> under the editor (<%= robot_icon("text-violet-500") %> “Suggestion”, a machine translation, and “Same text elsewhere”) fill it with one click.
     Read it again before saving.
   </li>
   <li>
@@ -74,7 +82,7 @@ then click Save to save it without leaving the page.
   for instance), keep them different.
 </p>
 
-<% if current_user.editable_languages.exists? %>
+<% if current_user.readable_languages.exists? %>
 <h2>Testing in OpenCutList</h2>
 <p>
   For advanced translators who build OpenCutList from its sources: the <%= link_to "Export", exports_path %> page

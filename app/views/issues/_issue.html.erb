@@ -25,8 +25,10 @@
     <span class="ml-auto" title="<%= l issue.created_at %>"><%= t("issues.index.raised", origin: issue.origin || "—", time: time_ago_in_words(issue.created_at)) %></span>
     <% if issue.closed? %>
       <span class="text-emerald-700" title="<%= l issue.closed_at %>"><%= t("issues.index.closed_by", name: issue.closed_by&.name || "—", time: time_ago_in_words(issue.closed_at)) %></span>
-      <%= button_to t("issues.index.reopen"), close_issue_path(issue), method: :patch, params: card_params.merge(reopen: 1),
-                    class: "rounded px-2 py-0.5 hover:bg-stone-100" %>
+      <% if current_user.can_translate?(issue.language) %>
+        <%= button_to t("issues.index.reopen"), close_issue_path(issue), method: :patch, params: card_params.merge(reopen: 1),
+                      class: "rounded px-2 py-0.5 hover:bg-stone-100" %>
+      <% end %>
     <% else %>
       <%= render "issues/close_button", issue: issue, params: card_params %>
     <% end %>

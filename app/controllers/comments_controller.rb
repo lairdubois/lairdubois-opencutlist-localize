@@ -39,7 +39,8 @@ class CommentsController < ApplicationController
   def set_unit_and_language
     @unit = Unit.find(params[:unit_id])
     @language = Language.find_by(code: params[:lang]) if params[:lang].present?
-    allowed = @language ? current_user.can_translate?(@language) : current_user.admin?
+    # A reader comments too
+    allowed = @language ? current_user.can_read?(@language) : current_user.admin?
     head :forbidden unless allowed
   end
 

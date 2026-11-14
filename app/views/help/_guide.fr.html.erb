@@ -14,6 +14,14 @@
 </dl>
 <p>Les relecteurs ont un bouton <strong>Approuver</strong> en plus de <strong>Enregistrer</strong>. Un texte approuvé ne doit être modifié qu’avec la plus grande prudence !</p>
 
+<h2>Rôles</h2>
+<p>Pour chacune de tes langues, un administrateur te donne l'un de ces rôles :</p>
+<dl>
+  <dt><strong>Lecteur</strong></dt><dd>Consulte la liste et les traductions sans pouvoir les modifier. Il peut commenter et poser des questions, voir les tickets (sans les marquer résolus) et exporter le fichier de la langue.</dd>
+  <dt><strong>Traducteur</strong></dt><dd>Écrit et enregistre les traductions, et marque les tickets résolus.</dd>
+  <dt><strong>Relecteur</strong></dt><dd>Comme un traducteur, et approuve les traductions.</dd>
+</dl>
+
 <h2>L'éditeur</h2>
 <ul>
   <li>
@@ -29,7 +37,7 @@
     Traduis le texte du lien, garde l'url.
   </li>
   <li>
-    Les <strong>propositions</strong> sous l'éditeur (<%= robot_icon("text-violet-500") %> traduction automatique, « Même texte ailleurs ») le remplissent d'un
+    Les <strong>propositions</strong> sous l'éditeur (<%= robot_icon("text-violet-500") %> « Proposition », une traduction automatique, et « Même texte ailleurs ») le remplissent d'un
     clic : relis avant d'enregistrer.
   </li>
   <li>
@@ -78,7 +86,7 @@
   colonne, par exemple).
 </p>
 
-<% if current_user.editable_languages.exists? %>
+<% if current_user.readable_languages.exists? %>
 <h2>Tester dans OpenCutList</h2>
 <p>
   Pour les traducteurs avancés qui compilent OpenCutList depuis ses sources : la page <%= link_to "Exporter", exports_path %>

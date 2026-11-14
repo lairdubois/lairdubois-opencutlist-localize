@@ -50,7 +50,9 @@
             <td class="px-3 py-2">
               <span class="flex flex-wrap gap-1">
                 <% user.memberships.sort_by { |m| m.language.code }.each do |m| %>
-                  <span class="rounded px-1.5 text-xs <%= m.reviewer? ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-700' %>"><%= m.language.code.upcase %><%= " ✓" if m.reviewer? %></span>
+                  <%# A reader's language : outlined, no fill %>
+                  <span class="rounded px-1.5 text-xs <%= m.reviewer? ? 'bg-emerald-100 text-emerald-800' : m.reader? ? 'text-stone-500 ring-1 ring-stone-300 ring-inset' : 'bg-stone-100 text-stone-700' %>"
+                        title="<%= t("roles.#{m.role}") %>"><%= m.language.code.upcase %><%= " ✓" if m.reviewer? %></span>
                 <% end %>
               </span>
             </td>

@@ -27,6 +27,7 @@ fr:
   roles:
     translator: "traducteur"
     reviewer: "relecteur"
+    reader: "lecteur"
   revision_kinds:
     import: "import"
     create: "création"
@@ -226,6 +227,7 @@ fr:
       columns: "Colonnes"
       column_drag: "%{name} · glisser pour déplacer la colonne"
       columns_all: "Toutes les langues affichées : cochez pour n'en garder que certaines"
+      columns_own: "Vos langues affichées : cochez EN pour y ajouter l'anglais (lecture seule)"
       columns_some:
         one: "%{count} langue affichée"
         other: "%{count} langues affichées"
@@ -730,6 +732,7 @@ fr:
         admin: "Administrateurs"
         reviewer: "Relecteurs"
         translator: "Traducteurs"
+        reader: "Lecteurs"
         none: "Sans langue"
         disabled: "Désactivés"
       activity: "Actifs"

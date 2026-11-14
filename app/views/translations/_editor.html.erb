@@ -24,6 +24,27 @@
       <%= render "translations/comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
                                     questions: data[:open_questions][unit.id] || 0, admin_notes: data[:open_admin_notes][unit.id] || 0 %>
     </div>
+  <%# A reader (Membership reader) : the stored text, read-only, its warnings, the issues and comments (a reader comments) %>
+  <% elsif !unit_page && !current_user.can_translate?(language) %>
+    <div class="flex min-w-0 flex-col border-y border-stone-200 md:border-l <%= t.nil? ? 'bg-yellow-50' : t.to_review? ? 'bg-orange-50' : 'bg-white' %>">
+      <% if t %>
+        <div class="flex-1 px-3 py-2 font-mono text-sm whitespace-pre-wrap" dir="<%= language.rtl ? 'rtl' : 'ltr' %>" lang="<%= language.code %>"
+             data-controller="i18n-text" data-i18n-text-text-value="<%= t.text %>" data-i18n-text-source-value="<%= unit.source_text %>"
+             data-i18n-text-refs-value="<%= refs_json(@refs[unit.id]) %>"><%= t.text %></div>
+      <% else %>
+        <p class="flex-1 px-3 py-2 text-sm text-stone-400 italic"><%= t("status.not_translated").capitalize %></p>
+      <% end %>
+      <% if warnings.any? %>
+        <div class="flex flex-col gap-1 border-t border-dashed border-stone-200 px-3 py-1.5">
+          <% warnings.each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
+        </div>
+      <% end %>
+    </div>
+    <div class="flex items-center gap-2 px-3 py-1.5">
+      <%= render "translations/issues_button", unit: unit, language: language, count: data[:issues][unit.id] || 0 %>
+      <%= render "translations/comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
+                                    questions: data[:open_questions][unit.id] || 0, admin_notes: data[:open_admin_notes][unit.id] || 0 %>
+    </div>
   <% else %>
   <%# hidden : the streams stay out of the frame's grid until Turbo performs and drops them %>
   <% if local_assigns[:saved] %>

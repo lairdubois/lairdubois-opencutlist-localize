@@ -1,5 +1,8 @@
 <%# locals: (issue:, params: {}) %>
 <%# Resolved : closes the issue. row (from a panel : translator's row, key page) or card (issues page)
      in params : answered with streams (IssuesController#close) %>
+<%# None for a reader (IssuesController#close refuses it too) %>
+<% if current_user.can_translate?(issue.language) %>
 <%= button_to t("issues.index.resolve"), close_issue_path(issue), method: :patch, params: params,
               class: "shrink-0 rounded border border-emerald-600 bg-white px-2 py-0.5 text-emerald-700 hover:bg-emerald-50" %>
+<% end %>

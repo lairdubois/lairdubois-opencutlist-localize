@@ -1,6 +1,6 @@
 # The glossary, read by everyone : the fr terms, created and edited by the admins, and the term each language expects,
 # set by its reviewers (GlossaryOperations, every change in the term's history). A table : the fr terms down, the
-# user's languages across (every target for an admin), a cell's detail and edit form in a side panel (cell /
+# user's languages across (every target for an admin ; en for everyone, read only unless a reviewer), a cell's detail and edit form in a side panel (cell /
 # save_cell ; the fr term's : source / save_source, admins ; a new one : new_source / create_source, admins)
 class GlossaryController < ApplicationController
   before_action :set_languages
@@ -131,9 +131,12 @@ class GlossaryController < ApplicationController
 
   private
 
-  # The user's languages (every target for an admin) : the table's columns
+  # The table's columns : the user's languages (every target for an admin, @own_languages) and en, the fallback
+  # reference, offered to everyone (read only : cell_editable? needs a reviewer)
   def set_languages
-    @languages = current_user.editable_languages.to_a
+    @own_languages = current_user.readable_languages.to_a
+    en = Language.find_by(code: Language::FALLBACK_CODE)
+    @languages = (en.nil? || @own_languages.include?(en)) ? @own_languages : [en, *@own_languages]
   end
 
   def set_term
@@ -176,10 +179,11 @@ class GlossaryController < ApplicationController
     render html: helpers.turbo_frame_tag("glossary_panel") { panel }, status: status
   end
 
-  # The columns : the user's languages (@all_columns) ; cols[] : the picked ones only (@picked, codes), in their order
+  # The columns : the user's languages and en (@all_columns) ; cols[] : the picked ones only (@picked, codes), in their order
   # (dragged chips or headers : column_order_controller). The choice is the user's (User#glossary_columns) : saved when
   # it comes from the search bar (cols_set=1, none checked : all of them), used when the URL holds none (a link's cols,
-  # e.g. the translator's toolbar's, is shown without being saved)
+  # e.g. the translator's toolbar's, is shown without being saved). None picked : the user's own languages (en only
+  # when picked, unless it is one of them), all of them when the user has none
   def set_columns
     @all_columns = @languages
     codes = @all_columns.map(&:code)
@@ -190,7 +194,7 @@ class GlossaryController < ApplicationController
     else
       @picked = (params.key?(:cols) ? Array(params[:cols]).map(&:to_s) : current_user.glossary_columns.to_s.split(",")) & codes
     end
-    @columns = @picked.empty? ? @all_columns : @picked.map { |code| @all_columns.find { |l| l.code == code } }
+    @columns = @picked.empty? ? @own_languages.presence || @all_columns : @picked.map { |code| @all_columns.find { |l| l.code == code } }
   end
 
   # The column choice, carried by the cells' links and the side panel's

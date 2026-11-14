@@ -28,7 +28,7 @@
           <% end %>
           <%= nav_link :translate, translate_root_path %>
           <%= nav_link :glossary, glossary_path %>
-          <% if current_user.editable_languages.exists? %>
+          <% if current_user.readable_languages.exists? %>
             <%= nav_link :export, exports_path %>
           <% end %>
           <% if current_user.admin? %>

@@ -27,6 +27,7 @@ en:
   roles:
     translator: "translator"
     reviewer: "reviewer"
+    reader: "reader"
   revision_kinds:
     import: "import"
     create: "creation"
@@ -226,6 +227,7 @@ en:
       columns: "Columns"
       column_drag: "%{name} · drag to move the column"
       columns_all: "Every language shown: check some to keep them only"
+      columns_own: "Your languages shown: check EN to add English (read only)"
       columns_some:
         one: "%{count} language shown"
         other: "%{count} languages shown"
@@ -730,6 +732,7 @@ en:
         admin: "Administrators"
         reviewer: "Reviewers"
         translator: "Translators"
+        reader: "Readers"
         none: "Without language"
         disabled: "Disabled"
       activity: "Active"

@@ -11,7 +11,7 @@ class CommentMailer < ApplicationMailer
 
   # The key page is an admin's : a translator gets their list, on the comment's language or their first one
   def url_for_recipient(comment, user)
-    language = comment.language || (user.editable_languages.first unless user.admin?)
+    language = comment.language || (user.readable_languages.first unless user.admin?)
     language ? translate_url(language.code, prefix: comment.unit.key) : unit_url(comment.unit)
   end
 

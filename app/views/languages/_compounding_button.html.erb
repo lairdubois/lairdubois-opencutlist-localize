@@ -1,0 +1,8 @@
+<%# The compounding toggle of manage's table, replaced alone by languages#compounding (scroll kept) %>
+<td id="<%= dom_id(language, :compounding) %>" class="px-3 py-2">
+  <% on = language.compounding? %>
+  <%= button_to on ? t("languages.manage.compounding_on") : t("languages.manage.compounding_off"), language_compounding_path(language),
+                method: :patch, params: { enabled: on ? "0" : "1", sort: sort, dir: dir },
+                title: t("languages.manage.compounding_title"),
+                class: "rounded border px-2 py-0.5 text-xs #{on ? "border-sky-300 bg-sky-50 text-sky-800 hover:bg-sky-100" : "border-stone-200 bg-white text-stone-500 hover:bg-stone-50"}" %>
+</td>

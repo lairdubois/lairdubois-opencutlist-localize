@@ -9,7 +9,7 @@
 #   sort      SORTS ("invited" : the last invitation sent) (DEFAULT_SORT by default), dir "asc" or "desc" (the sort's own direction by default) : the search bar's sort menu
 #             and the table's column headers (UsersHelper)
 class UserList
-  ROLES = %w[admin reviewer translator none disabled].freeze
+  ROLES = %w[admin reviewer translator reader none disabled].freeze
   ACTIVITIES = [*ListFilters::PERIODS, "never"].freeze
   # Each sort, with its default direction
   SORTS = { "name" => "asc", "email" => "asc", "languages" => "asc", "activity" => "desc", "seen" => "desc", "contributions" => "desc", "invited" => "desc" }.freeze
@@ -114,6 +114,7 @@ class UserList
     when "admin" then user.admin?
     when "reviewer" then memberships.any?(&:reviewer?)
     when "translator" then memberships.any?(&:translator?)
+    when "reader" then memberships.any?(&:reader?)
     when "none" then !user.admin? && user.memberships.empty?
     when "disabled" then user.disabled?
     end

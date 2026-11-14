@@ -42,15 +42,39 @@ class User < ApplicationRecord
             github_refresh_token: nil, github_refresh_token_expires_at: nil)
   end
 
+  # Sees the language's work (any membership, readers included)
+  def can_read?(language)
+    admin? || role_in(language).present?
+  end
+
+  # Edits its translations (readers left out)
   def can_translate?(language)
-    admin? || memberships.exists?(language: language)
+    admin? || %w[translator reviewer].include?(role_in(language))
   end
 
   def can_review?(language)
-    admin? || memberships.reviewer.exists?(language: language)
+    admin? || role_in(language) == "reviewer"
   end
 
+  # The membership's role in the language (nil : none), memoized for the request (asked by every row of the
+  # translator's list) : reload drops it
+  def role_in(language)
+    @roles ||= memberships.pluck(:language_id, :role).to_h
+    @roles[language.id]
+  end
+
+  def reload(...)
+    @roles = nil
+    super
+  end
+
+  # The languages the user translates (readers' left out)
   def editable_languages
+    admin? ? Language.targets : languages.merge(Language.targets).merge(Membership.editing)
+  end
+
+  # The languages the user sees : editable ones and those they read
+  def readable_languages
     admin? ? Language.targets : languages.merge(Language.targets)
   end
 end
