@@ -2,6 +2,8 @@ class Language < ApplicationRecord
   SOURCE_CODE = "fr".freeze
   # OCL's fallback (gulp) and the translators' other reference : never deleted, nor the source
   FALLBACK_CODE = "en".freeze
+  # The key holding each language's own name in OCL, kept in step with #name (TranslationOperations)
+  LABEL_KEY = "_label".freeze
   # ISO 639-1 codes offered for a new language : { "de" => { "name" => "Deutsch", "rtl" => false } }
   ISO = YAML.load_file(Rails.root.join("config/iso_languages.yml")).freeze
 

@@ -3,7 +3,7 @@
 # with mine=1 (offered when the user can edit some but not all). Admins manage them (manage) : add one of the ISO
 # list (create), delete one with all its work (destroy), say whether it writes compounds (compounding)
 class LanguagesController < ApplicationController
-  before_action :require_admin, only: [:manage, :create, :destroy, :compounding]
+  before_action :require_admin, only: [:manage, :create, :destroy, :compounding, :rename]
 
   COLUMNS = { todo: [:outdated, :translating], to_approve: [:translated], ready: [:approved] }.freeze
 
@@ -64,6 +64,24 @@ class LanguagesController < ApplicationController
                                                   locals: { language: language, sort: params[:sort], dir: params[:dir] })
       end
       format.html { redirect_to manage_languages_path(sort: params[:sort], dir: params[:dir]) }
+    end
+  end
+
+  # Its name and its _label (TranslationOperations#rename_language). Answers with its row alone (scroll kept), the
+  # delete confirmation naming it too ; a blank name gives the row back unchanged
+  def rename
+    language = Language.targets.find(params[:id])
+    renamed = TranslationOperations.new(current_user).rename_language(language, params[:name])
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(helpers.dom_id(language, :row), partial: "row",
+                                                  locals: { language: language, translations: language.translations.count,
+                                                            members: language.memberships.count,
+                                                            sort: params[:sort], dir: params[:dir] })
+      end
+      format.html do
+        redirect_to manage_languages_path(sort: params[:sort], dir: params[:dir]), renamed ? {} : { alert: t(".blank") }
+      end
     end
   end
 

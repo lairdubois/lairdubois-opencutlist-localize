@@ -468,6 +468,8 @@ fr:
         translations: "Traductions"
         members: "Membres"
         compounding: "Mots composés"
+      name_label: "Nom de la langue %{code}"
+      name_title: "Cliquer pour renommer (Entrée enregistre, Échap annule). Modifie aussi sa clé _label, le nom affiché dans OpenCutList."
       compounding_on: "Oui"
       compounding_off: "Non"
       compounding_title: "La langue soude ses mots composés (de : « Plattenrest ») : le terme attendu du glossaire peut alors être pris dans un mot plus long."
@@ -475,6 +477,8 @@ fr:
       destroy_confirm: "Supprimer %{language} (%{code}) et tout son travail (traductions : %{translations}, membres : %{members}) ? Historique, commentaires, suggestions, tickets et glossaire compris, sans retour possible."
       protected: "Protégée"
       protected_title: "Langue de repli d'OpenCutList et référence des traducteurs"
+    rename:
+      blank: "Le nom de la langue ne peut pas être vide."
     create:
       invalid: "Choisis une langue de la liste qui n'existe pas encore."
       created: "Langue %{language} ajoutée. Donne-la à des traducteurs depuis leur page."

@@ -60,9 +60,31 @@ class TranslationOperations
     translation
   end
 
+  # An admin renames a target language : its name here and its _label, the name OCL shows. False on a blank name
+  def rename_language(language, name)
+    name = name.to_s.squish
+    return false if name.empty?
+
+    Language.transaction do
+      language.update!(name: name)
+      unit = Unit.active.find_by(key: Language::LABEL_KEY)
+      correct(unit, language, name) if unit
+    end
+    true
+  end
+
   private
 
   def record(unit, language, kind, old_value, new_value)
     unit.revisions.create!(kind: kind, language: language, old_value: old_value, new_value: new_value, author: @user.name, user: @user)
+    sync_language_name(unit, language, new_value)
+  end
+
+  # A translated _label is the language's name ; removing it leaves the name as it is
+  def sync_language_name(unit, language, text)
+    return unless unit.key == Language::LABEL_KEY
+
+    name = text.to_s.squish
+    language.update!(name: name) if name.present?
   end
 end

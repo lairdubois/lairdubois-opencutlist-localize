@@ -31,26 +31,8 @@
           </thead>
           <tbody class="divide-y divide-stone-100">
             <% @languages.each do |language| %>
-              <% translations = @translations.fetch(language.id, 0) %>
-              <% members = @members.fetch(language.id, 0) %>
-              <tr>
-                <td class="px-6 py-2">
-                  <span class="flex items-center gap-2"><span class="w-7 rounded bg-stone-900 text-center font-mono text-xs text-white"><%= language.code.upcase %></span><%= language.name %></span>
-                </td>
-                <td class="px-3 py-2 text-right tabular-nums"><%= number_with_delimiter(translations) %></td>
-                <td class="px-3 py-2 text-right tabular-nums"><%= members %></td>
-                <%= render "compounding_button", language: language, sort: @sort, dir: @dir %>
-                <td class="px-6 py-2 text-right">
-                  <% if language.deletable? %>
-                    <%= button_to t(".destroy"), language_path(language), method: :delete, params: { sort: @sort, dir: @dir },
-                                  form: { data: { turbo_confirm: t(".destroy_confirm", language: language.name, code: language.code.upcase,
-                                                                   translations: number_with_delimiter(translations), members: members) } },
-                                  class: "rounded px-2 py-0.5 text-xs text-red-700 hover:bg-red-50" %>
-                  <% else %>
-                    <span class="text-xs text-stone-400" title="<%= t(".protected_title") %>"><%= t(".protected") %></span>
-                  <% end %>
-                </td>
-              </tr>
+              <%= render "row", language: language, translations: @translations.fetch(language.id, 0),
+                         members: @members.fetch(language.id, 0), sort: @sort, dir: @dir %>
             <% end %>
           </tbody>
         </table>

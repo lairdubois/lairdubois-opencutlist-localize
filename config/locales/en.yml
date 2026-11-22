@@ -468,6 +468,8 @@ en:
         translations: "Translations"
         members: "Members"
         compounding: "Compounds"
+      name_label: "Name of the %{code} language"
+      name_title: "Click to rename (Enter saves, Esc cancels). Also changes its _label key, the name shown in OpenCutList."
       compounding_on: "Yes"
       compounding_off: "No"
       compounding_title: "The language writes its compounds as one word (de: « Plattenrest »): the glossary's expected term may then be inside a longer word."
@@ -475,6 +477,8 @@ en:
       destroy_confirm: "Delete %{language} (%{code}) and all its work (translations: %{translations}, members: %{members})? History, comments, suggestions, issues and glossary included, for good."
       protected: "Protected"
       protected_title: "OpenCutList's fallback language and the translators' reference"
+    rename:
+      blank: "The language's name can't be empty."
     create:
       invalid: "Pick a language of the list that doesn't exist yet."
       created: "Language %{language} added. Give it to translators from their page."

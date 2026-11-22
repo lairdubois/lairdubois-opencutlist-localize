@@ -1,0 +1,31 @@
+<%# A language of manage's table, replaced alone by languages#rename. Its name is a field looking like text : Enter saves, Esc or leaving it cancels %>
+<tr id="<%= dom_id(language, :row) %>">
+  <td class="px-6 py-2">
+    <span class="flex items-center gap-2">
+      <span class="w-7 shrink-0 rounded bg-stone-900 text-center font-mono text-xs text-white"><%= language.code.upcase %></span>
+      <%= form_with url: language_name_path(language), method: :patch, scope: nil, class: "min-w-0 flex-1",
+                    data: { controller: "inline-edit" } do |f| %>
+        <%= hidden_field_tag :sort, sort, id: nil %>
+        <%= hidden_field_tag :dir, dir, id: nil %>
+        <%= f.text_field :name, value: language.name, id: dom_id(language, :name), required: true, pattern: ".*\\S.*", dir: "auto",
+                         autocomplete: "off", spellcheck: false, title: t("languages.manage.name_title"),
+                         "aria-label": t("languages.manage.name_label", code: language.code.upcase),
+                         data: { action: "keydown.esc->inline-edit#cancel blur->inline-edit#cancel" },
+                         class: "w-full min-w-32 rounded border border-transparent bg-transparent px-1 py-0.5 hover:border-stone-300 focus:border-stone-400 focus:bg-white" %>
+      <% end %>
+    </span>
+  </td>
+  <td class="px-3 py-2 text-right tabular-nums"><%= number_with_delimiter(translations) %></td>
+  <td class="px-3 py-2 text-right tabular-nums"><%= members %></td>
+  <%= render "languages/compounding_button", language: language, sort: sort, dir: dir %>
+  <td class="px-6 py-2 text-right">
+    <% if language.deletable? %>
+      <%= button_to t("languages.manage.destroy"), language_path(language), method: :delete, params: { sort: sort, dir: dir },
+                    form: { data: { turbo_confirm: t("languages.manage.destroy_confirm", language: language.name, code: language.code.upcase,
+                                                     translations: number_with_delimiter(translations), members: members) } },
+                    class: "rounded px-2 py-0.5 text-xs text-red-700 hover:bg-red-50" %>
+    <% else %>
+      <span class="text-xs text-stone-400" title="<%= t("languages.manage.protected_title") %>"><%= t("languages.manage.protected") %></span>
+    <% end %>
+  </td>
+</tr>

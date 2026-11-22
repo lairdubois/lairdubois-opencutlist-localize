@@ -53,6 +53,7 @@ Rails.application.routes.draw do
   get "languages/manage", to: "languages#manage", as: :manage_languages
   resources :languages, only: [:create, :destroy]
   patch "languages/:id/compounding", to: "languages#compounding", as: :language_compounding
+  patch "languages/:id/name", to: "languages#rename", as: :language_name
   resources :units, only: [:index, :show] do
     get :duplicates, on: :collection
     resources :comments, only: [:index, :create]
